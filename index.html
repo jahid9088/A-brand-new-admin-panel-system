@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FUN VIP — Admin Control</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#03030D;color:#E2E8F0;display:flex;min-height:100vh;overflow:hidden}
+a{text-decoration:none;color:inherit}
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;background:#08081C;border-right:1px solid #13133A;display:flex;flex-direction:column;flex-shrink:0;transition:.3s}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid #13133A;display:flex;align-items:center;gap:10px}
+.sidebar-logo .crown{font-size:28px}
+.sidebar-logo .brand{font-size:17px;font-weight:800;background:linear-gradient(135deg,#FFD700,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar-logo .sub{font-size:10px;color:#4B5563;margin-top:2px}
+.nav-section{padding:16px 14px 4px;font-size:10px;color:#374151;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;margin:2px 8px;border-radius:10px;cursor:pointer;font-size:13.5px;color:#6B7280;transition:.15s;position:relative}
+.nav-item:hover{background:#0F0F28;color:#C4C9D4}
+.nav-item.active{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(79,70,229,.15));color:#A78BFA;border:1px solid rgba(124,58,237,.3)}
+.nav-item .icon{width:20px;text-align:center;font-size:16px}
+.nav-item .badge-nav{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 24px;border-bottom:1px solid #13133A;background:#08081C;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.topbar-title{font-size:17px;font-weight:700;flex:1}
+.topbar-search{display:flex;align-items:center;gap:8px;background:#03030D;border:1px solid #1E1E40;border-radius:9px;padding:8px 14px;width:280px}
+.topbar-search input{background:transparent;border:none;color:#E2E8F0;font-size:13px;outline:none;width:100%}
+.topbar-search input::placeholder{color:#374151}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:#08081C;border:1px solid #13133A;border-radius:14px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.05;background:var(--accent,#7C3AED)}
+.stat-card .stat-icon{font-size:26px;margin-bottom:10px}
+.stat-card .stat-label{font-size:11px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat-card .stat-val{font-size:28px;font-weight:800;color:var(--accent,#E2E8F0)}
+.stat-card .stat-sub{font-size:11px;color:#374151;margin-top:4px}
+
+/* ── CARD ── */
+.card{background:#08081C;border:1px solid #13133A;border-radius:14px;padding:22px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #13133A}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:#0C0C22;padding:11px 14px;text-align:left;font-size:10.5px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;font-weight:700;white-space:nowrap;border-bottom:1px solid #13133A}
+tbody td{padding:12px 14px;border-bottom:1px solid #0B0B1E;vertical-align:middle;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#0A0A1F}
+.mobile-col{font-weight:700;color:#A78BFA}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;white-space:nowrap}
+.btn:hover{opacity:.88}
+.btn:active{transform:scale(.97)}
+.btn-gold{background:linear-gradient(135deg,#FFD700,#FF9500);color:#000}
+.btn-purple{background:linear-gradient(135deg,#7C3AED,#4F46E5);color:#fff}
+.btn-green{background:#10B981;color:#fff}
+.btn-red{background:#EF4444;color:#fff}
+.btn-blue{background:#3B82F6;color:#fff}
+.btn-outline{background:transparent;border:1px solid #1E1E40;color:#6B7280}
+.btn-sm{padding:5px 12px;font-size:12px;border-radius:7px}
+.btn-xs{padding:4px 10px;font-size:11px;border-radius:6px}
+.btn-icon{padding:7px;border-radius:8px;background:#0C0C22;border:1px solid #1E1E40;color:#6B7280;cursor:pointer;font-size:15px;transition:.15s}
+.btn-icon:hover{background:#13133A;color:#E2E8F0}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-gold{background:rgba(255,215,0,.12);color:#FFD700;border:1px solid rgba(255,215,0,.25)}
+.badge-green{background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.25)}
+.badge-red{background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.25)}
+.badge-blue{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.25)}
+.badge-purple{background:rgba(124,58,237,.12);color:#A78BFA;border:1px solid rgba(124,58,237,.25)}
+.badge-gray{background:rgba(75,85,99,.12);color:#9CA3AF;border:1px solid rgba(75,85,99,.25)}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-s{position:absolute;inset:0;background:#1E1E40;border-radius:24px;transition:.25s;cursor:pointer}
+.toggle-s::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#4B5563;border-radius:50%;transition:.25s}
+.toggle input:checked+.toggle-s{background:#10B981}
+.toggle input:checked+.toggle-s::before{transform:translateX(20px);background:#fff}
+
+/* ── FORM ── */
+.form-group{margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-label{font-size:11.5px;color:#6B7280;margin-bottom:5px;display:block;font-weight:600;letter-spacing:.04em}
+.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;background:#03030D;border:1px solid #1E1E40;border-radius:9px;color:#E2E8F0;font-size:13.5px;outline:none;transition:.15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
+.form-textarea{resize:vertical;min-height:80px;font-family:inherit}
+.form-select{cursor:pointer}
+.form-select option{background:#08081C}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex;animation:fadeIn .2s}
+.modal{background:#08081C;border:1px solid #1E1E40;border-radius:20px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:slideUp .25s}
+.modal-lg{width:680px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.modal-sub{font-size:12.5px;color:#4B5563;margin-bottom:22px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #13133A}
+
+/* ── SEARCH BAR ── */
+.search-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.search-bar .form-input{max-width:320px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:11px;font-size:13.5px;font-weight:600;z-index:99999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;max-width:340px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.t-success{background:#10B981;color:#fff}
+#toast.t-error{background:#EF4444;color:#fff}
+#toast.t-info{background:#3B82F6;color:#fff}
+#toast.t-warn{background:#F59E0B;color:#000}
+
+/* ── SPINNER ── */
+.spin{width:18px;height:18px;border:2px solid #1E1E40;border-top-color:#FFD700;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 24px;color:#374151}
+.empty .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty p{font-size:14px}
+
+/* ── INFO ROW ── */
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #0F0F28}
+.info-row:last-child{border-bottom:none}
+.info-row .info-label{font-size:12px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.info-row .info-val{font-size:13px;color:#E2E8F0;font-weight:600;text-align:right;max-width:220px;word-break:break-all}
+
+/* ── CONFIG BANNER ── */
+.config-banner{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(79,70,229,.1));border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
+
+/* ── DEPOSIT CONTROLS ── */
+.deposit-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#0A0A1E;border:1px solid #13133A;border-radius:10px;margin-bottom:8px;gap:12px;flex-wrap:wrap}
+
+/* Responsive */
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.stats-grid{grid-template-columns:1fr}.sidebar{width:0;overflow:hidden}.sidebar.open{width:230px;position:fixed;inset:0 auto 0 0;z-index:100}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="crown">👑</div>
+    <div>
+      <div class="brand">FUN VIP</div>
+      <div class="sub">Admin Control</div>
+    </div>
+  </div>
+  <div style="overflow-y:auto;flex:1">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showSection('dashboard')"><span class="icon">📊</span><span class="nav-label">Dashboard</span></div>
+    <div class="nav-section">Users</div>
+    <div class="nav-item" onclick="showSection('users')"><span class="icon">👥</span><span class="nav-label">All Users</span></div>
+    <div class="nav-item" onclick="showSection('demo')"><span class="icon">🎯</span><span class="nav-label">Demo Accounts</span></div>
+    <div class="nav-section">Finance</div>
+    <div class="nav-item" onclick="showSection('deposit')"><span class="icon">💰</span><span class="nav-label">Deposit Control</span></div>
+    <div class="nav-item" onclick="showSection('requests')"><span class="icon">📋</span><span class="nav-label">Deposit History</span></div>
+    <div class="nav-section">VIP</div>
+    <div class="nav-item" onclick="showSection('vipkeys')"><span class="icon">🔑</span><span class="nav-label">VIP Keys</span></div>
+    <div class="nav-item" onclick="showSection('refer')"><span class="icon">🔗</span><span class="nav-label">Refer Codes</span></div>
+    <div class="nav-section">System</div>
+    <div class="nav-item" onclick="showSection('settings')"><span class="icon">⚙️</span><span class="nav-label">Settings</span></div>
+  </div>
+  <div style="padding:16px;border-top:1px solid #13133A;font-size:11px;color:#374151">
+    FUN VIP Admin v2.0<br>
+    <span id="conn-status" style="color:#EF4444">● Not Connected</span>
+  </div>
+</div>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">📊 Dashboard</div>
+    <div class="topbar-search">
+      <span>🔍</span>
+      <input type="text" id="global-search" placeholder="Search users, keys…" oninput="globalSearch(this.value)">
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-gold btn-sm" onclick="refreshAll()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="empty"><div class="spin"></div><p style="margin-top:12px">Connecting to Firebase…</p></div>
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Edit User Modal -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit User</div>
+    <div class="modal-sub">Modify user details in database</div>
+    <input type="hidden" id="edit-mobile-key">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" id="edit-mobile" readonly style="opacity:.6"></div>
+      <div class="form-group"><label class="form-label">Brand</label><input class="form-input" id="edit-brand"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Current Balance</label><input class="form-input" id="edit-bal" type="number" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Login Count</label><input class="form-input" id="edit-logins" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Refer Code</label><input class="form-input" id="edit-refercode"></div>
+      <div class="form-group"><label class="form-label">Used Refer By</label><input class="form-input" id="edit-usedby"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">VIP Status</label>
+        <select class="form-select" id="edit-vipstatus">
+          <option value="">None</option>
+          <option value="UNUSED">UNUSED</option>
+          <option value="USED">USED</option>
+          <option value="EXPIRED">EXPIRED</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">VIP Validity</label>
+        <select class="form-select" id="edit-vipval">
+          <option value="">None</option>
+          <option value="1day">1 Day</option>
+          <option value="7days">7 Days</option>
+          <option value="14days">14 Days</option>
+          <option value="30days">30 Days</option>
+          <option value="lifetime">Lifetime</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Password (Code)</label><input class="form-input" id="edit-code"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-user')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveUser()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- View User Modal -->
+<div class="modal-overlay" id="modal-view">
+  <div class="modal modal-lg">
+    <div class="modal-title" id="view-title">👤 User Details</div>
+    <div class="modal-sub" id="view-sub">Full user data</div>
+    <div id="view-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-view')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Demo Modal -->
+<div class="modal-overlay" id="modal-demo">
+  <div class="modal">
+    <div class="modal-title">🎯 Add Demo Account</div>
+    <div class="modal-sub">Create a pre-configured demo user</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mobile Number *</label><input class="form-input" id="demo-mobile" placeholder="10-digit mobile" maxlength="10" type="number"></div>
+      <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="demo-code" placeholder="Password/Code"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Current Balance</label><input class="form-input" id="demo-bal" type="number" step="0.01" value="500"></div>
+      <div class="form-group"><label class="form-label">Brand Name</label><input class="form-input" id="demo-brand" value="Demo"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">VIP Status</label>
+        <select class="form-select" id="demo-vip">
+          <option value="UNUSED">UNUSED</option>
+          <option value="USED">USED</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">VIP Validity</label>
+        <select class="form-select" id="demo-vipval">
+          <option value="7days">7 Days</option>
+          <option value="14days">14 Days</option>
+          <option value="30days">30 Days</option>
+          <option value="lifetime">Lifetime</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-demo')">Cancel</button>
+      <button class="btn btn-green" onclick="addDemo()">✅ Add Demo Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deposit Control Modal -->
+<div class="modal-overlay" id="modal-deposit">
+  <div class="modal">
+    <div class="modal-title">💰 Deposit Control</div>
+    <div class="modal-sub" id="deposit-modal-sub">Configure deposit requirement</div>
+    <input type="hidden" id="dep-mobile-key">
+    <div class="form-group">
+      <label class="form-label">Enable Deposit Required</label>
+      <label class="toggle" style="margin-top:6px">
+        <input type="checkbox" id="dep-enabled">
+        <span class="toggle-s"></span>
+      </label>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Required Amount (₹)</label><input class="form-input" id="dep-amount" type="number" placeholder="300"></div>
+      <div class="form-group"><label class="form-label">VIP Validity on Deposit</label>
+        <select class="form-select" id="dep-validity">
+          <option value="1day">1 Day</option>
+          <option value="7days">7 Days</option>
+          <option value="14days">14 Days</option>
+          <option value="30days">30 Days</option>
+          <option value="lifetime">Lifetime ♾️</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-deposit')">Cancel</button>
+      <button class="btn btn-gold" onclick="saveDepositControl()">💾 Save Control</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIP Key Modal -->
+<div class="modal-overlay" id="modal-vip">
+  <div class="modal">
+    <div class="modal-title">🔑 VIP Key Details</div>
+    <div class="modal-sub">Manage this VIP key</div>
+    <div id="vip-detail-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-vip')">Close</button>
+      <button class="btn btn-red btn-sm" id="vip-delete-btn">🗑 Delete Key</button>
+      <button class="btn btn-gold btn-sm" id="vip-toggle-btn">Toggle Status</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:380px">
+    <div class="modal-title" style="color:#EF4444">⚠️ Confirm Delete</div>
+    <div class="modal-sub" id="confirm-msg">This action cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-red" id="confirm-yes-btn">🗑 Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//   CONFIG — edit in Settings tab
+// ═══════════════════════════════════════════════
+const DEFAULT_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "jashcore-official.firebaseapp.com",
+  databaseURL: "https://jashcore-official-default-rtdb.firebaseio.com",
+  projectId: "jashcore-official",
+  appId: "YOUR_APP_ID"
+};
+
+let db, app, fbConfig = null;
+let allUsers = {}, allVipKeys = {}, allRefer = {}, allDeposit = {};
+let currentSection = 'dashboard';
+
+// ═══════════════════════════════════════════════
+//   INIT
+// ═══════════════════════════════════════════════
+function initFirebase() {
+  const saved = localStorage.getItem('funvip_config');
+  fbConfig = saved ? JSON.parse(saved) : DEFAULT_CONFIG;
+  try {
+    if (firebase.apps.length) firebase.apps[0].delete().then(() => _init());
+    else _init();
+  } catch(e) { _init(); }
+}
+
+function _init() {
+  try {
+    app = firebase.initializeApp(fbConfig);
+    db = firebase.database();
+    db.ref('.info/connected').on('value', s => {
+      const el = document.getElementById('conn-status');
+      if (s.val()) { el.textContent = '● Connected'; el.style.color = '#10B981'; loadAllData(); }
+      else { el.textContent = '● Disconnected'; el.style.color = '#EF4444'; }
+    });
+  } catch(e) { toast('Firebase init failed: ' + e.message, 'error'); }
+}
+
+// ═══════════════════════════════════════════════
+//   LOAD DATA
+// ═══════════════════════════════════════════════
+function loadAllData() {
+  db.ref('Users').on('value', s => {
+    allUsers = s.val() || {};
+    if (currentSection === 'dashboard') renderDashboard();
+    else if (currentSection === 'users') renderUsers();
+    else if (currentSection === 'demo') renderDemo();
+    updateStats();
+  });
+  db.ref('VIPKeys').on('value', s => {
+    allVipKeys = s.val() || {};
+    if (currentSection === 'vipkeys') renderVipKeys();
+  });
+  db.ref('ReferCodes').on('value', s => {
+    allRefer = s.val() || {};
+    if (currentSection === 'refer') renderRefer();
+  });
+  db.ref('depositControls').on('value', s => {
+    allDeposit = s.val() || {};
+    if (currentSection === 'deposit') renderDeposit();
+    if (currentSection === 'requests') renderRequests();
+  });
+}
+
+function refreshAll() {
+  if (!db) return;
+  loadAllData();
+  toast('Data refreshed', 'info');
+}
+
+// ═══════════════════════════════════════════════
+//   SECTION ROUTER
+// ═══════════════════════════════════════════════
+function showSection(name) {
+  currentSection = name;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'"+name+"'")) el.classList.add('active');
+  });
+  const titles = {dashboard:'📊 Dashboard',users:'👥 All Users',demo:'🎯 Demo Accounts',deposit:'💰 Deposit Control',requests:'📋 Deposit History',vipkeys:'🔑 VIP Keys',refer:'🔗 Refer Codes',settings:'⚙️ Settings'};
+  document.getElementById('page-title').textContent = titles[name] || name;
+  const fns = {dashboard:renderDashboard,users:renderUsers,demo:renderDemo,deposit:renderDeposit,requests:renderRequests,vipkeys:renderVipKeys,refer:renderRefer,settings:renderSettings};
+  if (fns[name]) fns[name]();
+}
+
+// ═══════════════════════════════════════════════
+//   DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard() {
+  const uArr = Object.entries(allUsers);
+  const total = uArr.length;
+  const vipUsers = uArr.filter(([,u]) => u.vipStatus === 'UNUSED' || u.vipStatus === 'USED').length;
+  const totalBal = uArr.reduce((acc,[,u]) => acc + parseFloat(u.currentBalance||0), 0);
+  const depActive = Object.values(allDeposit).filter(d => d.enabled).length;
+
+  document.getElementById('content').innerHTML = `
+  <div class="stats-grid">
+    <div class="stat-card" style="--accent:#A78BFA"><div class="stat-icon">👥</div><div class="stat-label">Total Users</div><div class="stat-val">${total}</div><div class="stat-sub">Registered members</div></div>
+    <div class="stat-card" style="--accent:#FFD700"><div class="stat-icon">👑</div><div class="stat-label">VIP Users</div><div class="stat-val">${vipUsers}</div><div class="stat-sub">With VIP key</div></div>
+    <div class="stat-card" style="--accent:#10B981"><div class="stat-icon">💰</div><div class="stat-label">Total Balance</div><div class="stat-val">₹${totalBal.toFixed(0)}</div><div class="stat-sub">Across all users</div></div>
+    <div class="stat-card" style="--accent:#F59E0B"><div class="stat-icon">🔔</div><div class="stat-label">Active Deposits</div><div class="stat-val">${depActive}</div><div class="stat-sub">Required deposit ON</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-header"><div class="card-title">👥 Recent Users</div><button class="btn btn-outline btn-sm" onclick="showSection('users')">View All</button></div>
+      <table><thead><tr><th>Mobile</th><th>Balance</th><th>Brand</th><th>VIP</th></tr></thead><tbody>
+      ${uArr.slice(-8).reverse().map(([k,u]) => `
+        <tr>
+          <td class="mobile-col">${k}</td>
+          <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
+          <td>${u.brand||'-'}</td>
+          <td>${vipBadge(u.vipStatus)}</td>
+        </tr>`).join('')||'<tr><td colspan="4" class="empty"><p>No users yet</p></td></tr>'}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">💰 Active Deposit Controls</div><button class="btn btn-outline btn-sm" onclick="showSection('deposit')">Manage</button></div>
+      <table><thead><tr><th>Mobile</th><th>Amount</th><th>Validity</th></tr></thead><tbody>
+      ${Object.entries(allDeposit).filter(([,d])=>d.enabled).slice(0,8).map(([k,d]) => `
+        <tr>
+          <td class="mobile-col">${k}</td>
+          <td>₹${d.amount||'-'}</td>
+          <td>${d.vipValidity||'-'}</td>
+        </tr>`).join('')||'<tr><td colspan="3" class="empty"><p>None active</p></td></tr>'}
+      </tbody></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-header"><div class="card-title">🔑 Recent VIP Keys</div><button class="btn btn-outline btn-sm" onclick="showSection('vipkeys')">View All</button></div>
+    <table><thead><tr><th>Key</th><th>Mobile</th><th>Status</th><th>Validity</th></tr></thead><tbody>
+    ${Object.entries(allVipKeys).slice(-6).reverse().map(([k,v]) => `
+      <tr>
+        <td style="font-family:monospace;font-size:12px;color:#FFD700">${v.key||k}</td>
+        <td class="mobile-col">${v.mobile||'-'}</td>
+        <td>${vipBadge(v.status)}</td>
+        <td>${v.validity||'-'}</td>
+      </tr>`).join('')||'<tr><td colspan="4" class="empty"><p>No VIP keys</p></td></tr>'}
+    </tbody></table>
+  </div>`;
+}
+
+function updateStats() {}
+
+function vipBadge(status) {
+  if (!status || status === '') return '<span class="badge badge-gray">None</span>';
+  if (status === 'UNUSED') return '<span class="badge badge-green">UNUSED</span>';
+  if (status === 'USED') return '<span class="badge badge-blue">USED</span>';
+  if (status === 'EXPIRED') return '<span class="badge badge-red">EXPIRED</span>';
+  return `<span class="badge badge-gray">${status}</span>`;
+}
+
+// ═══════════════════════════════════════════════
+//   USERS
+// ═══════════════════════════════════════════════
+let userSearch = '';
+
+function renderUsers(search) {
+  if (search !== undefined) userSearch = search;
+  const arr = Object.entries(allUsers).filter(([k,u]) => {
+    const q = (userSearch||'').toLowerCase();
+    return !q || k.includes(q) || (u.brand||'').toLowerCase().includes(q) || (u.referCode||'').toLowerCase().includes(q);
+  });
+
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">👥 All Users <span class="badge badge-purple" style="margin-left:8px">${arr.length}</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-red btn-sm" onclick="deleteAllUsers()">🗑 Delete All</button>
+        <button class="btn btn-gold btn-sm" onclick="openModal('modal-demo')">+ Add Demo</button>
+      </div>
+    </div>
+    <div class="search-bar">
+      <input class="form-input" placeholder="Search mobile, brand, refer code…" oninput="renderUsers(this.value)" value="${userSearch}">
+      <button class="btn btn-outline btn-sm" onclick="userSearch='';renderUsers()">Clear</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Mobile</th><th>Balance</th><th>Brand</th><th>Logins</th><th>VIP</th><th>Battery</th><th>Time</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${arr.length ? arr.map(([k,u], i) => `
+          <tr>
+            <td style="color:#4B5563">${i+1}</td>
+            <td class="mobile-col">${k}</td>
+            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
+            <td>${u.brand||'-'}</td>
+            <td>${u.loginCount||0}</td>
+            <td>${vipBadge(u.vipStatus)}</td>
+            <td>${u.battery||'-'}</td>
+            <td style="font-size:11px;color:#4B5563">${u.time||'-'}</td>
+            <td>
+              <div style="display:flex;gap:5px">
+                <button class="btn-icon" title="View" onclick="viewUser('${k}')">👁</button>
+                <button class="btn-icon" title="Edit" onclick="editUser('${k}')">✏️</button>
+                <button class="btn-icon" title="Deposit" onclick="openDepositModal('${k}')">💰</button>
+                <button class="btn-icon" title="Delete" onclick="confirmDelete('user','${k}')">🗑</button>
+              </div>
+            </td>
+          </tr>`).join('') : '<tr><td colspan="9" class="empty"><div class="empty-icon">👥</div><p>No users found</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function viewUser(mobile) {
+  const u = allUsers[mobile]; if (!u) return;
+  const d = allDeposit[mobile]||{};
+  document.getElementById('view-title').textContent = '📱 ' + mobile;
+  document.getElementById('view-sub').textContent = `Brand: ${u.brand||'-'}  ·  Time: ${u.time||'-'}`;
+  document.getElementById('view-content').innerHTML = `
+    <div>
+    ${row('Mobile', mobile)}
+    ${row('Password/Code', u.code||'-')}
+    ${row('Current Balance', '₹'+(parseFloat(u.currentBalance||0).toFixed(2)))}
+    ${row('Last Balance', '₹'+(parseFloat(u.lastBalance||0).toFixed(2)))}
+    ${row('Login Count', u.loginCount||0)}
+    ${row('Brand', u.brand||'-')}
+    ${row('Device ID', u.deviceId||'-')}
+    ${row('Battery', u.battery||'-')}
+    ${row('Refer Code', u.referCode||'-')}
+    ${row('Used Refer By', u.usedReferBy||'None')}
+    ${row('VIP Key', `<span style="font-family:monospace;color:#FFD700;font-size:12px">${u.vipKey||'Not Generated'}</span>`)}
+    ${row('VIP Status', vipBadge(u.vipStatus))}
+    ${row('VIP Validity', u.vipValidity||'-')}
+    ${row('Deposit Required', d.enabled ? `<span class="badge badge-red">ON — ₹${d.amount}</span>` : '<span class="badge badge-gray">OFF</span>')}
+    </div>`;
+  openModal('modal-view');
+}
+
+function row(label, value) {
+  return `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${value}</span></div>`;
+}
+
+function editUser(mobile) {
+  const u = allUsers[mobile]; if (!u) return;
+  document.getElementById('edit-mobile-key').value = mobile;
+  document.getElementById('edit-mobile').value = mobile;
+  document.getElementById('edit-brand').value = u.brand||'';
+  document.getElementById('edit-bal').value = u.currentBalance||0;
+  document.getElementById('edit-logins').value = u.loginCount||0;
+  document.getElementById('edit-refercode').value = u.referCode||'';
+  document.getElementById('edit-usedby').value = u.usedReferBy||'';
+  document.getElementById('edit-vipstatus').value = u.vipStatus||'';
+  document.getElementById('edit-vipval').value = u.vipValidity||'';
+  document.getElementById('edit-code').value = u.code||'';
+  openModal('modal-user');
+}
+
+function saveUser() {
+  const mobile = document.getElementById('edit-mobile-key').value;
+  if (!mobile || !db) return;
+  const updates = {
+    brand: document.getElementById('edit-brand').value,
+    currentBalance: document.getElementById('edit-bal').value,
+    loginCount: parseInt(document.getElementById('edit-logins').value)||0,
+    referCode: document.getElementById('edit-refercode').value,
+    usedReferBy: document.getElementById('edit-usedby').value,
+    vipStatus: document.getElementById('edit-vipstatus').value,
+    vipValidity: document.getElementById('edit-vipval').value,
+    code: document.getElementById('edit-code').value
+  };
+  db.ref('Users/'+mobile).update(updates);
+  db.ref('dbRef/'+mobile).update(updates);
+  closeModal('modal-user');
+  toast('User updated ✅', 'success');
+}
+
+// ═══════════════════════════════════════════════
+//   DEMO ACCOUNTS
+// ═══════════════════════════════════════════════
+let demoMobiles = new Set();
+
+function renderDemo() {
+  const demoArr = Object.entries(allUsers).filter(([,u]) => u.brand === 'Demo' || demoMobiles.has(Object.keys(allUsers).find(k => allUsers[k] === u)));
+
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🎯 Demo Accounts</div>
+      <button class="btn btn-gold" onclick="openModal('modal-demo')">+ Add Demo Account</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mobile</th><th>Code</th><th>Balance</th><th>VIP Status</th><th>Validity</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${Object.entries(allUsers).filter(([,u])=>u.brand==='Demo').map(([k,u]) => `
+          <tr>
+            <td class="mobile-col">${k}</td>
+            <td>${u.code||'-'}</td>
+            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
+            <td>${vipBadge(u.vipStatus)}</td>
+            <td>${u.vipValidity||'-'}</td>
+            <td><div style="display:flex;gap:5px">
+              <button class="btn-icon" onclick="editUser('${k}')">✏️</button>
+              <button class="btn-icon" onclick="confirmDelete('user','${k}')">🗑</button>
+            </div></td>
+          </tr>`).join('')||'<tr><td colspan="6" class="empty"><div class="empty-icon">🎯</div><p>No demo accounts. Add one above.</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function addDemo() {
+  const mobile = document.getElementById('demo-mobile').value.trim();
+  const code = document.getElementById('demo-code').value.trim();
+  const bal = document.getElementById('demo-bal').value || '500';
+  const brand = document.getElementById('demo-brand').value || 'Demo';
+  const vip = document.getElementById('demo-vip').value;
+  const vipVal = document.getElementById('demo-vipval').value;
+  if (!mobile || mobile.length < 4) { toast('Enter valid mobile', 'error'); return; }
+  if (!code) { toast('Enter password/code', 'error'); return; }
+  if (!db) return;
+  const key = 'FUN' + Math.random().toString(36).slice(2,7).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+  const refCode = 'FUNJASCORE' + mobile.slice(-4);
+  const data = {
+    mobile, code, brand, currentBalance: bal, lastBalance: '0', loginCount: 0,
+    referCode: refCode, usedReferBy: '',
+    vipKey: key, vipStatus: vip, vipValidity: vipVal,
+    vipGeneratedAt: Date.now(), vipExpiresAt: 0,
+    battery: '80%', deviceId: 'demo', time: new Date().toLocaleString('en-GB').replace(',','')
+  };
+  db.ref('Users/'+mobile).update(data);
+  db.ref('dbRef/'+mobile).update(data);
+  db.ref('ReferCodes/'+refCode).update({ mobile, name: refCode });
+  db.ref('VIPKeys/'+key.replace(/-/g,'')).update({ mobile, key, validity: vipVal, status: vip, generatedAt: Date.now(), expiresAt: 0 });
+  demoMobiles.add(mobile);
+  closeModal('modal-demo');
+  toast('Demo account added ✅', 'success');
+}
+
+// ═══════════════════════════════════════════════
+//   DEPOSIT CONTROL
+// ═══════════════════════════════════════════════
+function renderDeposit() {
+  const entries = Object.entries(allUsers);
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">💰 Deposit Control <span class="badge badge-red" style="margin-left:8px">${Object.values(allDeposit).filter(d=>d.enabled).length} Active</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-red btn-sm" onclick="disableAllDeposit()">Turn OFF All</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mobile</th><th>Brand</th><th>Balance</th><th>Status</th><th>Required Amount</th><th>Validity</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${entries.map(([k,u]) => {
+          const d = allDeposit[k]||{};
+          return `<tr>
+            <td class="mobile-col">${k}</td>
+            <td>${u.brand||'-'}</td>
+            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
+            <td>${d.enabled ? '<span class="badge badge-red">● ON</span>' : '<span class="badge badge-gray">OFF</span>'}</td>
+            <td>${d.amount ? '₹'+d.amount : '-'}</td>
+            <td>${d.vipValidity||'-'}</td>
+            <td><button class="btn btn-gold btn-xs" onclick="openDepositModal('${k}')">⚙ Control</button></td>
+          </tr>`;
+        }).join('')||'<tr><td colspan="7" class="empty"><p>No users</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function openDepositModal(mobile) {
+  const d = allDeposit[mobile]||{};
+  document.getElementById('dep-mobile-key').value = mobile;
+  document.getElementById('deposit-modal-sub').textContent = '📱 ' + mobile;
+  document.getElementById('dep-enabled').checked = d.enabled||false;
+  document.getElementById('dep-amount').value = d.amount||'300';
+  document.getElementById('dep-validity').value = d.vipValidity||'7days';
+  openModal('modal-deposit');
+}
+
+function saveDepositControl() {
+  const mobile = document.getElementById('dep-mobile-key').value;
+  if (!mobile || !db) return;
+  const data = {
+    enabled: document.getElementById('dep-enabled').checked,
+    amount: document.getElementById('dep-amount').value,
+    vipValidity: document.getElementById('dep-validity').value
+  };
+  db.ref('depositControls/'+mobile).update(data);
+  closeModal('modal-deposit');
+  toast('Deposit control saved ✅', 'success');
+}
+
+function disableAllDeposit() {
+  if (!db) return;
+  const updates = {};
+  Object.keys(allDeposit).forEach(k => { updates['depositControls/'+k+'/enabled'] = false; });
+  db.ref().update(updates);
+  toast('All deposit controls turned OFF', 'warn');
+}
+
+// ═══════════════════════════════════════════════
+//   DEPOSIT HISTORY
+// ═══════════════════════════════════════════════
+function renderRequests() {
+  const entries = Object.entries(allDeposit);
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header"><div class="card-title">📋 Deposit History & Controls</div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mobile</th><th>Enabled</th><th>Amount (₹)</th><th>VIP Validity</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${entries.map(([k,d]) => `
+          <tr>
+            <td class="mobile-col">${k}</td>
+            <td>${d.enabled ? '<span class="badge badge-red">ON</span>' : '<span class="badge badge-gray">OFF</span>'}</td>
+            <td>₹${d.amount||'-'}</td>
+            <td>${d.vipValidity||'-'}</td>
+            <td><div style="display:flex;gap:5px">
+              <button class="btn btn-gold btn-xs" onclick="openDepositModal('${k}')">Edit</button>
+              <button class="btn btn-red btn-xs" onclick="confirmDelete('deposit','${k}')">Remove</button>
+            </div></td>
+          </tr>`).join('')||'<tr><td colspan="5" class="empty"><p>No deposit records</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//   VIP KEYS
+// ═══════════════════════════════════════════════
+function renderVipKeys() {
+  const entries = Object.entries(allVipKeys);
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🔑 VIP Keys <span class="badge badge-gold" style="margin-left:8px">${entries.length} Total</span></div>
+      <div style="display:flex;gap:8px">
+        <span class="badge badge-green">${entries.filter(([,v])=>v.status==='UNUSED').length} Unused</span>
+        <span class="badge badge-blue">${entries.filter(([,v])=>v.status==='USED').length} Used</span>
+        <span class="badge badge-red">${entries.filter(([,v])=>v.status==='EXPIRED').length} Expired</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Mobile</th><th>Status</th><th>Validity</th><th>Generated</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${entries.map(([k,v]) => `
+          <tr>
+            <td style="font-family:monospace;font-size:12px;color:#FFD700">${v.key||k.slice(0,8)+'...'}</td>
+            <td class="mobile-col">${v.mobile||'-'}</td>
+            <td>${vipBadge(v.status)}</td>
+            <td>${v.validity||'-'}</td>
+            <td style="font-size:11px;color:#4B5563">${v.generatedAt ? new Date(v.generatedAt).toLocaleDateString() : '-'}</td>
+            <td><div style="display:flex;gap:5px">
+              <button class="btn btn-gold btn-xs" onclick="viewVipKey('${k}')">View</button>
+              <button class="btn btn-red btn-xs" onclick="confirmDelete('vip','${k}')">Delete</button>
+            </div></td>
+          </tr>`).join('')||'<tr><td colspan="6" class="empty"><p>No VIP keys generated yet</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function viewVipKey(k) {
+  const v = allVipKeys[k]; if (!v) return;
+  document.getElementById('vip-detail-content').innerHTML = `
+    ${row('Key', `<span style="font-family:monospace;color:#FFD700">${v.key||k}</span>`)}
+    ${row('Mobile', v.mobile||'-')}
+    ${row('Status', vipBadge(v.status))}
+    ${row('Validity', v.validity||'-')}
+    ${row('Generated', v.generatedAt ? new Date(v.generatedAt).toLocaleString() : '-')}
+    ${row('Expires', v.expiresAt && v.expiresAt > 0 ? new Date(v.expiresAt).toLocaleString() : 'Never (Lifetime)')}`;
+  document.getElementById('vip-delete-btn').onclick = () => { closeModal('modal-vip'); confirmDelete('vip', k); };
+  document.getElementById('vip-toggle-btn').onclick = () => {
+    const newStatus = v.status === 'UNUSED' ? 'USED' : 'UNUSED';
+    db.ref('VIPKeys/'+k+'/status').set(newStatus);
+    if (v.mobile) db.ref('Users/'+v.mobile+'/vipStatus').set(newStatus);
+    closeModal('modal-vip');
+    toast('Key status updated → '+newStatus, 'success');
+  };
+  document.getElementById('vip-toggle-btn').textContent = v.status === 'UNUSED' ? 'Mark as USED' : 'Mark as UNUSED';
+  openModal('modal-vip');
+}
+
+// ═══════════════════════════════════════════════
+//   REFER CODES
+// ═══════════════════════════════════════════════
+function renderRefer() {
+  const entries = Object.entries(allRefer);
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🔗 Refer Codes <span class="badge badge-purple" style="margin-left:8px">${entries.length}</span></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Refer Code</th><th>Owner Mobile</th><th>Used By Count</th><th>Actions</th></tr></thead>
+        <tbody>
+        ${entries.map(([k,v]) => {
+          const usedCount = Object.values(allUsers).filter(u => u.usedReferBy === k).length;
+          return `<tr>
+            <td style="font-family:monospace;color:#10B981;font-weight:700">${k}</td>
+            <td class="mobile-col">${v.mobile||'-'}</td>
+            <td><span class="badge ${usedCount>0?'badge-green':'badge-gray'}">${usedCount} users</span></td>
+            <td><button class="btn btn-red btn-xs" onclick="confirmDelete('refer','${k}')">Remove</button></td>
+          </tr>`;
+        }).join('')||'<tr><td colspan="4" class="empty"><p>No refer codes</p></td></tr>'}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//   SETTINGS
+// ═══════════════════════════════════════════════
+function renderSettings() {
+  const cfg = fbConfig || DEFAULT_CONFIG;
+  document.getElementById('content').innerHTML = `
+  <div class="card">
+    <div class="card-header"><div class="card-title">⚙️ Firebase Configuration</div></div>
+    <div class="config-banner">
+      <span style="font-size:24px">🔥</span>
+      <div>
+        <div style="font-weight:700;margin-bottom:3px">Database URL</div>
+        <div style="font-size:12px;color:#10B981">${cfg.databaseURL}</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="cfg-apikey" value="${cfg.apiKey}"></div>
+      <div class="form-group"><label class="form-label">Project ID</label><input class="form-input" id="cfg-projectid" value="${cfg.projectId}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Database URL</label><input class="form-input" id="cfg-dburl" value="${cfg.databaseURL}"></div>
+      <div class="form-group"><label class="form-label">App ID</label><input class="form-input" id="cfg-appid" value="${cfg.appId}"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-gold" onclick="saveConfig()">💾 Save & Reconnect</button>
+      <button class="btn btn-outline" onclick="resetConfig()">↺ Reset to Default</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div class="card-title">🗑 Danger Zone</div></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
+        <div><div style="font-weight:600;margin-bottom:3px">Delete All Users</div><div style="font-size:12px;color:#4B5563">Permanently removes all users from database</div></div>
+        <button class="btn btn-red btn-sm" onclick="deleteAllUsers()">Delete All Users</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
+        <div><div style="font-weight:600;margin-bottom:3px">Clear All VIP Keys</div><div style="font-size:12px;color:#4B5563">Remove all VIP keys from database</div></div>
+        <button class="btn btn-red btn-sm" onclick="confirmDelete('allvip','all')">Clear VIP Keys</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
+        <div><div style="font-weight:600;margin-bottom:3px">Disable All Deposits</div><div style="font-size:12px;color:#4B5563">Turn off all deposit requirements</div></div>
+        <button class="btn btn-red btn-sm" onclick="disableAllDeposit()">Disable All</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function saveConfig() {
+  const cfg = {
+    apiKey: document.getElementById('cfg-apikey').value,
+    authDomain: document.getElementById('cfg-projectid').value+'.firebaseapp.com',
+    databaseURL: document.getElementById('cfg-dburl').value,
+    projectId: document.getElementById('cfg-projectid').value,
+    appId: document.getElementById('cfg-appid').value
+  };
+  localStorage.setItem('funvip_config', JSON.stringify(cfg));
+  fbConfig = cfg;
+  toast('Config saved! Reconnecting…', 'info');
+  setTimeout(() => location.reload(), 1000);
+}
+
+function resetConfig() {
+  localStorage.removeItem('funvip_config');
+  fbConfig = DEFAULT_CONFIG;
+  toast('Config reset to default', 'info');
+  setTimeout(() => location.reload(), 800);
+}
+
+// ═══════════════════════════════════════════════
+//   DELETE & CONFIRM
+// ═══════════════════════════════════════════════
+function confirmDelete(type, key) {
+  const msgs = {
+    user: `Delete user ${key}? This removes all their data.`,
+    vip: `Delete VIP key? This cannot be undone.`,
+    refer: `Remove refer code ${key}?`,
+    deposit: `Remove deposit control for ${key}?`,
+    allvip: 'Delete ALL VIP keys? This cannot be undone.',
+    allusers: 'Delete ALL users? This is irreversible!'
+  };
+  document.getElementById('confirm-msg').textContent = msgs[type]||'This cannot be undone.';
+  document.getElementById('confirm-yes-btn').onclick = () => { doDelete(type, key); closeModal('modal-confirm'); };
+  openModal('modal-confirm');
+}
+
+function doDelete(type, key) {
+  if (!db) return;
+  if (type === 'user') {
+    db.ref('Users/'+key).remove();
+    db.ref('dbRef/'+key).remove();
+    db.ref('depositControls/'+key).remove();
+    db.ref('Notifications/'+key).remove();
+    toast('User deleted', 'success');
+  } else if (type === 'vip') {
+    db.ref('VIPKeys/'+key).remove();
+    toast('VIP key deleted', 'success');
+  } else if (type === 'refer') {
+    db.ref('ReferCodes/'+key).remove();
+    toast('Refer code removed', 'success');
+  } else if (type === 'deposit') {
+    db.ref('depositControls/'+key).remove();
+    toast('Deposit control removed', 'success');
+  } else if (type === 'allvip') {
+    db.ref('VIPKeys').remove();
+    toast('All VIP keys deleted', 'warn');
+  } else if (type === 'allusers') {
+    db.ref('Users').remove();
+    db.ref('dbRef').remove();
+    db.ref('depositControls').remove();
+    toast('All users deleted', 'warn');
+  }
+}
+
+function deleteAllUsers() {
+  confirmDelete('allusers','all');
+}
+
+// ═══════════════════════════════════════════════
+//   GLOBAL SEARCH
+// ═══════════════════════════════════════════════
+function globalSearch(q) {
+  if (currentSection === 'users') renderUsers(q);
+}
+
+// ═══════════════════════════════════════════════
+//   MODAL HELPERS
+// ═══════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════
+//   TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = (type==='success'?'✅ ':type==='error'?'❌ ':type==='warn'?'⚠️ ':'ℹ️ ') + msg;
+  el.className = `show t-${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3000);
+}
+
+// ═══════════════════════════════════════════════
+//   BOOT
+// ═══════════════════════════════════════════════
+window.onload = () => {
+  initFirebase();
+  setTimeout(() => { if (!db) renderSettings(); }, 2500);
+};
+</script>
+</body>
+</html>
