@@ -3,352 +3,288 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FUN VIP — Admin Control</title>
+<title>FUN XPro Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#03030D;color:#E2E8F0;display:flex;min-height:100vh;overflow:hidden}
-a{text-decoration:none;color:inherit}
-
-/* ── SIDEBAR ── */
-.sidebar{width:230px;background:#08081C;border-right:1px solid #13133A;display:flex;flex-direction:column;flex-shrink:0;transition:.3s}
-.sidebar-logo{padding:22px 20px;border-bottom:1px solid #13133A;display:flex;align-items:center;gap:10px}
-.sidebar-logo .crown{font-size:28px}
-.sidebar-logo .brand{font-size:17px;font-weight:800;background:linear-gradient(135deg,#FFD700,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar-logo .sub{font-size:10px;color:#4B5563;margin-top:2px}
-.nav-section{padding:16px 14px 4px;font-size:10px;color:#374151;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:10px;padding:11px 18px;margin:2px 8px;border-radius:10px;cursor:pointer;font-size:13.5px;color:#6B7280;transition:.15s;position:relative}
-.nav-item:hover{background:#0F0F28;color:#C4C9D4}
-.nav-item.active{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(79,70,229,.15));color:#A78BFA;border:1px solid rgba(124,58,237,.3)}
-.nav-item .icon{width:20px;text-align:center;font-size:16px}
-.nav-item .badge-nav{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
-
-/* ── MAIN ── */
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#030310;color:#E2E8F0;display:flex;min-height:100vh}
+/* SIDEBAR */
+.sb{width:220px;background:#07071A;border-right:1px solid #12123A;display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{padding:20px 16px;border-bottom:1px solid #12123A;display:flex;align-items:center;gap:10px}
+.sb-logo .crown{font-size:26px}
+.sb-logo .name{font-size:16px;font-weight:800;background:linear-gradient(135deg,#FFD700,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sb-logo .ver{font-size:10px;color:#374151;margin-top:1px}
+.ns{padding:14px 12px 4px;font-size:10px;color:#2D3748;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 14px;margin:2px 6px;border-radius:9px;cursor:pointer;font-size:13px;color:#6B7280;transition:.12s}
+.ni:hover{background:#0F0F2A;color:#C4C9D4}
+.ni.active{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(79,70,229,.12));color:#A78BFA;border:1px solid rgba(124,58,237,.25)}
+.ni .ic{width:18px;text-align:center}
+.ni .nb{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;min-width:18px;text-align:center}
+.sb-foot{padding:12px 14px;border-top:1px solid #12123A;font-size:11px;color:#2D3748}
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{padding:14px 24px;border-bottom:1px solid #13133A;background:#08081C;display:flex;align-items:center;gap:14px;flex-shrink:0}
-.topbar-title{font-size:17px;font-weight:700;flex:1}
-.topbar-search{display:flex;align-items:center;gap:8px;background:#03030D;border:1px solid #1E1E40;border-radius:9px;padding:8px 14px;width:280px}
-.topbar-search input{background:transparent;border:none;color:#E2E8F0;font-size:13px;outline:none;width:100%}
-.topbar-search input::placeholder{color:#374151}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.content{flex:1;overflow-y:auto;padding:24px}
-
-/* ── STAT CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.stat-card{background:#08081C;border:1px solid #13133A;border-radius:14px;padding:20px;position:relative;overflow:hidden}
-.stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.05;background:var(--accent,#7C3AED)}
-.stat-card .stat-icon{font-size:26px;margin-bottom:10px}
-.stat-card .stat-label{font-size:11px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.stat-card .stat-val{font-size:28px;font-weight:800;color:var(--accent,#E2E8F0)}
-.stat-card .stat-sub{font-size:11px;color:#374151;margin-top:4px}
-
-/* ── CARD ── */
-.card{background:#08081C;border:1px solid #13133A;border-radius:14px;padding:22px;margin-bottom:20px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.card-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-
-/* ── TABLE ── */
-.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #13133A}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{background:#0C0C22;padding:11px 14px;text-align:left;font-size:10.5px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;font-weight:700;white-space:nowrap;border-bottom:1px solid #13133A}
-tbody td{padding:12px 14px;border-bottom:1px solid #0B0B1E;vertical-align:middle;white-space:nowrap}
+.topbar{padding:12px 20px;border-bottom:1px solid #12123A;background:#07071A;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.page-title{font-size:16px;font-weight:700;flex:1}
+.tb-search{display:flex;align-items:center;gap:7px;background:#030310;border:1px solid #1A1A3A;border-radius:8px;padding:7px 12px;width:240px}
+.tb-search input{background:transparent;border:none;color:#E2E8F0;font-size:13px;outline:none;width:100%}
+.tb-search input::placeholder{color:#2D3748}
+.content{flex:1;overflow-y:auto;padding:20px}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.scard{background:#07071A;border:1px solid #12123A;border-radius:12px;padding:16px;cursor:pointer;transition:.15s}
+.scard:hover{border-color:#2D2D5A;transform:translateY(-1px)}
+.scard .sicon{font-size:22px;margin-bottom:8px}
+.scard .slabel{font-size:10px;color:#4B5563;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.scard .sval{font-size:24px;font-weight:800;color:var(--ac,#E2E8F0)}
+.scard .ssub{font-size:10px;color:#2D3748;margin-top:3px}
+/* CARD */
+.card{background:#07071A;border:1px solid #12123A;border-radius:12px;padding:18px;margin-bottom:16px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ct{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+/* TABLE */
+.tw{overflow-x:auto;border-radius:10px;border:1px solid #12123A}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead th{background:#0A0A1E;padding:10px 12px;text-align:left;font-size:10px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;font-weight:700;border-bottom:1px solid #12123A;white-space:nowrap}
+tbody td{padding:11px 12px;border-bottom:1px solid #090919;vertical-align:middle;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:#0A0A1F}
-.mobile-col{font-weight:700;color:#A78BFA}
-
-/* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;white-space:nowrap}
-.btn:hover{opacity:.88}
-.btn:active{transform:scale(.97)}
-.btn-gold{background:linear-gradient(135deg,#FFD700,#FF9500);color:#000}
-.btn-purple{background:linear-gradient(135deg,#7C3AED,#4F46E5);color:#fff}
-.btn-green{background:#10B981;color:#fff}
-.btn-red{background:#EF4444;color:#fff}
-.btn-blue{background:#3B82F6;color:#fff}
-.btn-outline{background:transparent;border:1px solid #1E1E40;color:#6B7280}
-.btn-sm{padding:5px 12px;font-size:12px;border-radius:7px}
-.btn-xs{padding:4px 10px;font-size:11px;border-radius:6px}
-.btn-icon{padding:7px;border-radius:8px;background:#0C0C22;border:1px solid #1E1E40;color:#6B7280;cursor:pointer;font-size:15px;transition:.15s}
-.btn-icon:hover{background:#13133A;color:#E2E8F0}
-
-/* ── BADGE ── */
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.badge-gold{background:rgba(255,215,0,.12);color:#FFD700;border:1px solid rgba(255,215,0,.25)}
-.badge-green{background:rgba(16,185,129,.12);color:#10B981;border:1px solid rgba(16,185,129,.25)}
-.badge-red{background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.25)}
-.badge-blue{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.25)}
-.badge-purple{background:rgba(124,58,237,.12);color:#A78BFA;border:1px solid rgba(124,58,237,.25)}
-.badge-gray{background:rgba(75,85,99,.12);color:#9CA3AF;border:1px solid rgba(75,85,99,.25)}
-
-/* ── TOGGLE ── */
-.toggle{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-s{position:absolute;inset:0;background:#1E1E40;border-radius:24px;transition:.25s;cursor:pointer}
-.toggle-s::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#4B5563;border-radius:50%;transition:.25s}
-.toggle input:checked+.toggle-s{background:#10B981}
-.toggle input:checked+.toggle-s::before{transform:translateX(20px);background:#fff}
-
-/* ── FORM ── */
-.form-group{margin-bottom:14px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-label{font-size:11.5px;color:#6B7280;margin-bottom:5px;display:block;font-weight:600;letter-spacing:.04em}
-.form-input,.form-select,.form-textarea{width:100%;padding:10px 14px;background:#03030D;border:1px solid #1E1E40;border-radius:9px;color:#E2E8F0;font-size:13.5px;outline:none;transition:.15s}
-.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,.12)}
-.form-textarea{resize:vertical;min-height:80px;font-family:inherit}
-.form-select{cursor:pointer}
-.form-select option{background:#08081C}
-
-/* ── MODAL ── */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(4px)}
-.modal-overlay.open{display:flex;animation:fadeIn .2s}
-.modal{background:#08081C;border:1px solid #1E1E40;border-radius:20px;padding:28px;width:520px;max-width:95vw;max-height:90vh;overflow-y:auto;animation:slideUp .25s}
-.modal-lg{width:680px}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.modal-sub{font-size:12.5px;color:#4B5563;margin-bottom:22px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #13133A}
-
-/* ── SEARCH BAR ── */
-.search-bar{display:flex;gap:10px;margin-bottom:16px;align-items:center}
-.search-bar .form-input{max-width:320px}
-
-/* ── TOAST ── */
-#toast{position:fixed;bottom:24px;right:24px;padding:13px 20px;border-radius:11px;font-size:13.5px;font-weight:600;z-index:99999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;max-width:340px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+tbody tr:hover td{background:#09091C}
+.mc{font-weight:700;color:#A78BFA;font-family:monospace}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12.5px;font-weight:600;transition:.12s;white-space:nowrap}
+.btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
+.bg{background:linear-gradient(135deg,#FFD700,#FF9500);color:#000}
+.bp{background:linear-gradient(135deg,#7C3AED,#4F46E5);color:#fff}
+.br{background:#EF4444;color:#fff}
+.bgrn{background:#10B981;color:#fff}
+.bbl{background:#3B82F6;color:#fff}
+.bo{background:transparent;border:1px solid #1A1A3A;color:#6B7280}
+.bsm{padding:5px 10px;font-size:11.5px;border-radius:6px}
+.bxs{padding:3px 9px;font-size:11px;border-radius:5px}
+/* BADGE */
+.bdg{display:inline-block;padding:3px 9px;border-radius:16px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.bdg-g{background:rgba(255,215,0,.1);color:#FFD700;border:1px solid rgba(255,215,0,.2)}
+.bdg-grn{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
+.bdg-r{background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2)}
+.bdg-bl{background:rgba(59,130,246,.1);color:#60A5FA;border:1px solid rgba(59,130,246,.2)}
+.bdg-p{background:rgba(124,58,237,.1);color:#A78BFA;border:1px solid rgba(124,58,237,.2)}
+.bdg-gy{background:rgba(75,85,99,.1);color:#6B7280;border:1px solid rgba(75,85,99,.2)}
+.bdg-am{background:rgba(245,158,11,.1);color:#F59E0B;border:1px solid rgba(245,158,11,.2)}
+/* TOGGLE */
+.tgl{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.tgl input{opacity:0;width:0;height:0}
+.tgl-s{position:absolute;inset:0;background:#1A1A3A;border-radius:22px;transition:.25s;cursor:pointer}
+.tgl-s::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#4B5563;border-radius:50%;transition:.25s}
+.tgl input:checked+.tgl-s{background:#10B981}
+.tgl input:checked+.tgl-s::before{transform:translateX(18px);background:#fff}
+/* FORM */
+.fg{margin-bottom:12px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fl{font-size:11px;color:#6B7280;margin-bottom:4px;display:block;font-weight:600;letter-spacing:.04em}
+.fi,.fs,.fta{width:100%;padding:9px 12px;background:#030310;border:1px solid #1A1A3A;border-radius:8px;color:#E2E8F0;font-size:13px;outline:none;transition:.12s}
+.fi:focus,.fs:focus,.fta:focus{border-color:#4F46E5;box-shadow:0 0 0 2px rgba(79,70,229,.1)}
+.fs option{background:#07071A}
+.fta{resize:vertical;min-height:70px;font-family:inherit}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(3px)}
+.mo.open{display:flex;animation:fi .18s}
+.mdl{background:#07071A;border:1px solid #1A1A3A;border-radius:18px;padding:24px;width:480px;max-width:95vw;max-height:88vh;overflow-y:auto;animation:su .22s}
+.mdl-lg{width:640px}
+.mt{font-size:17px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.ms{font-size:12px;color:#4B5563;margin-bottom:18px}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #12123A}
+/* SEARCH BAR */
+.sb2{display:flex;gap:8px;margin-bottom:14px;align-items:center}
+.sb2 .fi{max-width:280px}
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:7px 14px;background:#07071A;border:1px solid #12123A;border-radius:7px;cursor:pointer;font-size:12.5px;color:#6B7280;transition:.12s}
+.tab.active{background:#7C3AED;color:#fff;border-color:#7C3AED;font-weight:700}
+/* INFO ROW */
+.ir{display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #090919}
+.ir:last-child{border-bottom:none}
+.irl{font-size:11px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;margin-right:12px}
+.irv{font-size:13px;color:#E2E8F0;font-weight:600;text-align:right;word-break:break-all}
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;z-index:99999;transform:translateY(70px);opacity:0;transition:.28s;max-width:320px;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 #toast.show{transform:translateY(0);opacity:1}
-#toast.t-success{background:#10B981;color:#fff}
-#toast.t-error{background:#EF4444;color:#fff}
-#toast.t-info{background:#3B82F6;color:#fff}
-#toast.t-warn{background:#F59E0B;color:#000}
-
-/* ── SPINNER ── */
-.spin{width:18px;height:18px;border:2px solid #1E1E40;border-top-color:#FFD700;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-/* ── EMPTY STATE ── */
-.empty{text-align:center;padding:48px 24px;color:#374151}
-.empty .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
-.empty p{font-size:14px}
-
-/* ── INFO ROW ── */
-.info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #0F0F28}
-.info-row:last-child{border-bottom:none}
-.info-row .info-label{font-size:12px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.info-row .info-val{font-size:13px;color:#E2E8F0;font-weight:600;text-align:right;max-width:220px;word-break:break-all}
-
-/* ── CONFIG BANNER ── */
-.config-banner{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(79,70,229,.1));border:1px solid rgba(124,58,237,.3);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px}
-
-/* ── DEPOSIT CONTROLS ── */
-.deposit-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#0A0A1E;border:1px solid #13133A;border-radius:10px;margin-bottom:8px;gap:12px;flex-wrap:wrap}
-
-/* Responsive */
-@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.stats-grid{grid-template-columns:1fr}.sidebar{width:0;overflow:hidden}.sidebar.open{width:230px;position:fixed;inset:0 auto 0 0;z-index:100}}
+#toast.ts{background:#10B981;color:#fff}
+#toast.te{background:#EF4444;color:#fff}
+#toast.ti{background:#3B82F6;color:#fff}
+#toast.tw2{background:#F59E0B;color:#000}
+/* SPINNERS */
+.spin{width:16px;height:16px;border:2px solid #1A1A3A;border-top-color:#FFD700;border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:#2D3748}
+.empty .ei{font-size:34px;opacity:.4;margin-bottom:10px}
+/* CONFIRM */
+.danger-zone{background:#0F0506;border:1px solid #2A0A0A;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+/* Status colors */
+.s-pending{color:#F59E0B}.s-confirmed{color:#10B981}.s-completed{color:#A78BFA}.s-expired{color:#EF4444}.s-cancelled{color:#6B7280}
+/* Masked mobile display */
+.msk{font-family:monospace;font-weight:700;color:#A78BFA;letter-spacing:.05em}
+@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.sb{width:0;overflow:hidden}.sb.open{width:220px;position:fixed;height:100%;z-index:100}}
 </style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="crown">👑</div>
-    <div>
-      <div class="brand">FUN VIP</div>
-      <div class="sub">Admin Control</div>
-    </div>
+<!-- SIDEBAR -->
+<div class="sb" id="sidebar">
+  <div class="sb-logo"><div class="crown">👑</div><div><div class="name">FUN XPro</div><div class="ver">Identity-Bound VIP Engine</div></div></div>
+  <div style="flex:1;overflow-y:auto">
+    <div class="ns">Overview</div>
+    <div class="ni active" onclick="nav('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="ns">Users</div>
+    <div class="ni" onclick="nav('users')"><span class="ic">👥</span>All Users</div>
+    <div class="ni" onclick="nav('demo')"><span class="ic">🎯</span>Demo Accounts</div>
+    <div class="ns">Finance</div>
+    <div class="ni" onclick="nav('deposit')"><span class="ic">💰</span>Deposit Requests</div>
+    <div class="ns">VIP</div>
+    <div class="ni" onclick="nav('vip')"><span class="ic">🔑</span>VIP Entitlements</div>
+    <div class="ns">System</div>
+    <div class="ni" onclick="nav('refer')"><span class="ic">🔗</span>Referrals</div>
+    <div class="ni" onclick="nav('audit')"><span class="ic">📋</span>Audit Log</div>
+    <div class="ni" onclick="nav('settings')"><span class="ic">⚙️</span>Settings</div>
   </div>
-  <div style="overflow-y:auto;flex:1">
-    <div class="nav-section">Overview</div>
-    <div class="nav-item active" onclick="showSection('dashboard')"><span class="icon">📊</span><span class="nav-label">Dashboard</span></div>
-    <div class="nav-section">Users</div>
-    <div class="nav-item" onclick="showSection('users')"><span class="icon">👥</span><span class="nav-label">All Users</span></div>
-    <div class="nav-item" onclick="showSection('demo')"><span class="icon">🎯</span><span class="nav-label">Demo Accounts</span></div>
-    <div class="nav-section">Finance</div>
-    <div class="nav-item" onclick="showSection('deposit')"><span class="icon">💰</span><span class="nav-label">Deposit Control</span></div>
-    <div class="nav-item" onclick="showSection('requests')"><span class="icon">📋</span><span class="nav-label">Deposit History</span></div>
-    <div class="nav-section">VIP</div>
-    <div class="nav-item" onclick="showSection('vipkeys')"><span class="icon">🔑</span><span class="nav-label">VIP Keys</span></div>
-    <div class="nav-item" onclick="showSection('refer')"><span class="icon">🔗</span><span class="nav-label">Refer Codes</span></div>
-    <div class="nav-section">System</div>
-    <div class="nav-item" onclick="showSection('settings')"><span class="icon">⚙️</span><span class="nav-label">Settings</span></div>
-  </div>
-  <div style="padding:16px;border-top:1px solid #13133A;font-size:11px;color:#374151">
-    FUN VIP Admin v2.0<br>
-    <span id="conn-status" style="color:#EF4444">● Not Connected</span>
-  </div>
+  <div class="sb-foot"><span id="conn" style="color:#EF4444">● Disconnected</span><br>FUN XPro Admin v3.0</div>
 </div>
 
-<!-- ═══ MAIN ═══ -->
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="topbar-title" id="page-title">📊 Dashboard</div>
-    <div class="topbar-search">
-      <span>🔍</span>
-      <input type="text" id="global-search" placeholder="Search users, keys…" oninput="globalSearch(this.value)">
-    </div>
-    <div class="topbar-right">
-      <button class="btn btn-gold btn-sm" onclick="refreshAll()">↻ Refresh</button>
-    </div>
+    <div class="page-title" id="ptitle">📊 Dashboard</div>
+    <div class="tb-search"><span>🔍</span><input id="gsearch" placeholder="Search users, mobile…" oninput="gSearch(this.value)"></div>
+    <button class="btn bo bsm" onclick="refreshAll()">↻ Refresh</button>
   </div>
-
-  <div class="content" id="content">
-    <div class="empty"><div class="spin"></div><p style="margin-top:12px">Connecting to Firebase…</p></div>
-  </div>
+  <div class="content" id="content"><div class="empty"><div class="spin"></div><br><br>Connecting…</div></div>
 </div>
 
 <!-- ═══ MODALS ═══ -->
 
-<!-- Edit User Modal -->
-<div class="modal-overlay" id="modal-user">
-  <div class="modal">
-    <div class="modal-title">✏️ Edit User</div>
-    <div class="modal-sub">Modify user details in database</div>
-    <input type="hidden" id="edit-mobile-key">
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" id="edit-mobile" readonly style="opacity:.6"></div>
-      <div class="form-group"><label class="form-label">Brand</label><input class="form-input" id="edit-brand"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Current Balance</label><input class="form-input" id="edit-bal" type="number" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Login Count</label><input class="form-input" id="edit-logins" type="number"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Refer Code</label><input class="form-input" id="edit-refercode"></div>
-      <div class="form-group"><label class="form-label">Used Refer By</label><input class="form-input" id="edit-usedby"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">VIP Status</label>
-        <select class="form-select" id="edit-vipstatus">
-          <option value="">None</option>
-          <option value="UNUSED">UNUSED</option>
-          <option value="USED">USED</option>
-          <option value="EXPIRED">EXPIRED</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">VIP Validity</label>
-        <select class="form-select" id="edit-vipval">
-          <option value="">None</option>
-          <option value="1day">1 Day</option>
-          <option value="7days">7 Days</option>
-          <option value="14days">14 Days</option>
-          <option value="30days">30 Days</option>
-          <option value="lifetime">Lifetime</option>
-        </select>
+<!-- Edit User -->
+<div class="mo" id="m-user">
+  <div class="mdl">
+    <div class="mt">✏️ Edit User</div><div class="ms" id="m-user-sub">Edit user data</div>
+    <input type="hidden" id="eu-mobile">
+    <div class="fr">
+      <div class="fg"><label class="fl">Mobile</label><input class="fi" id="eu-mob" readonly style="opacity:.5"></div>
+      <div class="fg"><label class="fl">Account Status</label>
+        <select class="fs" id="eu-status"><option value="ACTIVE">ACTIVE</option><option value="BLOCKED">BLOCKED</option><option value="SUSPENDED">SUSPENDED</option></select>
       </div>
     </div>
-    <div class="form-group"><label class="form-label">Password (Code)</label><input class="form-input" id="edit-code"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-user')">Cancel</button>
-      <button class="btn btn-gold" onclick="saveUser()">💾 Save Changes</button>
+    <div class="fr">
+      <div class="fg"><label class="fl">Balance</label><input class="fi" id="eu-bal" type="number" step="0.01"></div>
+      <div class="fg"><label class="fl">Brand</label><input class="fi" id="eu-brand"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Referral Code</label><input class="fi" id="eu-ref"></div>
+      <div class="fg"><label class="fl">Referred By</label><input class="fi" id="eu-refby"></div>
+    </div>
+    <div class="fg"><label class="fl">Suspend Until (optional)</label><input class="fi" id="eu-suspuntil" type="datetime-local" placeholder="Suspend expiry"></div>
+    <div class="fg"><label class="fl">Admin Note</label><textarea class="fta" id="eu-note" rows="2" placeholder="Reason for action…"></textarea></div>
+    <div class="ma">
+      <button class="btn bo bsm" onclick="close2('m-user')">Cancel</button>
+      <button class="btn bg bsm" onclick="saveUser()">💾 Save</button>
     </div>
   </div>
 </div>
 
-<!-- View User Modal -->
-<div class="modal-overlay" id="modal-view">
-  <div class="modal modal-lg">
-    <div class="modal-title" id="view-title">👤 User Details</div>
-    <div class="modal-sub" id="view-sub">Full user data</div>
-    <div id="view-content"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-view')">Close</button>
-    </div>
+<!-- View User -->
+<div class="mo" id="m-view">
+  <div class="mdl mdl-lg">
+    <div class="mt" id="vt">👤 User</div><div class="ms" id="vs"></div>
+    <div id="vc"></div>
+    <div class="ma"><button class="btn bo bsm" onclick="close2('m-view')">Close</button></div>
   </div>
 </div>
 
-<!-- Add Demo Modal -->
-<div class="modal-overlay" id="modal-demo">
-  <div class="modal">
-    <div class="modal-title">🎯 Add Demo Account</div>
-    <div class="modal-sub">Create a pre-configured demo user</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Mobile Number *</label><input class="form-input" id="demo-mobile" placeholder="10-digit mobile" maxlength="10" type="number"></div>
-      <div class="form-group"><label class="form-label">Password *</label><input class="form-input" id="demo-code" placeholder="Password/Code"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Current Balance</label><input class="form-input" id="demo-bal" type="number" step="0.01" value="500"></div>
-      <div class="form-group"><label class="form-label">Brand Name</label><input class="form-input" id="demo-brand" value="Demo"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">VIP Status</label>
-        <select class="form-select" id="demo-vip">
-          <option value="UNUSED">UNUSED</option>
-          <option value="USED">USED</option>
-        </select>
-      </div>
-      <div class="form-group"><label class="form-label">VIP Validity</label>
-        <select class="form-select" id="demo-vipval">
-          <option value="7days">7 Days</option>
-          <option value="14days">14 Days</option>
-          <option value="30days">30 Days</option>
-          <option value="lifetime">Lifetime</option>
-        </select>
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-demo')">Cancel</button>
-      <button class="btn btn-green" onclick="addDemo()">✅ Add Demo Account</button>
-    </div>
-  </div>
-</div>
-
-<!-- Deposit Control Modal -->
-<div class="modal-overlay" id="modal-deposit">
-  <div class="modal">
-    <div class="modal-title">💰 Deposit Control</div>
-    <div class="modal-sub" id="deposit-modal-sub">Configure deposit requirement</div>
-    <input type="hidden" id="dep-mobile-key">
-    <div class="form-group">
-      <label class="form-label">Enable Deposit Required</label>
-      <label class="toggle" style="margin-top:6px">
-        <input type="checkbox" id="dep-enabled">
-        <span class="toggle-s"></span>
-      </label>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Required Amount (₹)</label><input class="form-input" id="dep-amount" type="number" placeholder="300"></div>
-      <div class="form-group"><label class="form-label">VIP Validity on Deposit</label>
-        <select class="form-select" id="dep-validity">
-          <option value="1day">1 Day</option>
-          <option value="7days">7 Days</option>
-          <option value="14days">14 Days</option>
-          <option value="30days">30 Days</option>
+<!-- Deposit Request -->
+<div class="mo" id="m-depreq">
+  <div class="mdl">
+    <div class="mt">💰 Create Deposit Request</div><div class="ms">Send deposit offer to a specific user</div>
+    <div class="fg"><label class="fl">Mobile Number *</label><input class="fi" id="dr-mobile" placeholder="User's mobile number"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Required Amount (₹) *</label><input class="fi" id="dr-amount" type="number" placeholder="500"></div>
+      <div class="fg"><label class="fl">VIP Validity *</label>
+        <select class="fs" id="dr-validity">
+          <option value="1day">1 Day</option><option value="7days">7 Days</option>
+          <option value="14days">14 Days</option><option value="30days">30 Days</option>
           <option value="lifetime">Lifetime ♾️</option>
         </select>
       </div>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-deposit')">Cancel</button>
-      <button class="btn btn-gold" onclick="saveDepositControl()">💾 Save Control</button>
+    <div class="fg"><label class="fl">Message to User</label><textarea class="fta" id="dr-msg" placeholder="Optional message…"></textarea></div>
+    <div class="ma">
+      <button class="btn bo bsm" onclick="close2('m-depreq')">Cancel</button>
+      <button class="btn bg bsm" onclick="createDepositRequest()">📤 Send Request</button>
     </div>
   </div>
 </div>
 
-<!-- VIP Key Modal -->
-<div class="modal-overlay" id="modal-vip">
-  <div class="modal">
-    <div class="modal-title">🔑 VIP Key Details</div>
-    <div class="modal-sub">Manage this VIP key</div>
-    <div id="vip-detail-content"></div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-vip')">Close</button>
-      <button class="btn btn-red btn-sm" id="vip-delete-btn">🗑 Delete Key</button>
-      <button class="btn btn-gold btn-sm" id="vip-toggle-btn">Toggle Status</button>
+<!-- Confirm Deposit -->
+<div class="mo" id="m-confirm-dep">
+  <div class="mdl" style="width:380px">
+    <div class="mt">✅ Confirm Deposit</div>
+    <div class="ms" id="cd-sub">Confirm and activate VIP entitlement for user</div>
+    <input type="hidden" id="cd-reqid">
+    <div id="cd-info" style="margin-bottom:16px"></div>
+    <div class="ma">
+      <button class="btn bo bsm" onclick="close2('m-confirm-dep')">Cancel</button>
+      <button class="btn bgrn bsm" onclick="confirmDeposit()">✅ Confirm & Activate VIP</button>
     </div>
   </div>
 </div>
 
-<!-- Delete Confirm Modal -->
-<div class="modal-overlay" id="modal-confirm">
-  <div class="modal" style="width:380px">
-    <div class="modal-title" style="color:#EF4444">⚠️ Confirm Delete</div>
-    <div class="modal-sub" id="confirm-msg">This action cannot be undone.</div>
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="closeModal('modal-confirm')">Cancel</button>
-      <button class="btn btn-red" id="confirm-yes-btn">🗑 Delete</button>
+<!-- VIP Action -->
+<div class="mo" id="m-vip">
+  <div class="mdl">
+    <div class="mt">🔑 VIP Entitlement</div><div class="ms" id="va-sub"></div>
+    <div id="va-content"></div>
+    <div class="ma" id="va-actions"></div>
+  </div>
+</div>
+
+<!-- Demo Add -->
+<div class="mo" id="m-demo">
+  <div class="mdl">
+    <div class="mt">🎯 Add Demo Account</div><div class="ms">Create pre-configured demo user</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Mobile *</label><input class="fi" id="dm-mob" type="number" placeholder="10-digit mobile"></div>
+      <div class="fg"><label class="fl">Password *</label><input class="fi" id="dm-code" placeholder="Code/Password"></div>
     </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Balance</label><input class="fi" id="dm-bal" type="number" value="500"></div>
+      <div class="fg"><label class="fl">VIP Validity</label>
+        <select class="fs" id="dm-vipval"><option value="7days">7 Days</option><option value="14days">14 Days</option><option value="30days">30 Days</option><option value="lifetime">Lifetime</option></select>
+      </div>
+    </div>
+    <div class="ma">
+      <button class="btn bo bsm" onclick="close2('m-demo')">Cancel</button>
+      <button class="btn bgrn bsm" onclick="addDemo()">✅ Create Demo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm destructive -->
+<div class="mo" id="m-del">
+  <div class="mdl" style="width:360px">
+    <div class="mt" style="color:#EF4444">⚠️ Confirm Action</div>
+    <div class="ms" id="del-msg">This cannot be undone.</div>
+    <div class="ma"><button class="btn bo bsm" onclick="close2('m-del')">Cancel</button><button class="btn br bsm" id="del-yes">Delete</button></div>
+  </div>
+</div>
+
+<!-- Extend VIP -->
+<div class="mo" id="m-ext">
+  <div class="mdl" style="width:360px">
+    <div class="mt">📅 Extend VIP</div><div class="ms" id="ext-sub"></div>
+    <input type="hidden" id="ext-mobile">
+    <div class="fg"><label class="fl">New Valid Until</label><input class="fi" id="ext-date" type="datetime-local"></div>
+    <div class="ma"><button class="btn bo bsm" onclick="close2('m-ext')">Cancel</button><button class="btn bg bsm" onclick="extendVip()">Extend VIP</button></div>
   </div>
 </div>
 
@@ -356,677 +292,626 @@ tbody tr:hover td{background:#0A0A1F}
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════
-//   CONFIG — edit in Settings tab
-// ═══════════════════════════════════════════════
-const DEFAULT_CONFIG = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "jashcore-official.firebaseapp.com",
-  databaseURL: "https://jashcore-official-default-rtdb.firebaseio.com",
-  projectId: "jashcore-official",
-  appId: "YOUR_APP_ID"
+// ═══════════════════════════════════
+//  CONFIG — Edit in Settings
+// ═══════════════════════════════════
+const DEFAULT = {
+  apiKey:"YOUR_API_KEY",
+  authDomain:"jashcore-official.firebaseapp.com",
+  databaseURL:"https://jashcore-official-default-rtdb.firebaseio.com",
+  projectId:"jashcore-official",
+  appId:"YOUR_APP_ID"
 };
 
-let db, app, fbConfig = null;
-let allUsers = {}, allVipKeys = {}, allRefer = {}, allDeposit = {};
-let currentSection = 'dashboard';
+let db, cfg = null, section = 'dashboard';
+let users={}, vipData={}, deposits={}, referCodes={}, audit=[];
 
-// ═══════════════════════════════════════════════
-//   INIT
-// ═══════════════════════════════════════════════
-function initFirebase() {
-  const saved = localStorage.getItem('funvip_config');
-  fbConfig = saved ? JSON.parse(saved) : DEFAULT_CONFIG;
-  try {
-    if (firebase.apps.length) firebase.apps[0].delete().then(() => _init());
-    else _init();
-  } catch(e) { _init(); }
+function maskMobile(m) {
+  if (!m || m.length < 5) return m||'';
+  const n = m.replace(/\D/g,'');
+  if (n.length < 5) return n;
+  return n.slice(0,2)+' 666 '+n.slice(-3);
 }
 
-function _init() {
+// ═══════════ FIREBASE INIT ═══════════
+function initFB() {
+  const saved = localStorage.getItem('funxpro_cfg');
+  cfg = saved ? JSON.parse(saved) : DEFAULT;
   try {
-    app = firebase.initializeApp(fbConfig);
+    if (firebase.apps.length) { firebase.apps[0].delete().then(_fb); return; }
+    _fb();
+  } catch(e) { _fb(); }
+}
+function _fb() {
+  try {
+    firebase.initializeApp(cfg);
     db = firebase.database();
     db.ref('.info/connected').on('value', s => {
-      const el = document.getElementById('conn-status');
-      if (s.val()) { el.textContent = '● Connected'; el.style.color = '#10B981'; loadAllData(); }
-      else { el.textContent = '● Disconnected'; el.style.color = '#EF4444'; }
+      const el = document.getElementById('conn');
+      if (s.val()) { el.textContent='● Connected'; el.style.color='#10B981'; loadAll(); }
+      else { el.textContent='● Disconnected'; el.style.color='#EF4444'; }
     });
-  } catch(e) { toast('Firebase init failed: ' + e.message, 'error'); }
+  } catch(e) { toast('Firebase error: '+e.message,'e'); }
 }
 
-// ═══════════════════════════════════════════════
-//   LOAD DATA
-// ═══════════════════════════════════════════════
-function loadAllData() {
-  db.ref('Users').on('value', s => {
-    allUsers = s.val() || {};
-    if (currentSection === 'dashboard') renderDashboard();
-    else if (currentSection === 'users') renderUsers();
-    else if (currentSection === 'demo') renderDemo();
-    updateStats();
-  });
-  db.ref('VIPKeys').on('value', s => {
-    allVipKeys = s.val() || {};
-    if (currentSection === 'vipkeys') renderVipKeys();
-  });
-  db.ref('ReferCodes').on('value', s => {
-    allRefer = s.val() || {};
-    if (currentSection === 'refer') renderRefer();
-  });
-  db.ref('depositControls').on('value', s => {
-    allDeposit = s.val() || {};
-    if (currentSection === 'deposit') renderDeposit();
-    if (currentSection === 'requests') renderRequests();
+// ═══════════ LOAD DATA ═══════════
+function loadAll() {
+  db.ref('Users').on('value', s => { users = s.val()||{}; refresh(); });
+  db.ref('VipEntitlements').on('value', s => { vipData = s.val()||{}; refresh(); });
+  db.ref('DepositRequests').on('value', s => { deposits = s.val()||{}; refresh(); });
+  db.ref('ReferralCodes').on('value', s => { referCodes = s.val()||{}; refresh(); });
+  db.ref('AuditLogs').orderByChild('timestamp').limitToLast(200).on('value', s => {
+    audit = [];
+    s.forEach(c => audit.unshift({id:c.key,...c.val()}));
+    if (section==='audit') renderAudit();
   });
 }
+function refresh() {
+  const fns={dashboard:renderDash,users:renderUsers,demo:renderDemo,deposit:renderDeposit,vip:renderVip,refer:renderRefer,audit:renderAudit,settings:renderSettings};
+  if (fns[section]) fns[section]();
+}
+function refreshAll() { loadAll(); toast('Refreshed','i'); }
 
-function refreshAll() {
-  if (!db) return;
-  loadAllData();
-  toast('Data refreshed', 'info');
+// ═══════════ NAVIGATION ═══════════
+const titles={dashboard:'📊 Dashboard',users:'👥 All Users',demo:'🎯 Demo Accounts',deposit:'💰 Deposit Requests',vip:'🔑 VIP Entitlements',refer:'🔗 Referrals',audit:'📋 Audit Log',settings:'⚙️ Settings'};
+function nav(name) {
+  section = name;
+  document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(e=>{if(e.getAttribute('onclick')&&e.getAttribute('onclick').includes("'"+name+"'"))e.classList.add('active');});
+  document.getElementById('ptitle').textContent = titles[name]||name;
+  refresh();
 }
 
-// ═══════════════════════════════════════════════
-//   SECTION ROUTER
-// ═══════════════════════════════════════════════
-function showSection(name) {
-  currentSection = name;
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(el => {
-    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes("'"+name+"'")) el.classList.add('active');
-  });
-  const titles = {dashboard:'📊 Dashboard',users:'👥 All Users',demo:'🎯 Demo Accounts',deposit:'💰 Deposit Control',requests:'📋 Deposit History',vipkeys:'🔑 VIP Keys',refer:'🔗 Refer Codes',settings:'⚙️ Settings'};
-  document.getElementById('page-title').textContent = titles[name] || name;
-  const fns = {dashboard:renderDashboard,users:renderUsers,demo:renderDemo,deposit:renderDeposit,requests:renderRequests,vipkeys:renderVipKeys,refer:renderRefer,settings:renderSettings};
-  if (fns[name]) fns[name]();
+// ═══════════ HELPERS ═══════════
+function vipBdg(st) {
+  if (!st||st===''||st==='NONE') return '<span class="bdg bdg-gy">NONE</span>';
+  if (st==='ACTIVE') return '<span class="bdg bdg-grn">ACTIVE</span>';
+  if (st==='AVAILABLE') return '<span class="bdg bdg-bl">AVAILABLE</span>';
+  if (st==='CLAIMED'||st==='CONSUMED') return '<span class="bdg bdg-p">USED</span>';
+  if (st==='EXPIRED') return '<span class="bdg bdg-r">EXPIRED</span>';
+  if (st==='REVOKED'||st==='BLOCKED') return '<span class="bdg bdg-r">${st}</span>';
+  return `<span class="bdg bdg-gy">${st}</span>`;
 }
+function depBdg(st) {
+  if (st==='PENDING') return '<span class="bdg bdg-am">PENDING</span>';
+  if (st==='CONFIRMED') return '<span class="bdg bdg-grn">CONFIRMED</span>';
+  if (st==='COMPLETED') return '<span class="bdg bdg-p">COMPLETED</span>';
+  if (st==='EXPIRED') return '<span class="bdg bdg-r">EXPIRED</span>';
+  if (st==='CANCELLED') return '<span class="bdg bdg-gy">CANCELLED</span>';
+  return `<span class="bdg bdg-gy">${st||'-'}</span>`;
+}
+function accBdg(st) {
+  if (st==='ACTIVE'||!st) return '<span class="bdg bdg-grn">ACTIVE</span>';
+  if (st==='BLOCKED') return '<span class="bdg bdg-r">BLOCKED</span>';
+  if (st==='SUSPENDED') return '<span class="bdg bdg-am">SUSPENDED</span>';
+  return `<span class="bdg bdg-gy">${st}</span>`;
+}
+function fmtDate(ts) {
+  if (!ts||ts===0) return '-';
+  return new Date(parseInt(ts)).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function fmtTime(ts) { return ts ? new Date(parseInt(ts)).toLocaleString() : '-'; }
+function ir(label,value) { return `<div class="ir"><span class="irl">${label}</span><span class="irv">${value}</span></div>`; }
 
-// ═══════════════════════════════════════════════
-//   DASHBOARD
-// ═══════════════════════════════════════════════
-function renderDashboard() {
-  const uArr = Object.entries(allUsers);
-  const total = uArr.length;
-  const vipUsers = uArr.filter(([,u]) => u.vipStatus === 'UNUSED' || u.vipStatus === 'USED').length;
-  const totalBal = uArr.reduce((acc,[,u]) => acc + parseFloat(u.currentBalance||0), 0);
-  const depActive = Object.values(allDeposit).filter(d => d.enabled).length;
+// ═══════════ DASHBOARD ═══════════
+function renderDash() {
+  const ua = Object.entries(users);
+  const total = ua.length;
+  const va = Object.entries(vipData);
+  const activeVip = va.filter(([,v])=>v.status==='ACTIVE').length;
+  const availVip = va.filter(([,v])=>v.status==='AVAILABLE').length;
+  const expVip = va.filter(([,v])=>v.status==='EXPIRED').length;
+  const da = Object.entries(deposits);
+  const pend = da.filter(([,d])=>d.status==='PENDING').length;
+  const conf = da.filter(([,d])=>d.status==='CONFIRMED').length;
+  const blocked = ua.filter(([,u])=>u.accountStatus==='BLOCKED').length;
+  const susp = ua.filter(([,u])=>u.accountStatus==='SUSPENDED').length;
+  const recent = ua.slice(-5).reverse();
 
   document.getElementById('content').innerHTML = `
-  <div class="stats-grid">
-    <div class="stat-card" style="--accent:#A78BFA"><div class="stat-icon">👥</div><div class="stat-label">Total Users</div><div class="stat-val">${total}</div><div class="stat-sub">Registered members</div></div>
-    <div class="stat-card" style="--accent:#FFD700"><div class="stat-icon">👑</div><div class="stat-label">VIP Users</div><div class="stat-val">${vipUsers}</div><div class="stat-sub">With VIP key</div></div>
-    <div class="stat-card" style="--accent:#10B981"><div class="stat-icon">💰</div><div class="stat-label">Total Balance</div><div class="stat-val">₹${totalBal.toFixed(0)}</div><div class="stat-sub">Across all users</div></div>
-    <div class="stat-card" style="--accent:#F59E0B"><div class="stat-icon">🔔</div><div class="stat-label">Active Deposits</div><div class="stat-val">${depActive}</div><div class="stat-sub">Required deposit ON</div></div>
+  <div class="stats">
+    <div class="scard" style="--ac:#A78BFA" onclick="nav('users')"><div class="sicon">👥</div><div class="slabel">Total Users</div><div class="sval">${total}</div><div class="ssub">Registered</div></div>
+    <div class="scard" style="--ac:#FFD700" onclick="nav('vip')"><div class="sicon">👑</div><div class="slabel">Active VIP</div><div class="sval">${activeVip}</div><div class="ssub">${availVip} available</div></div>
+    <div class="scard" style="--ac:#10B981" onclick="nav('deposit')"><div class="sicon">💰</div><div class="slabel">Pending</div><div class="sval">${pend}</div><div class="ssub">Deposit requests</div></div>
+    <div class="scard" style="--ac:#EF4444" onclick="nav('users')"><div class="sicon">⛔</div><div class="slabel">Blocked</div><div class="sval">${blocked}</div><div class="ssub">${susp} suspended</div></div>
+    <div class="scard" style="--ac:#F59E0B" onclick="nav('vip')"><div class="sicon">⏰</div><div class="slabel">Expired VIP</div><div class="sval">${expVip}</div><div class="ssub">Needs renewal</div></div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
     <div class="card">
-      <div class="card-header"><div class="card-title">👥 Recent Users</div><button class="btn btn-outline btn-sm" onclick="showSection('users')">View All</button></div>
-      <table><thead><tr><th>Mobile</th><th>Balance</th><th>Brand</th><th>VIP</th></tr></thead><tbody>
-      ${uArr.slice(-8).reverse().map(([k,u]) => `
-        <tr>
-          <td class="mobile-col">${k}</td>
-          <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
-          <td>${u.brand||'-'}</td>
-          <td>${vipBadge(u.vipStatus)}</td>
-        </tr>`).join('')||'<tr><td colspan="4" class="empty"><p>No users yet</p></td></tr>'}
-      </tbody></table>
+      <div class="ch"><div class="ct">👥 Recent Users</div><button class="btn bo bsm" onclick="nav('users')">View All</button></div>
+      <div class="tw"><table><thead><tr><th>Mobile (Masked)</th><th>Status</th><th>VIP</th><th>Balance</th></tr></thead><tbody>
+      ${recent.map(([k,u])=>`<tr><td><span class="msk">${maskMobile(k)}</span></td><td>${accBdg(u.accountStatus)}</td><td>${vipBdg((vipData[k]||{}).status)}</td><td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(0)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty" style="padding:20px">No users</td></tr>'}
+      </tbody></table></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title">💰 Active Deposit Controls</div><button class="btn btn-outline btn-sm" onclick="showSection('deposit')">Manage</button></div>
-      <table><thead><tr><th>Mobile</th><th>Amount</th><th>Validity</th></tr></thead><tbody>
-      ${Object.entries(allDeposit).filter(([,d])=>d.enabled).slice(0,8).map(([k,d]) => `
-        <tr>
-          <td class="mobile-col">${k}</td>
-          <td>₹${d.amount||'-'}</td>
-          <td>${d.vipValidity||'-'}</td>
-        </tr>`).join('')||'<tr><td colspan="3" class="empty"><p>None active</p></td></tr>'}
-      </tbody></table>
+      <div class="ch"><div class="ct">💰 Pending Deposits</div><button class="btn bg bsm" onclick="open2('m-depreq')">+ New</button></div>
+      <div class="tw"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+      ${Object.entries(deposits).filter(([,d])=>d.status==='PENDING').slice(0,6).map(([k,d])=>`<tr><td><span class="msk">${maskMobile(d.mobile)}</span></td><td>₹${d.amount}</td><td>${depBdg(d.status)}</td><td><button class="btn bgrn bxs" onclick="openConfirmDep('${k}')">Confirm</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty" style="padding:20px">No pending</td></tr>'}
+      </tbody></table></div>
     </div>
-  </div>
-
-  <div class="card" style="margin-top:16px">
-    <div class="card-header"><div class="card-title">🔑 Recent VIP Keys</div><button class="btn btn-outline btn-sm" onclick="showSection('vipkeys')">View All</button></div>
-    <table><thead><tr><th>Key</th><th>Mobile</th><th>Status</th><th>Validity</th></tr></thead><tbody>
-    ${Object.entries(allVipKeys).slice(-6).reverse().map(([k,v]) => `
-      <tr>
-        <td style="font-family:monospace;font-size:12px;color:#FFD700">${v.key||k}</td>
-        <td class="mobile-col">${v.mobile||'-'}</td>
-        <td>${vipBadge(v.status)}</td>
-        <td>${v.validity||'-'}</td>
-      </tr>`).join('')||'<tr><td colspan="4" class="empty"><p>No VIP keys</p></td></tr>'}
-    </tbody></table>
   </div>`;
 }
 
-function updateStats() {}
-
-function vipBadge(status) {
-  if (!status || status === '') return '<span class="badge badge-gray">None</span>';
-  if (status === 'UNUSED') return '<span class="badge badge-green">UNUSED</span>';
-  if (status === 'USED') return '<span class="badge badge-blue">USED</span>';
-  if (status === 'EXPIRED') return '<span class="badge badge-red">EXPIRED</span>';
-  return `<span class="badge badge-gray">${status}</span>`;
-}
-
-// ═══════════════════════════════════════════════
-//   USERS
-// ═══════════════════════════════════════════════
-let userSearch = '';
-
-function renderUsers(search) {
-  if (search !== undefined) userSearch = search;
-  const arr = Object.entries(allUsers).filter(([k,u]) => {
-    const q = (userSearch||'').toLowerCase();
-    return !q || k.includes(q) || (u.brand||'').toLowerCase().includes(q) || (u.referCode||'').toLowerCase().includes(q);
+// ═══════════ USERS ═══════════
+let usrQ='';
+function renderUsers(q) {
+  if (q!==undefined) usrQ=q;
+  const ua = Object.entries(users).filter(([k,u])=>{
+    const s=(usrQ||'').toLowerCase();
+    return !s||k.includes(s)||(u.brand||'').toLowerCase().includes(s)||(u.referralCode||'').toLowerCase().includes(s)||(u.accountStatus||'').toLowerCase().includes(s);
   });
-
   document.getElementById('content').innerHTML = `
   <div class="card">
-    <div class="card-header">
-      <div class="card-title">👥 All Users <span class="badge badge-purple" style="margin-left:8px">${arr.length}</span></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-red btn-sm" onclick="deleteAllUsers()">🗑 Delete All</button>
-        <button class="btn btn-gold btn-sm" onclick="openModal('modal-demo')">+ Add Demo</button>
-      </div>
+    <div class="ch"><div class="ct">👥 All Users <span class="bdg bdg-p" style="margin-left:6px">${ua.length}</span></div>
+      <div style="display:flex;gap:7px"><button class="btn br bsm" onclick="confirm2('allusers','all','Delete ALL users?')">🗑 All</button><button class="btn bgrn bsm" onclick="open2('m-demo')">+ Demo</button></div>
     </div>
-    <div class="search-bar">
-      <input class="form-input" placeholder="Search mobile, brand, refer code…" oninput="renderUsers(this.value)" value="${userSearch}">
-      <button class="btn btn-outline btn-sm" onclick="userSearch='';renderUsers()">Clear</button>
+    <div class="sb2">
+      <input class="fi" placeholder="Search mobile, brand, status…" oninput="renderUsers(this.value)" value="${usrQ}" style="max-width:280px">
+      <button class="btn bo bsm" onclick="usrQ='';renderUsers()">Clear</button>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>#</th><th>Mobile</th><th>Balance</th><th>Brand</th><th>Logins</th><th>VIP</th><th>Battery</th><th>Time</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${arr.length ? arr.map(([k,u], i) => `
-          <tr>
-            <td style="color:#4B5563">${i+1}</td>
-            <td class="mobile-col">${k}</td>
-            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
-            <td>${u.brand||'-'}</td>
-            <td>${u.loginCount||0}</td>
-            <td>${vipBadge(u.vipStatus)}</td>
-            <td>${u.battery||'-'}</td>
-            <td style="font-size:11px;color:#4B5563">${u.time||'-'}</td>
-            <td>
-              <div style="display:flex;gap:5px">
-                <button class="btn-icon" title="View" onclick="viewUser('${k}')">👁</button>
-                <button class="btn-icon" title="Edit" onclick="editUser('${k}')">✏️</button>
-                <button class="btn-icon" title="Deposit" onclick="openDepositModal('${k}')">💰</button>
-                <button class="btn-icon" title="Delete" onclick="confirmDelete('user','${k}')">🗑</button>
-              </div>
-            </td>
-          </tr>`).join('') : '<tr><td colspan="9" class="empty"><div class="empty-icon">👥</div><p>No users found</p></td></tr>'}
-        </tbody>
-      </table>
-    </div>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Mobile (Masked)</th><th>Balance</th><th>Brand</th><th>Status</th><th>VIP</th><th>Refer Code</th><th>Referred By</th><th>Last Active</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${ua.map(([k,u],i)=>`<tr>
+        <td style="color:#374151">${i+1}</td>
+        <td><span class="msk">${maskMobile(k)}</span></td>
+        <td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(2)}</td>
+        <td>${u.brand||'-'}</td>
+        <td>${accBdg(u.accountStatus)}</td>
+        <td>${vipBdg((vipData[k]||{}).status)}</td>
+        <td style="font-family:monospace;font-size:11px;color:#10B981">${u.referralCode||'-'}</td>
+        <td style="font-size:11px;color:#4B5563">${u.referredBy||'-'}</td>
+        <td style="font-size:11px;color:#374151">${u.time||'-'}</td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn bo bxs" onclick="viewUser('${k}')">👁</button>
+          <button class="btn bo bxs" onclick="editUser('${k}')">✏️</button>
+          <button class="btn bg bxs" onclick="openDepModal('${k}')">💰</button>
+          <button class="btn br bxs" onclick="confirm2('user','${k}','Delete user ${maskMobile(k)}?')">🗑</button>
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="10" class="empty"><div class="ei">👥</div><p>No users found</p></td></tr>'}
+      </tbody>
+    </table></div>
   </div>`;
 }
 
 function viewUser(mobile) {
-  const u = allUsers[mobile]; if (!u) return;
-  const d = allDeposit[mobile]||{};
-  document.getElementById('view-title').textContent = '📱 ' + mobile;
-  document.getElementById('view-sub').textContent = `Brand: ${u.brand||'-'}  ·  Time: ${u.time||'-'}`;
-  document.getElementById('view-content').innerHTML = `
-    <div>
-    ${row('Mobile', mobile)}
-    ${row('Password/Code', u.code||'-')}
-    ${row('Current Balance', '₹'+(parseFloat(u.currentBalance||0).toFixed(2)))}
-    ${row('Last Balance', '₹'+(parseFloat(u.lastBalance||0).toFixed(2)))}
-    ${row('Login Count', u.loginCount||0)}
-    ${row('Brand', u.brand||'-')}
-    ${row('Device ID', u.deviceId||'-')}
-    ${row('Battery', u.battery||'-')}
-    ${row('Refer Code', u.referCode||'-')}
-    ${row('Used Refer By', u.usedReferBy||'None')}
-    ${row('VIP Key', `<span style="font-family:monospace;color:#FFD700;font-size:12px">${u.vipKey||'Not Generated'}</span>`)}
-    ${row('VIP Status', vipBadge(u.vipStatus))}
-    ${row('VIP Validity', u.vipValidity||'-')}
-    ${row('Deposit Required', d.enabled ? `<span class="badge badge-red">ON — ₹${d.amount}</span>` : '<span class="badge badge-gray">OFF</span>')}
-    </div>`;
-  openModal('modal-view');
-}
-
-function row(label, value) {
-  return `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${value}</span></div>`;
+  const u=users[mobile]||{}, v=vipData[mobile]||{};
+  const ud=Object.entries(deposits).find(([,d])=>d.mobile===mobile&&d.status==='PENDING');
+  document.getElementById('vt').textContent='📱 '+maskMobile(mobile);
+  document.getElementById('vs').textContent='Full account details';
+  document.getElementById('vc').innerHTML=`
+    ${ir('Mobile (Masked)',`<span class="msk">${maskMobile(mobile)}</span>`)}
+    ${ir('Account Status',accBdg(u.accountStatus))}
+    ${ir('Balance','₹'+parseFloat(u.balance||u.currentBalance||0).toFixed(2))}
+    ${ir('Brand',u.brand||'-')}
+    ${ir('Referral Code',`<span style="font-family:monospace;color:#10B981">${u.referralCode||'-'}</span>`)}
+    ${ir('Referred By',u.referredBy||'None')}
+    ${ir('Referral Used',u.referralUsed?'✅ Yes':'❌ No')}
+    ${ir('VIP Status',vipBdg(v.status))}
+    ${ir('VIP Valid Until',fmtDate(v.validUntil))}
+    ${ir('Deposit Pending',ud?`₹${ud[1].amount} — ${ud[1].vipDuration}`:'None')}
+    ${ir('Device',u.deviceId||'-')}
+    ${ir('Battery',u.battery||'-')}
+    ${ir('Registered',fmtDate(u.createdAt))}
+    ${ir('Last Active',u.time||'-')}`;
+  open2('m-view');
 }
 
 function editUser(mobile) {
-  const u = allUsers[mobile]; if (!u) return;
-  document.getElementById('edit-mobile-key').value = mobile;
-  document.getElementById('edit-mobile').value = mobile;
-  document.getElementById('edit-brand').value = u.brand||'';
-  document.getElementById('edit-bal').value = u.currentBalance||0;
-  document.getElementById('edit-logins').value = u.loginCount||0;
-  document.getElementById('edit-refercode').value = u.referCode||'';
-  document.getElementById('edit-usedby').value = u.usedReferBy||'';
-  document.getElementById('edit-vipstatus').value = u.vipStatus||'';
-  document.getElementById('edit-vipval').value = u.vipValidity||'';
-  document.getElementById('edit-code').value = u.code||'';
-  openModal('modal-user');
+  const u=users[mobile]||{};
+  document.getElementById('eu-mobile').value=mobile;
+  document.getElementById('m-user-sub').textContent='Masked: '+maskMobile(mobile);
+  document.getElementById('eu-mob').value=mobile;
+  document.getElementById('eu-status').value=u.accountStatus||'ACTIVE';
+  document.getElementById('eu-bal').value=u.balance||u.currentBalance||0;
+  document.getElementById('eu-brand').value=u.brand||'';
+  document.getElementById('eu-ref').value=u.referralCode||'';
+  document.getElementById('eu-refby').value=u.referredBy||'';
+  document.getElementById('eu-note').value='';
+  open2('m-user');
 }
 
 function saveUser() {
-  const mobile = document.getElementById('edit-mobile-key').value;
-  if (!mobile || !db) return;
-  const updates = {
-    brand: document.getElementById('edit-brand').value,
-    currentBalance: document.getElementById('edit-bal').value,
-    loginCount: parseInt(document.getElementById('edit-logins').value)||0,
-    referCode: document.getElementById('edit-refercode').value,
-    usedReferBy: document.getElementById('edit-usedby').value,
-    vipStatus: document.getElementById('edit-vipstatus').value,
-    vipValidity: document.getElementById('edit-vipval').value,
-    code: document.getElementById('edit-code').value
+  const mobile=document.getElementById('eu-mobile').value;
+  const status=document.getElementById('eu-status').value;
+  const note=document.getElementById('eu-note').value;
+  if (!mobile||!db) return;
+  const updates={
+    accountStatus:status,
+    balance:document.getElementById('eu-bal').value,
+    brand:document.getElementById('eu-brand').value,
+    referralCode:document.getElementById('eu-ref').value,
+    referredBy:document.getElementById('eu-refby').value,
+    updatedAt:Date.now()
   };
+  if (note) updates.adminNote=note;
   db.ref('Users/'+mobile).update(updates);
   db.ref('dbRef/'+mobile).update(updates);
-  closeModal('modal-user');
-  toast('User updated ✅', 'success');
+  // Audit
+  logAudit('ADMIN','USER_UPDATED',mobile,{status,note});
+  close2('m-user'); toast('User updated ✅','s');
 }
 
-// ═══════════════════════════════════════════════
-//   DEMO ACCOUNTS
-// ═══════════════════════════════════════════════
-let demoMobiles = new Set();
+// ═══════════ DEPOSIT REQUESTS ═══════════
+let depTab='ALL';
+function renderDeposit(tab) {
+  if(tab) depTab=tab;
+  const all=Object.entries(deposits);
+  const filtered = depTab==='ALL' ? all : all.filter(([,d])=>d.status===depTab);
+  const counts={PENDING:all.filter(([,d])=>d.status==='PENDING').length,CONFIRMED:all.filter(([,d])=>d.status==='CONFIRMED').length,COMPLETED:all.filter(([,d])=>d.status==='COMPLETED').length,EXPIRED:all.filter(([,d])=>d.status==='EXPIRED').length,CANCELLED:all.filter(([,d])=>d.status==='CANCELLED').length};
 
-function renderDemo() {
-  const demoArr = Object.entries(allUsers).filter(([,u]) => u.brand === 'Demo' || demoMobiles.has(Object.keys(allUsers).find(k => allUsers[k] === u)));
-
-  document.getElementById('content').innerHTML = `
+  document.getElementById('content').innerHTML=`
   <div class="card">
-    <div class="card-header">
-      <div class="card-title">🎯 Demo Accounts</div>
-      <button class="btn btn-gold" onclick="openModal('modal-demo')">+ Add Demo Account</button>
+    <div class="ch"><div class="ct">💰 Deposit Requests</div><button class="btn bg bsm" onclick="open2('m-depreq')">+ Create Request</button></div>
+    <div class="tabs">
+      ${['ALL','PENDING','CONFIRMED','COMPLETED','EXPIRED','CANCELLED'].map(t=>`<div class="tab ${depTab===t?'active':''}" onclick="renderDeposit('${t}')">${t} ${counts[t]!==undefined?'('+counts[t]+')':''}</div>`).join('')}
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Mobile</th><th>Code</th><th>Balance</th><th>VIP Status</th><th>Validity</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${Object.entries(allUsers).filter(([,u])=>u.brand==='Demo').map(([k,u]) => `
-          <tr>
-            <td class="mobile-col">${k}</td>
-            <td>${u.code||'-'}</td>
-            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
-            <td>${vipBadge(u.vipStatus)}</td>
-            <td>${u.vipValidity||'-'}</td>
-            <td><div style="display:flex;gap:5px">
-              <button class="btn-icon" onclick="editUser('${k}')">✏️</button>
-              <button class="btn-icon" onclick="confirmDelete('user','${k}')">🗑</button>
-            </div></td>
-          </tr>`).join('')||'<tr><td colspan="6" class="empty"><div class="empty-icon">🎯</div><p>No demo accounts. Add one above.</p></td></tr>'}
-        </tbody>
-      </table>
+    <div class="tw"><table>
+      <thead><tr><th>Request ID</th><th>Mobile</th><th>Amount</th><th>VIP Duration</th><th>Status</th><th>Created</th><th>Confirmed</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${filtered.map(([k,d])=>`<tr>
+        <td style="font-family:monospace;font-size:11px;color:#4B5563">${k.slice(0,10)}…</td>
+        <td><span class="msk">${maskMobile(d.mobile)}</span></td>
+        <td style="font-weight:700;color:#FFD700">₹${d.amount}</td>
+        <td>${d.vipDuration||'-'}</td>
+        <td>${depBdg(d.status)}</td>
+        <td style="font-size:11px">${fmtDate(d.createdAt)}</td>
+        <td style="font-size:11px">${fmtDate(d.confirmedAt)}</td>
+        <td><div style="display:flex;gap:4px">
+          ${d.status==='PENDING'?`<button class="btn bgrn bxs" onclick="openConfirmDep('${k}')">✅ Confirm</button><button class="btn br bxs" onclick="cancelDep('${k}')">✗ Cancel</button>`:''}
+          ${d.status==='CONFIRMED'||d.status==='COMPLETED'?`<button class="btn bp bxs" onclick="viewDep('${k}')">View</button>`:''}
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="8" class="empty"><p>No deposits in this category</p></td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+function openDepModal(mobile) {
+  document.getElementById('dr-mobile').value=mobile;
+  open2('m-depreq');
+}
+
+function createDepositRequest() {
+  const mobile=document.getElementById('dr-mobile').value.trim();
+  const amount=document.getElementById('dr-amount').value;
+  const validity=document.getElementById('dr-validity').value;
+  const msg=document.getElementById('dr-msg').value;
+  if (!mobile||!amount||!db) { toast('Fill required fields','e'); return; }
+  if (!users[mobile]) { toast('User not found: '+mobile,'e'); return; }
+  const req={
+    mobile, amount, vipDuration:validity,
+    status:'PENDING', message:msg,
+    createdAt:Date.now()
+  };
+  const newRef=db.ref('DepositRequests').push();
+  newRef.set(req).then(()=>{
+    logAudit('ADMIN','DEPOSIT_REQUESTED',mobile,{amount,validity});
+    close2('m-depreq'); toast('Request sent to user ✅','s');
+  });
+}
+
+function openConfirmDep(reqId) {
+  const d=deposits[reqId]; if (!d) return;
+  document.getElementById('cd-reqid').value=reqId;
+  document.getElementById('cd-sub').textContent='Mobile: '+maskMobile(d.mobile);
+  document.getElementById('cd-info').innerHTML=`
+    ${ir('Amount','₹'+d.amount)}
+    ${ir('VIP Duration',d.vipDuration||'-')}
+    ${ir('Message',d.message||'-')}`;
+  open2('m-confirm-dep');
+}
+
+function confirmDeposit() {
+  const reqId=document.getElementById('cd-reqid').value;
+  const d=deposits[reqId]; if (!d) return;
+  const mobile=d.mobile;
+  // Idempotency: check if already confirmed
+  if (d.status!=='PENDING') { toast('Already processed','e'); return; }
+  
+  const now=Date.now();
+  let expiresAt=0;
+  if (d.vipDuration==='1day') expiresAt=now+86400000;
+  else if (d.vipDuration==='7days') expiresAt=now+604800000;
+  else if (d.vipDuration==='14days') expiresAt=now+1209600000;
+  else if (d.vipDuration==='30days') expiresAt=now+2592000000;
+  // lifetime = 0 (never expires)
+
+  const entId=db.ref('VipEntitlements').push().key;
+  const ent={
+    mobile, depositRequestId:reqId,
+    status:'AVAILABLE',
+    createdAt:now, validFrom:now, validUntil:expiresAt,
+    activatedAt:0, claimedAt:0
+  };
+
+  const updates={};
+  updates['DepositRequests/'+reqId+'/status']='CONFIRMED';
+  updates['DepositRequests/'+reqId+'/confirmedAt']=now;
+  updates['VipEntitlements/'+entId]=ent;
+  updates['VIP/'+mobile+'/status']='ACTIVE';
+  updates['VIP/'+mobile+'/validUntil']=expiresAt;
+  updates['VIP/'+mobile+'/entitlementId']=entId;
+  updates['VIP/'+mobile+'/activatedAt']=now;
+  updates['Users/'+mobile+'/updatedAt']=now;
+
+  db.ref().update(updates).then(()=>{
+    logAudit('ADMIN','DEPOSIT_CONFIRMED',mobile,{reqId,entId,amount:d.amount});
+    close2('m-confirm-dep'); toast('VIP activated for '+maskMobile(mobile)+' ✅','s');
+  });
+}
+
+function cancelDep(reqId) {
+  confirm2('dep',reqId,'Cancel deposit request?');
+}
+function viewDep(reqId) {
+  const d=deposits[reqId]||{};
+  document.getElementById('vt').textContent='💰 Deposit Request';
+  document.getElementById('vs').textContent=reqId;
+  document.getElementById('vc').innerHTML=`
+    ${ir('Mobile',`<span class="msk">${maskMobile(d.mobile)}</span>`)}
+    ${ir('Amount','₹'+d.amount)}
+    ${ir('VIP Duration',d.vipDuration)}
+    ${ir('Status',depBdg(d.status))}
+    ${ir('Message',d.message||'-')}
+    ${ir('Created',fmtDate(d.createdAt))}
+    ${ir('Confirmed',fmtDate(d.confirmedAt))}`;
+  open2('m-view');
+}
+
+// ═══════════ VIP ENTITLEMENTS ═══════════
+function renderVip() {
+  const va=Object.entries(vipData);
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="ch"><div class="ct">🔑 VIP Entitlements <span class="bdg bdg-g" style="margin-left:6px">${va.length}</span></div>
+      <div style="display:flex;gap:7px">
+        <span class="bdg bdg-grn">${va.filter(([,v])=>v.status==='ACTIVE').length} Active</span>
+        <span class="bdg bdg-bl">${va.filter(([,v])=>v.status==='AVAILABLE').length} Available</span>
+        <span class="bdg bdg-r">${va.filter(([,v])=>v.status==='EXPIRED').length} Expired</span>
+      </div>
     </div>
+    <div class="tw"><table>
+      <thead><tr><th>Mobile</th><th>Status</th><th>Activated</th><th>Valid Until</th><th>Entitlement ID</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${va.map(([k,v])=>`<tr>
+        <td><span class="msk">${maskMobile(k)}</span></td>
+        <td>${vipBdg(v.status)}</td>
+        <td style="font-size:11px">${fmtDate(v.activatedAt)}</td>
+        <td style="font-size:11px;${v.validUntil&&v.validUntil<Date.now()?'color:#EF4444':''}">${v.validUntil===0?'♾️ Lifetime':fmtDate(v.validUntil)}</td>
+        <td style="font-family:monospace;font-size:10px;color:#4B5563">${v.entitlementId||k}</td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn bp bxs" onclick="extendVip2('${k}')">📅 Extend</button>
+          <button class="btn br bxs" onclick="revokeVip('${k}')">Revoke</button>
+          <button class="btn bo bxs" onclick="viewVip('${k}')">View</button>
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="6" class="empty"><p>No VIP data</p></td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+function viewVip(mobile) {
+  const v=vipData[mobile]||{};
+  document.getElementById('va-sub').textContent='Mobile: '+maskMobile(mobile);
+  document.getElementById('va-content').innerHTML=`
+    ${ir('Mobile',`<span class="msk">${maskMobile(mobile)}</span>`)}
+    ${ir('Status',vipBdg(v.status))}
+    ${ir('Activated',fmtDate(v.activatedAt))}
+    ${ir('Valid Until',v.validUntil===0?'♾️ Lifetime':fmtDate(v.validUntil))}
+    ${ir('Entitlement',v.entitlementId||'-')}`;
+  document.getElementById('va-actions').innerHTML=`
+    <button class="btn bo bsm" onclick="close2('m-vip')">Close</button>
+    <button class="btn br bsm" onclick="revokeVip('${mobile}');close2('m-vip')">Revoke</button>
+    <button class="btn bg bsm" onclick="close2('m-vip');extendVip2('${mobile}')">Extend</button>`;
+  open2('m-vip');
+}
+
+function extendVip2(mobile) {
+  document.getElementById('ext-mobile').value=mobile;
+  document.getElementById('ext-sub').textContent='Extend VIP for '+maskMobile(mobile);
+  const v=vipData[mobile]||{};
+  if (v.validUntil&&v.validUntil>0) {
+    const d=new Date(v.validUntil);
+    document.getElementById('ext-date').value=d.toISOString().slice(0,16);
+  }
+  open2('m-ext');
+}
+
+function extendVip() {
+  const mobile=document.getElementById('ext-mobile').value;
+  const newDate=document.getElementById('ext-date').value;
+  if (!mobile||!newDate||!db) return;
+  const newTs=new Date(newDate).getTime();
+  db.ref('VIP/'+mobile).update({validUntil:newTs,status:'ACTIVE'});
+  logAudit('ADMIN','VIP_EXTENDED',mobile,{newUntil:newTs});
+  close2('m-ext'); toast('VIP extended for '+maskMobile(mobile),'s');
+}
+
+function revokeVip(mobile) {
+  if (!db||!mobile) return;
+  const v=vipData[mobile]||{};
+  db.ref('VIP/'+mobile).update({status:'REVOKED'});
+  if (v.entitlementId) db.ref('VipEntitlements/'+v.entitlementId).update({status:'REVOKED'});
+  logAudit('ADMIN','VIP_REVOKED',mobile,{});
+  toast('VIP revoked for '+maskMobile(mobile),'s');
+}
+
+// ═══════════ DEMO ═══════════
+function renderDemo() {
+  const demos=Object.entries(users).filter(([,u])=>u.brand==='Demo');
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="ch"><div class="ct">🎯 Demo Accounts</div><button class="btn bg bsm" onclick="open2('m-demo')">+ Add Demo</button></div>
+    <div class="tw"><table>
+      <thead><tr><th>Mobile</th><th>Code</th><th>Balance</th><th>VIP</th><th>Referral</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${demos.map(([k,u])=>`<tr>
+        <td><span class="msk">${maskMobile(k)}</span></td>
+        <td style="font-family:monospace">${u.code||'-'}</td>
+        <td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(2)}</td>
+        <td>${vipBdg((vipData[k]||{}).status)}</td>
+        <td style="font-family:monospace;color:#10B981;font-size:11px">${u.referralCode||'-'}</td>
+        <td><div style="display:flex;gap:4px">
+          <button class="btn bo bxs" onclick="editUser('${k}')">✏️</button>
+          <button class="btn br bxs" onclick="confirm2('user','${k}','Delete demo ${maskMobile(k)}?')">🗑</button>
+        </div></td>
+      </tr>`).join('')||'<tr><td colspan="6" class="empty"><div class="ei">🎯</div><p>No demo accounts. Add one above.</p></td></tr>'}
+      </tbody>
+    </table></div>
   </div>`;
 }
 
 function addDemo() {
-  const mobile = document.getElementById('demo-mobile').value.trim();
-  const code = document.getElementById('demo-code').value.trim();
-  const bal = document.getElementById('demo-bal').value || '500';
-  const brand = document.getElementById('demo-brand').value || 'Demo';
-  const vip = document.getElementById('demo-vip').value;
-  const vipVal = document.getElementById('demo-vipval').value;
-  if (!mobile || mobile.length < 4) { toast('Enter valid mobile', 'error'); return; }
-  if (!code) { toast('Enter password/code', 'error'); return; }
-  if (!db) return;
-  const key = 'FUN' + Math.random().toString(36).slice(2,7).toUpperCase() + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
-  const refCode = 'FUNJASCORE' + mobile.slice(-4);
-  const data = {
-    mobile, code, brand, currentBalance: bal, lastBalance: '0', loginCount: 0,
-    referCode: refCode, usedReferBy: '',
-    vipKey: key, vipStatus: vip, vipValidity: vipVal,
-    vipGeneratedAt: Date.now(), vipExpiresAt: 0,
-    battery: '80%', deviceId: 'demo', time: new Date().toLocaleString('en-GB').replace(',','')
-  };
-  db.ref('Users/'+mobile).update(data);
-  db.ref('dbRef/'+mobile).update(data);
-  db.ref('ReferCodes/'+refCode).update({ mobile, name: refCode });
-  db.ref('VIPKeys/'+key.replace(/-/g,'')).update({ mobile, key, validity: vipVal, status: vip, generatedAt: Date.now(), expiresAt: 0 });
-  demoMobiles.add(mobile);
-  closeModal('modal-demo');
-  toast('Demo account added ✅', 'success');
+  const mobile=document.getElementById('dm-mob').value.trim();
+  const code=document.getElementById('dm-code').value.trim();
+  const bal=document.getElementById('dm-bal').value||'500';
+  const vipval=document.getElementById('dm-vipval').value;
+  if (!mobile||mobile.length<4) { toast('Enter valid mobile','e'); return; }
+  if (!code) { toast('Enter password','e'); return; }
+  const refCode='FUNJASCORE'+mobile.slice(-4);
+  const now=Date.now();
+  let exp=0;
+  if (vipval==='1day') exp=now+86400000;
+  else if (vipval==='7days') exp=now+604800000;
+  else if (vipval==='14days') exp=now+1209600000;
+  else if (vipval==='30days') exp=now+2592000000;
+
+  const u={mobile,code,brand:'Demo',balance:bal,currentBalance:bal,lastBalance:'0',loginCount:0,referralCode:refCode,referredBy:'',referralUsed:false,accountStatus:'ACTIVE',createdAt:now,time:new Date().toLocaleDateString()};
+  db.ref('Users/'+mobile).update(u);
+  db.ref('dbRef/'+mobile).update(u);
+  db.ref('ReferralCodes/'+refCode).update({mobile,active:true});
+  db.ref('VIP/'+mobile).update({status:'ACTIVE',validUntil:exp,activatedAt:now,entitlementId:'demo-'+mobile});
+  logAudit('ADMIN','DEMO_CREATED',mobile,{vipval});
+  close2('m-demo'); toast('Demo account created ✅','s');
 }
 
-// ═══════════════════════════════════════════════
-//   DEPOSIT CONTROL
-// ═══════════════════════════════════════════════
-function renderDeposit() {
-  const entries = Object.entries(allUsers);
-  document.getElementById('content').innerHTML = `
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">💰 Deposit Control <span class="badge badge-red" style="margin-left:8px">${Object.values(allDeposit).filter(d=>d.enabled).length} Active</span></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-red btn-sm" onclick="disableAllDeposit()">Turn OFF All</button>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Mobile</th><th>Brand</th><th>Balance</th><th>Status</th><th>Required Amount</th><th>Validity</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${entries.map(([k,u]) => {
-          const d = allDeposit[k]||{};
-          return `<tr>
-            <td class="mobile-col">${k}</td>
-            <td>${u.brand||'-'}</td>
-            <td>₹${parseFloat(u.currentBalance||0).toFixed(2)}</td>
-            <td>${d.enabled ? '<span class="badge badge-red">● ON</span>' : '<span class="badge badge-gray">OFF</span>'}</td>
-            <td>${d.amount ? '₹'+d.amount : '-'}</td>
-            <td>${d.vipValidity||'-'}</td>
-            <td><button class="btn btn-gold btn-xs" onclick="openDepositModal('${k}')">⚙ Control</button></td>
-          </tr>`;
-        }).join('')||'<tr><td colspan="7" class="empty"><p>No users</p></td></tr>'}
-        </tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function openDepositModal(mobile) {
-  const d = allDeposit[mobile]||{};
-  document.getElementById('dep-mobile-key').value = mobile;
-  document.getElementById('deposit-modal-sub').textContent = '📱 ' + mobile;
-  document.getElementById('dep-enabled').checked = d.enabled||false;
-  document.getElementById('dep-amount').value = d.amount||'300';
-  document.getElementById('dep-validity').value = d.vipValidity||'7days';
-  openModal('modal-deposit');
-}
-
-function saveDepositControl() {
-  const mobile = document.getElementById('dep-mobile-key').value;
-  if (!mobile || !db) return;
-  const data = {
-    enabled: document.getElementById('dep-enabled').checked,
-    amount: document.getElementById('dep-amount').value,
-    vipValidity: document.getElementById('dep-validity').value
-  };
-  db.ref('depositControls/'+mobile).update(data);
-  closeModal('modal-deposit');
-  toast('Deposit control saved ✅', 'success');
-}
-
-function disableAllDeposit() {
-  if (!db) return;
-  const updates = {};
-  Object.keys(allDeposit).forEach(k => { updates['depositControls/'+k+'/enabled'] = false; });
-  db.ref().update(updates);
-  toast('All deposit controls turned OFF', 'warn');
-}
-
-// ═══════════════════════════════════════════════
-//   DEPOSIT HISTORY
-// ═══════════════════════════════════════════════
-function renderRequests() {
-  const entries = Object.entries(allDeposit);
-  document.getElementById('content').innerHTML = `
-  <div class="card">
-    <div class="card-header"><div class="card-title">📋 Deposit History & Controls</div></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Mobile</th><th>Enabled</th><th>Amount (₹)</th><th>VIP Validity</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${entries.map(([k,d]) => `
-          <tr>
-            <td class="mobile-col">${k}</td>
-            <td>${d.enabled ? '<span class="badge badge-red">ON</span>' : '<span class="badge badge-gray">OFF</span>'}</td>
-            <td>₹${d.amount||'-'}</td>
-            <td>${d.vipValidity||'-'}</td>
-            <td><div style="display:flex;gap:5px">
-              <button class="btn btn-gold btn-xs" onclick="openDepositModal('${k}')">Edit</button>
-              <button class="btn btn-red btn-xs" onclick="confirmDelete('deposit','${k}')">Remove</button>
-            </div></td>
-          </tr>`).join('')||'<tr><td colspan="5" class="empty"><p>No deposit records</p></td></tr>'}
-        </tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-// ═══════════════════════════════════════════════
-//   VIP KEYS
-// ═══════════════════════════════════════════════
-function renderVipKeys() {
-  const entries = Object.entries(allVipKeys);
-  document.getElementById('content').innerHTML = `
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">🔑 VIP Keys <span class="badge badge-gold" style="margin-left:8px">${entries.length} Total</span></div>
-      <div style="display:flex;gap:8px">
-        <span class="badge badge-green">${entries.filter(([,v])=>v.status==='UNUSED').length} Unused</span>
-        <span class="badge badge-blue">${entries.filter(([,v])=>v.status==='USED').length} Used</span>
-        <span class="badge badge-red">${entries.filter(([,v])=>v.status==='EXPIRED').length} Expired</span>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Key</th><th>Mobile</th><th>Status</th><th>Validity</th><th>Generated</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${entries.map(([k,v]) => `
-          <tr>
-            <td style="font-family:monospace;font-size:12px;color:#FFD700">${v.key||k.slice(0,8)+'...'}</td>
-            <td class="mobile-col">${v.mobile||'-'}</td>
-            <td>${vipBadge(v.status)}</td>
-            <td>${v.validity||'-'}</td>
-            <td style="font-size:11px;color:#4B5563">${v.generatedAt ? new Date(v.generatedAt).toLocaleDateString() : '-'}</td>
-            <td><div style="display:flex;gap:5px">
-              <button class="btn btn-gold btn-xs" onclick="viewVipKey('${k}')">View</button>
-              <button class="btn btn-red btn-xs" onclick="confirmDelete('vip','${k}')">Delete</button>
-            </div></td>
-          </tr>`).join('')||'<tr><td colspan="6" class="empty"><p>No VIP keys generated yet</p></td></tr>'}
-        </tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
-function viewVipKey(k) {
-  const v = allVipKeys[k]; if (!v) return;
-  document.getElementById('vip-detail-content').innerHTML = `
-    ${row('Key', `<span style="font-family:monospace;color:#FFD700">${v.key||k}</span>`)}
-    ${row('Mobile', v.mobile||'-')}
-    ${row('Status', vipBadge(v.status))}
-    ${row('Validity', v.validity||'-')}
-    ${row('Generated', v.generatedAt ? new Date(v.generatedAt).toLocaleString() : '-')}
-    ${row('Expires', v.expiresAt && v.expiresAt > 0 ? new Date(v.expiresAt).toLocaleString() : 'Never (Lifetime)')}`;
-  document.getElementById('vip-delete-btn').onclick = () => { closeModal('modal-vip'); confirmDelete('vip', k); };
-  document.getElementById('vip-toggle-btn').onclick = () => {
-    const newStatus = v.status === 'UNUSED' ? 'USED' : 'UNUSED';
-    db.ref('VIPKeys/'+k+'/status').set(newStatus);
-    if (v.mobile) db.ref('Users/'+v.mobile+'/vipStatus').set(newStatus);
-    closeModal('modal-vip');
-    toast('Key status updated → '+newStatus, 'success');
-  };
-  document.getElementById('vip-toggle-btn').textContent = v.status === 'UNUSED' ? 'Mark as USED' : 'Mark as UNUSED';
-  openModal('modal-vip');
-}
-
-// ═══════════════════════════════════════════════
-//   REFER CODES
-// ═══════════════════════════════════════════════
+// ═══════════ REFER ═══════════
 function renderRefer() {
-  const entries = Object.entries(allRefer);
-  document.getElementById('content').innerHTML = `
+  const ra=Object.entries(referCodes);
+  document.getElementById('content').innerHTML=`
   <div class="card">
-    <div class="card-header">
-      <div class="card-title">🔗 Refer Codes <span class="badge badge-purple" style="margin-left:8px">${entries.length}</span></div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Refer Code</th><th>Owner Mobile</th><th>Used By Count</th><th>Actions</th></tr></thead>
-        <tbody>
-        ${entries.map(([k,v]) => {
-          const usedCount = Object.values(allUsers).filter(u => u.usedReferBy === k).length;
-          return `<tr>
-            <td style="font-family:monospace;color:#10B981;font-weight:700">${k}</td>
-            <td class="mobile-col">${v.mobile||'-'}</td>
-            <td><span class="badge ${usedCount>0?'badge-green':'badge-gray'}">${usedCount} users</span></td>
-            <td><button class="btn btn-red btn-xs" onclick="confirmDelete('refer','${k}')">Remove</button></td>
-          </tr>`;
-        }).join('')||'<tr><td colspan="4" class="empty"><p>No refer codes</p></td></tr>'}
-        </tbody>
-      </table>
-    </div>
+    <div class="ch"><div class="ct">🔗 Referral Codes <span class="bdg bdg-p" style="margin-left:6px">${ra.length}</span></div></div>
+    <div class="tw"><table>
+      <thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th><th>Users Referred</th><th>Actions</th></tr></thead>
+      <tbody>
+      ${ra.map(([k,v])=>{
+        const cnt=Object.values(users).filter(u=>u.referredBy===k).length;
+        return `<tr>
+          <td style="font-family:monospace;color:#10B981;font-weight:700">${k}</td>
+          <td><span class="msk">${maskMobile(v.mobile)}</span></td>
+          <td>${v.active!==false?'<span class="bdg bdg-grn">Active</span>':'<span class="bdg bdg-r">Inactive</span>'}</td>
+          <td><span class="bdg bdg-${cnt>0?'grn':'gy'}">${cnt} users</span></td>
+          <td><button class="btn br bxs" onclick="confirm2('refer','${k}','Remove refer code?')">Remove</button></td>
+        </tr>`;
+      }).join('')||'<tr><td colspan="5" class="empty"><p>No referral codes</p></td></tr>'}
+      </tbody>
+    </table></div>
   </div>`;
 }
 
-// ═══════════════════════════════════════════════
-//   SETTINGS
-// ═══════════════════════════════════════════════
-function renderSettings() {
-  const cfg = fbConfig || DEFAULT_CONFIG;
-  document.getElementById('content').innerHTML = `
+// ═══════════ AUDIT LOG ═══════════
+function renderAudit() {
+  document.getElementById('content').innerHTML=`
   <div class="card">
-    <div class="card-header"><div class="card-title">⚙️ Firebase Configuration</div></div>
-    <div class="config-banner">
-      <span style="font-size:24px">🔥</span>
-      <div>
-        <div style="font-weight:700;margin-bottom:3px">Database URL</div>
-        <div style="font-size:12px;color:#10B981">${cfg.databaseURL}</div>
-      </div>
+    <div class="ch"><div class="ct">📋 Audit Log <span class="bdg bdg-gy" style="margin-left:6px">${audit.length}</span></div></div>
+    <div class="tw"><table>
+      <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+      <tbody>
+      ${audit.slice(0,100).map(a=>`<tr>
+        <td style="font-size:11px;color:#374151">${fmtDate(a.timestamp)}</td>
+        <td style="color:#A78BFA;font-size:11px">${a.actor}</td>
+        <td style="font-family:monospace;font-size:11px;color:#FFD700">${a.action}</td>
+        <td><span class="msk">${maskMobile(a.target)||a.target||'-'}</span></td>
+        <td style="font-size:11px;color:#4B5563">${a.details?JSON.stringify(a.details).slice(0,60):'-'}</td>
+      </tr>`).join('')||'<tr><td colspan="5" class="empty"><p>No audit records yet</p></td></tr>'}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+// ═══════════ SETTINGS ═══════════
+function renderSettings() {
+  const c=cfg||DEFAULT;
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="ch"><div class="ct">🔥 Firebase Config</div></div>
+    <div style="background:#030310;border:1px solid #1A1A3A;border-radius:9px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;color:#4B5563">Database URL</div>
+      <div style="font-size:13px;color:#10B981;font-family:monospace;margin-top:3px">${c.databaseURL}</div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" id="cfg-apikey" value="${cfg.apiKey}"></div>
-      <div class="form-group"><label class="form-label">Project ID</label><input class="form-input" id="cfg-projectid" value="${cfg.projectId}"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">API Key</label><input class="fi" id="c-apikey" value="${c.apiKey}"></div>
+      <div class="fg"><label class="fl">Project ID</label><input class="fi" id="c-projid" value="${c.projectId}"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Database URL</label><input class="form-input" id="cfg-dburl" value="${cfg.databaseURL}"></div>
-      <div class="form-group"><label class="form-label">App ID</label><input class="form-input" id="cfg-appid" value="${cfg.appId}"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Database URL</label><input class="fi" id="c-dburl" value="${c.databaseURL}"></div>
+      <div class="fg"><label class="fl">App ID</label><input class="fi" id="c-appid" value="${c.appId}"></div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:8px">
-      <button class="btn btn-gold" onclick="saveConfig()">💾 Save & Reconnect</button>
-      <button class="btn btn-outline" onclick="resetConfig()">↺ Reset to Default</button>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn bg bsm" onclick="saveConfig()">💾 Save & Reconnect</button>
+      <button class="btn bo bsm" onclick="resetConfig()">↺ Reset</button>
     </div>
   </div>
-
   <div class="card">
-    <div class="card-header"><div class="card-title">🗑 Danger Zone</div></div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
-        <div><div style="font-weight:600;margin-bottom:3px">Delete All Users</div><div style="font-size:12px;color:#4B5563">Permanently removes all users from database</div></div>
-        <button class="btn btn-red btn-sm" onclick="deleteAllUsers()">Delete All Users</button>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
-        <div><div style="font-weight:600;margin-bottom:3px">Clear All VIP Keys</div><div style="font-size:12px;color:#4B5563">Remove all VIP keys from database</div></div>
-        <button class="btn btn-red btn-sm" onclick="confirmDelete('allvip','all')">Clear VIP Keys</button>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #1E1E40;border-radius:10px">
-        <div><div style="font-weight:600;margin-bottom:3px">Disable All Deposits</div><div style="font-size:12px;color:#4B5563">Turn off all deposit requirements</div></div>
-        <button class="btn btn-red btn-sm" onclick="disableAllDeposit()">Disable All</button>
-      </div>
-    </div>
+    <div class="ch"><div class="ct" style="color:#EF4444">🗑 Danger Zone</div></div>
+    <div class="danger-zone"><div><div style="font-weight:700">Delete All Users</div><div style="font-size:11px;color:#4B5563">Removes all users permanently</div></div><button class="btn br bsm" onclick="confirm2('allusers','all','Delete ALL users? Cannot undo!')">Delete All</button></div>
+    <div class="danger-zone"><div><div style="font-weight:700">Clear All VIP Data</div><div style="font-size:11px;color:#4B5563">Remove all VIP entitlements</div></div><button class="btn br bsm" onclick="confirm2('allvip','all','Clear ALL VIP data?')">Clear VIP</button></div>
+    <div class="danger-zone"><div><div style="font-weight:700">Clear Deposit Requests</div><div style="font-size:11px;color:#4B5563">Remove all deposit requests</div></div><button class="btn br bsm" onclick="confirm2('alldeposit','all','Clear ALL deposit requests?')">Clear Deposits</button></div>
   </div>`;
 }
 
 function saveConfig() {
-  const cfg = {
-    apiKey: document.getElementById('cfg-apikey').value,
-    authDomain: document.getElementById('cfg-projectid').value+'.firebaseapp.com',
-    databaseURL: document.getElementById('cfg-dburl').value,
-    projectId: document.getElementById('cfg-projectid').value,
-    appId: document.getElementById('cfg-appid').value
-  };
-  localStorage.setItem('funvip_config', JSON.stringify(cfg));
-  fbConfig = cfg;
-  toast('Config saved! Reconnecting…', 'info');
-  setTimeout(() => location.reload(), 1000);
+  const c={apiKey:document.getElementById('c-apikey').value,projectId:document.getElementById('c-projid').value,databaseURL:document.getElementById('c-dburl').value,appId:document.getElementById('c-appid').value};
+  c.authDomain=c.projectId+'.firebaseapp.com';
+  localStorage.setItem('funxpro_cfg',JSON.stringify(c));
+  toast('Saved! Reloading…','i');
+  setTimeout(()=>location.reload(),1000);
 }
+function resetConfig() { localStorage.removeItem('funxpro_cfg'); toast('Reset!','i'); setTimeout(()=>location.reload(),800); }
 
-function resetConfig() {
-  localStorage.removeItem('funvip_config');
-  fbConfig = DEFAULT_CONFIG;
-  toast('Config reset to default', 'info');
-  setTimeout(() => location.reload(), 800);
+// ═══════════ DELETE & CONFIRM ═══════════
+function confirm2(type,key,msg) {
+  document.getElementById('del-msg').textContent=msg||'This cannot be undone.';
+  document.getElementById('del-yes').onclick=()=>{ doDelete(type,key); close2('m-del'); };
+  open2('m-del');
 }
-
-// ═══════════════════════════════════════════════
-//   DELETE & CONFIRM
-// ═══════════════════════════════════════════════
-function confirmDelete(type, key) {
-  const msgs = {
-    user: `Delete user ${key}? This removes all their data.`,
-    vip: `Delete VIP key? This cannot be undone.`,
-    refer: `Remove refer code ${key}?`,
-    deposit: `Remove deposit control for ${key}?`,
-    allvip: 'Delete ALL VIP keys? This cannot be undone.',
-    allusers: 'Delete ALL users? This is irreversible!'
-  };
-  document.getElementById('confirm-msg').textContent = msgs[type]||'This cannot be undone.';
-  document.getElementById('confirm-yes-btn').onclick = () => { doDelete(type, key); closeModal('modal-confirm'); };
-  openModal('modal-confirm');
-}
-
-function doDelete(type, key) {
+function doDelete(type,key) {
   if (!db) return;
-  if (type === 'user') {
-    db.ref('Users/'+key).remove();
-    db.ref('dbRef/'+key).remove();
-    db.ref('depositControls/'+key).remove();
-    db.ref('Notifications/'+key).remove();
-    toast('User deleted', 'success');
-  } else if (type === 'vip') {
-    db.ref('VIPKeys/'+key).remove();
-    toast('VIP key deleted', 'success');
-  } else if (type === 'refer') {
-    db.ref('ReferCodes/'+key).remove();
-    toast('Refer code removed', 'success');
-  } else if (type === 'deposit') {
-    db.ref('depositControls/'+key).remove();
-    toast('Deposit control removed', 'success');
-  } else if (type === 'allvip') {
-    db.ref('VIPKeys').remove();
-    toast('All VIP keys deleted', 'warn');
-  } else if (type === 'allusers') {
-    db.ref('Users').remove();
-    db.ref('dbRef').remove();
-    db.ref('depositControls').remove();
-    toast('All users deleted', 'warn');
-  }
+  if (type==='user') { db.ref('Users/'+key).remove(); db.ref('dbRef/'+key).remove(); db.ref('depositControls/'+key).remove(); db.ref('VIP/'+key).remove(); logAudit('ADMIN','USER_DELETED',key,{}); toast('User deleted','s'); }
+  else if (type==='dep') { db.ref('DepositRequests/'+key).update({status:'CANCELLED',cancelledAt:Date.now()}); toast('Request cancelled','s'); }
+  else if (type==='refer') { db.ref('ReferralCodes/'+key).remove(); toast('Refer code removed','s'); }
+  else if (type==='allusers') { db.ref('Users').remove(); db.ref('dbRef').remove(); db.ref('VIP').remove(); toast('All users deleted','s'); }
+  else if (type==='allvip') { db.ref('VIP').remove(); db.ref('VipEntitlements').remove(); toast('VIP cleared','s'); }
+  else if (type==='alldeposit') { db.ref('DepositRequests').remove(); toast('Deposits cleared','s'); }
 }
 
-function deleteAllUsers() {
-  confirmDelete('allusers','all');
+// ═══════════ AUDIT HELPER ═══════════
+function logAudit(actor,action,target,details) {
+  if (!db) return;
+  db.ref('AuditLogs').push({actor,action,target,details:details||{},timestamp:Date.now()});
 }
 
-// ═══════════════════════════════════════════════
-//   GLOBAL SEARCH
-// ═══════════════════════════════════════════════
-function globalSearch(q) {
-  if (currentSection === 'users') renderUsers(q);
+// ═══════════ GLOBAL SEARCH ═══════════
+function gSearch(q) { if (section==='users') renderUsers(q); }
+
+// ═══════════ MODAL ═══════════
+function open2(id) { document.getElementById(id).classList.add('open'); }
+function close2(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(e=>e.addEventListener('click',function(ev){if(ev.target===this)this.classList.remove('open');}));
+
+// ═══════════ TOAST ═══════════
+let tt;
+function toast(msg,type='i') {
+  const el=document.getElementById('toast');
+  el.textContent=(type==='s'?'✅ ':type==='e'?'❌ ':type==='w'?'⚠️ ':'ℹ️ ')+msg;
+  el.className='show t'+type;
+  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3200);
 }
 
-// ═══════════════════════════════════════════════
-//   MODAL HELPERS
-// ═══════════════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
-});
-
-// ═══════════════════════════════════════════════
-//   TOAST
-// ═══════════════════════════════════════════════
-let toastTimer;
-function toast(msg, type='info') {
-  const el = document.getElementById('toast');
-  el.textContent = (type==='success'?'✅ ':type==='error'?'❌ ':type==='warn'?'⚠️ ':'ℹ️ ') + msg;
-  el.className = `show t-${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3000);
-}
-
-// ═══════════════════════════════════════════════
-//   BOOT
-// ═══════════════════════════════════════════════
-window.onload = () => {
-  initFirebase();
-  setTimeout(() => { if (!db) renderSettings(); }, 2500);
-};
+// ═══════════ BOOT ═══════════
+window.onload=()=>{ initFB(); setTimeout(()=>{ if(!db) renderSettings(); },3000); };
 </script>
 </body>
 </html>
