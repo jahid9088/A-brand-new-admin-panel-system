@@ -2,916 +2,709 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>FUN XPro Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#030310;color:#E2E8F0;display:flex;min-height:100vh}
+:root{--bg:#020209;--sb:#06060F;--card:#0A0A18;--border:#131328;--gold:#FFD700;--cyan:#00C8FF;--ok:#00D4AA;--err:#FF4444;--amb:#FF9500;--dim:#4A5568;--txt:#E2E8F0;--mut:#6B7280;--pur:#7C3AED;--blue:#3B82F6}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);display:flex;height:100vh;overflow:hidden}
 /* SIDEBAR */
-.sb{width:220px;background:#07071A;border-right:1px solid #12123A;display:flex;flex-direction:column;flex-shrink:0}
-.sb-logo{padding:20px 16px;border-bottom:1px solid #12123A;display:flex;align-items:center;gap:10px}
-.sb-logo .crown{font-size:26px}
-.sb-logo .name{font-size:16px;font-weight:800;background:linear-gradient(135deg,#FFD700,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sb-logo .ver{font-size:10px;color:#374151;margin-top:1px}
-.ns{padding:14px 12px 4px;font-size:10px;color:#2D3748;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
-.ni{display:flex;align-items:center;gap:9px;padding:10px 14px;margin:2px 6px;border-radius:9px;cursor:pointer;font-size:13px;color:#6B7280;transition:.12s}
-.ni:hover{background:#0F0F2A;color:#C4C9D4}
-.ni.active{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(79,70,229,.12));color:#A78BFA;border:1px solid rgba(124,58,237,.25)}
-.ni .ic{width:18px;text-align:center}
-.ni .nb{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;min-width:18px;text-align:center}
-.sb-foot{padding:12px 14px;border-top:1px solid #12123A;font-size:11px;color:#2D3748}
+.sb{width:220px;background:var(--sb);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.logo{padding:16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-ic{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#FFD700,#FF9500);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;box-shadow:0 0 12px rgba(255,215,0,.3)}
+.logo-nm{font-size:13.5px;font-weight:800;background:linear-gradient(135deg,#FFD700,#FF9500);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-vr{font-size:9px;color:var(--dim);margin-top:1px}
+.ns{padding:14px 10px 3px;font-size:9px;color:var(--dim);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:8px;padding:9px 12px;margin:1px 6px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--mut);transition:.1s;position:relative;border:1px solid transparent}
+.ni:hover{background:rgba(255,255,255,.03);color:#C4C9D4}
+.ni.on{background:linear-gradient(135deg,rgba(124,58,237,.22),rgba(79,70,229,.08));color:#A78BFA;border-color:rgba(124,58,237,.18)}
+.ni .ic{width:16px;text-align:center;flex-shrink:0;font-size:13px}
+.nb{position:absolute;right:9px;background:var(--err);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center}
+.sf{padding:11px 13px;border-top:1px solid var(--border);margin-top:auto;font-size:10px;color:var(--dim)}
+.cd{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--err);margin-right:4px;transition:.3s}
+.cd.ok{background:var(--ok)}
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.topbar{padding:12px 20px;border-bottom:1px solid #12123A;background:#07071A;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.page-title{font-size:16px;font-weight:700;flex:1}
-.tb-search{display:flex;align-items:center;gap:7px;background:#030310;border:1px solid #1A1A3A;border-radius:8px;padding:7px 12px;width:240px}
-.tb-search input{background:transparent;border:none;color:#E2E8F0;font-size:13px;outline:none;width:100%}
-.tb-search input::placeholder{color:#2D3748}
-.content{flex:1;overflow-y:auto;padding:20px}
+.topbar{padding:10px 18px;border-bottom:1px solid var(--border);background:var(--sb);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pt{font-size:13.5px;font-weight:700;flex:1}
+.sbar{display:flex;align-items:center;gap:6px;background:#030310;border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:200px}
+.sbar input{background:none;border:none;color:var(--txt);font-size:12px;outline:none;width:100%}
+.sbar input::placeholder{color:var(--dim)}
+.content{flex:1;overflow-y:auto;padding:16px}
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
-.scard{background:#07071A;border:1px solid #12123A;border-radius:12px;padding:16px;cursor:pointer;transition:.15s}
-.scard:hover{border-color:#2D2D5A;transform:translateY(-1px)}
-.scard .sicon{font-size:22px;margin-bottom:8px}
-.scard .slabel{font-size:10px;color:#4B5563;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.scard .sval{font-size:24px;font-weight:800;color:var(--ac,#E2E8F0)}
-.scard .ssub{font-size:10px;color:#2D3748;margin-top:3px}
+.sg{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-bottom:14px}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 11px;cursor:pointer;transition:.1s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac,var(--pur))}
+.sc:hover{transform:translateY(-1px);border-color:#1C1C3A}
+.sc-ic{font-size:17px;margin-bottom:5px}
+.sc-l{font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.sc-v{font-size:19px;font-weight:800;color:var(--ac,var(--txt))}
+.sc-s{font-size:8.5px;color:var(--dim);margin-top:2px}
 /* CARD */
-.card{background:#07071A;border:1px solid #12123A;border-radius:12px;padding:18px;margin-bottom:16px}
-.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.ct{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:15px;margin-bottom:13px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ct{font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+.ca{display:flex;gap:6px;align-items:center}
 /* TABLE */
-.tw{overflow-x:auto;border-radius:10px;border:1px solid #12123A}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-thead th{background:#0A0A1E;padding:10px 12px;text-align:left;font-size:10px;color:#4B5563;text-transform:uppercase;letter-spacing:.06em;font-weight:700;border-bottom:1px solid #12123A;white-space:nowrap}
-tbody td{padding:11px 12px;border-bottom:1px solid #090919;vertical-align:middle;white-space:nowrap}
+.tw{overflow-x:auto;border-radius:9px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead th{background:#080816;padding:8px 10px;text-align:left;font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-weight:700;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:9px 10px;border-bottom:1px solid #090915;vertical-align:middle;white-space:nowrap}
 tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:#09091C}
-.mc{font-weight:700;color:#A78BFA;font-family:monospace}
+tbody tr:hover td{background:rgba(255,255,255,.015)}
+.mono{font-family:'SF Mono',monospace;font-size:10.5px}
+.fg{color:var(--gold);font-weight:700}
+.fc{color:var(--cyan)}
+.fo{color:var(--ok)}
+.fr{color:var(--err)}
+.fd{color:var(--dim)}
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12.5px;font-weight:600;transition:.12s;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:7px 13px;border-radius:7px;border:none;cursor:pointer;font-size:11.5px;font-weight:600;transition:.1s;white-space:nowrap;font-family:inherit}
 .btn:hover{opacity:.85}.btn:active{transform:scale(.97)}
 .bg{background:linear-gradient(135deg,#FFD700,#FF9500);color:#000}
 .bp{background:linear-gradient(135deg,#7C3AED,#4F46E5);color:#fff}
-.br{background:#EF4444;color:#fff}
-.bgrn{background:#10B981;color:#fff}
+.bgn{background:#10B981;color:#fff}
+.bre{background:#EF4444;color:#fff}
 .bbl{background:#3B82F6;color:#fff}
-.bo{background:transparent;border:1px solid #1A1A3A;color:#6B7280}
-.bsm{padding:5px 10px;font-size:11.5px;border-radius:6px}
-.bxs{padding:3px 9px;font-size:11px;border-radius:5px}
-/* BADGE */
-.bdg{display:inline-block;padding:3px 9px;border-radius:16px;font-size:10.5px;font-weight:700;white-space:nowrap}
-.bdg-g{background:rgba(255,215,0,.1);color:#FFD700;border:1px solid rgba(255,215,0,.2)}
-.bdg-grn{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
-.bdg-r{background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2)}
-.bdg-bl{background:rgba(59,130,246,.1);color:#60A5FA;border:1px solid rgba(59,130,246,.2)}
-.bdg-p{background:rgba(124,58,237,.1);color:#A78BFA;border:1px solid rgba(124,58,237,.2)}
-.bdg-gy{background:rgba(75,85,99,.1);color:#6B7280;border:1px solid rgba(75,85,99,.2)}
-.bdg-am{background:rgba(245,158,11,.1);color:#F59E0B;border:1px solid rgba(245,158,11,.2)}
+.bgh{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--mut)}
+.bsm{padding:5px 10px;font-size:11px;border-radius:6px}
+.bxs{padding:3px 8px;font-size:10px;border-radius:5px}
+/* BADGES */
+.bdg{display:inline-block;padding:2px 8px;border-radius:12px;font-size:9.5px;font-weight:700;white-space:nowrap}
+.bg-gold{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.18)}
+.bg-ok{background:rgba(0,212,170,.1);color:var(--ok);border:1px solid rgba(0,212,170,.18)}
+.bg-err{background:rgba(255,68,68,.1);color:var(--err);border:1px solid rgba(255,68,68,.18)}
+.bg-blue{background:rgba(59,130,246,.1);color:#60A5FA;border:1px solid rgba(59,130,246,.18)}
+.bg-amb{background:rgba(255,149,0,.1);color:var(--amb);border:1px solid rgba(255,149,0,.18)}
+.bg-pur{background:rgba(124,58,237,.1);color:#A78BFA;border:1px solid rgba(124,58,237,.18)}
+.bg-dim{background:rgba(75,85,99,.08);color:var(--dim);border:1px solid rgba(75,85,99,.18)}
+.bg-sus{background:rgba(239,68,68,.18);color:#FCA5A5;border:1px solid rgba(239,68,68,.35)}
+/* FORMS */
+.fg2{margin-bottom:10px}
+.fg2 label{display:block;font-size:10px;color:var(--mut);font-weight:600;letter-spacing:.04em;margin-bottom:4px;text-transform:uppercase}
+.fi,.fsl,.fta{width:100%;padding:8px 11px;background:#02020E;border:1px solid var(--border);border-radius:7px;color:var(--txt);font-size:12px;outline:none;transition:.1s;font-family:inherit}
+.fi:focus,.fsl:focus,.fta:focus{border-color:var(--pur)}
+.fsl option{background:#06060F}
+.fta{resize:vertical;min-height:65px}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.fr3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
 /* TOGGLE */
 .tgl{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
 .tgl input{opacity:0;width:0;height:0}
-.tgl-s{position:absolute;inset:0;background:#1A1A3A;border-radius:22px;transition:.25s;cursor:pointer}
-.tgl-s::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#4B5563;border-radius:50%;transition:.25s}
-.tgl input:checked+.tgl-s{background:#10B981}
+.tgl-s{position:absolute;inset:0;background:#151530;border-radius:22px;transition:.22s;cursor:pointer}
+.tgl-s::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#374151;border-radius:50%;transition:.22s}
+.tgl input:checked+.tgl-s{background:linear-gradient(135deg,#10B981,#059669)}
 .tgl input:checked+.tgl-s::before{transform:translateX(18px);background:#fff}
-/* FORM */
-.fg{margin-bottom:12px}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.fl{font-size:11px;color:#6B7280;margin-bottom:4px;display:block;font-weight:600;letter-spacing:.04em}
-.fi,.fs,.fta{width:100%;padding:9px 12px;background:#030310;border:1px solid #1A1A3A;border-radius:8px;color:#E2E8F0;font-size:13px;outline:none;transition:.12s}
-.fi:focus,.fs:focus,.fta:focus{border-color:#4F46E5;box-shadow:0 0 0 2px rgba(79,70,229,.1)}
-.fs option{background:#07071A}
-.fta{resize:vertical;min-height:70px;font-family:inherit}
-/* MODAL */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:9000;backdrop-filter:blur(3px)}
-.mo.open{display:flex;animation:fi .18s}
-.mdl{background:#07071A;border:1px solid #1A1A3A;border-radius:18px;padding:24px;width:480px;max-width:95vw;max-height:88vh;overflow-y:auto;animation:su .22s}
-.mdl-lg{width:640px}
-.mt{font-size:17px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.ms{font-size:12px;color:#4B5563;margin-bottom:18px}
-.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:14px;border-top:1px solid #12123A}
-/* SEARCH BAR */
-.sb2{display:flex;gap:8px;margin-bottom:14px;align-items:center}
-.sb2 .fi{max-width:280px}
-/* TABS */
-.tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.tab{padding:7px 14px;background:#07071A;border:1px solid #12123A;border-radius:7px;cursor:pointer;font-size:12.5px;color:#6B7280;transition:.12s}
-.tab.active{background:#7C3AED;color:#fff;border-color:#7C3AED;font-weight:700}
-/* INFO ROW */
-.ir{display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-bottom:1px solid #090919}
-.ir:last-child{border-bottom:none}
-.irl{font-size:11px;color:#4B5563;font-weight:600;text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;margin-right:12px}
-.irv{font-size:13px;color:#E2E8F0;font-weight:600;text-align:right;word-break:break-all}
-/* TOAST */
-#toast{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;z-index:99999;transform:translateY(70px);opacity:0;transition:.28s;max-width:320px;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+/* MODALS */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(4px)}
+.mo.open{display:flex;animation:mf .15s}
+.mdl{background:var(--card);border:1px solid #1A1A35;border-radius:16px;padding:20px;width:480px;max-width:95vw;max-height:92vh;overflow-y:auto;animation:ms .18s}
+.ml{width:640px}
+.mt{font-size:14px;font-weight:800;margin-bottom:2px;display:flex;align-items:center;gap:7px}
+.msb{font-size:11px;color:var(--mut);margin-bottom:15px}
+.mf2{display:flex;gap:7px;justify-content:flex-end;padding-top:12px;border-top:1px solid var(--border);margin-top:13px}
+/* MISC */
+.tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:5px 13px;background:var(--card);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:11px;color:var(--mut);transition:.1s;font-weight:600}
+.tab.on{background:var(--pur);color:#fff;border-color:var(--pur)}
+.irow{display:flex;align-items:flex-start;justify-content:space-between;padding:7px 0;border-bottom:1px solid #0A0A18}
+.irow:last-child{border-bottom:none}
+.il{font-size:9.5px;color:var(--dim);font-weight:600;text-transform:uppercase;flex-shrink:0;margin-right:10px;padding-top:1px}
+.iv{font-size:11.5px;font-weight:600;text-align:right;word-break:break-all}
+.arow{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:#06061A;border:1px solid var(--border);border-radius:8px;margin-bottom:7px;gap:10px}
+.arow-t{font-size:11.5px;font-weight:700;margin-bottom:2px}
+.arow-s{font-size:9.5px;color:var(--mut)}
+.dz{background:#0E0406;border:1px solid #280606;border-radius:8px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.keybox{background:#02020E;border:1px solid rgba(255,215,0,.2);border-radius:9px;padding:10px 13px;font-family:monospace;font-size:12.5px;font-weight:700;color:var(--gold);letter-spacing:1.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.empty{text-align:center;padding:36px 20px;color:var(--dim)}
+.ei{font-size:32px;opacity:.3;margin-bottom:10px}
+#toast{position:fixed;bottom:16px;right:16px;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:600;z-index:99999;transform:translateY(60px);opacity:0;transition:.22s;max-width:310px;box-shadow:0 6px 24px rgba(0,0,0,.55)}
 #toast.show{transform:translateY(0);opacity:1}
-#toast.ts{background:#10B981;color:#fff}
-#toast.te{background:#EF4444;color:#fff}
-#toast.ti{background:#3B82F6;color:#fff}
-#toast.tw2{background:#F59E0B;color:#000}
-/* SPINNERS */
-.spin{width:16px;height:16px;border:2px solid #1A1A3A;border-top-color:#FFD700;border-radius:50%;animation:sp .6s linear infinite;display:inline-block}
+#toast.s{background:#10B981;color:#fff}
+#toast.e{background:#EF4444;color:#fff}
+#toast.i{background:#3B82F6;color:#fff}
+#toast.w{background:#F59E0B;color:#000}
+.spin{width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:sp .5s linear infinite;display:inline-block}
 @keyframes sp{to{transform:rotate(360deg)}}
-@keyframes fi{from{opacity:0}to{opacity:1}}
-@keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-/* EMPTY */
-.empty{text-align:center;padding:40px;color:#2D3748}
-.empty .ei{font-size:34px;opacity:.4;margin-bottom:10px}
-/* CONFIRM */
-.danger-zone{background:#0F0506;border:1px solid #2A0A0A;border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-/* Status colors */
-.s-pending{color:#F59E0B}.s-confirmed{color:#10B981}.s-completed{color:#A78BFA}.s-expired{color:#EF4444}.s-cancelled{color:#6B7280}
-/* Masked mobile display */
-.msk{font-family:monospace;font-weight:700;color:#A78BFA;letter-spacing:.05em}
-@media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}.sb{width:0;overflow:hidden}.sb.open{width:220px;position:fixed;height:100%;z-index:100}}
+@keyframes mf{from{opacity:0}to{opacity:1}}
+@keyframes ms{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(max-width:1200px){.sg{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.sg{grid-template-columns:repeat(2,1fr)}.sb{width:190px}}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div class="sb" id="sidebar">
-  <div class="sb-logo"><div class="crown">👑</div><div><div class="name">FUN XPro</div><div class="ver">Identity-Bound VIP Engine</div></div></div>
-  <div style="flex:1;overflow-y:auto">
+<div class="sb">
+  <div class="logo">
+    <div class="logo-ic">👑</div>
+    <div><div class="logo-nm">FUN XPro</div><div class="logo-vr">Admin Panel v4.1</div></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:6px">
     <div class="ns">Overview</div>
-    <div class="ni active" onclick="nav('dashboard')"><span class="ic">📊</span>Dashboard</div>
+    <div class="ni on" onclick="nav('dash')"><span class="ic">📊</span>Dashboard</div>
     <div class="ns">Users</div>
     <div class="ni" onclick="nav('users')"><span class="ic">👥</span>All Users</div>
-    <div class="ni" onclick="nav('demo')"><span class="ic">🎯</span>Demo Accounts</div>
+    <div class="ni" onclick="nav('demo')"><span class="ic">🎭</span>Demo Accounts</div>
     <div class="ns">Finance</div>
-    <div class="ni" onclick="nav('deposit')"><span class="ic">💰</span>Deposit Requests</div>
+    <div class="ni" onclick="nav('dep')"><span class="ic">💰</span>Deposits<span class="nb" id="pbd" style="display:none">0</span></div>
+    <div class="ni" onclick="nav('auto')"><span class="ic">🤖</span>Auto System</div>
     <div class="ns">VIP</div>
-    <div class="ni" onclick="nav('vip')"><span class="ic">🔑</span>VIP Entitlements</div>
+    <div class="ni" onclick="nav('vip')"><span class="ic">👑</span>VIP Status</div>
+    <div class="ni" onclick="nav('keys')"><span class="ic">🔑</span>VIP Keys</div>
     <div class="ns">System</div>
-    <div class="ni" onclick="nav('refer')"><span class="ic">🔗</span>Referrals</div>
+    <div class="ni" onclick="nav('ref')"><span class="ic">🔗</span>Referrals</div>
+    <div class="ni" onclick="nav('notif')"><span class="ic">🔔</span>Notifications</div>
     <div class="ni" onclick="nav('audit')"><span class="ic">📋</span>Audit Log</div>
-    <div class="ni" onclick="nav('settings')"><span class="ic">⚙️</span>Settings</div>
+    <div class="ns">Config</div>
+    <div class="ni" onclick="nav('cfg')"><span class="ic">⚙️</span>App Config</div>
+    <div class="ni" onclick="nav('fb')"><span class="ic">🔧</span>Firebase</div>
   </div>
-  <div class="sb-foot"><span id="conn" style="color:#EF4444">● Disconnected</span><br>FUN XPro Admin v3.0</div>
+  <div class="sf">
+    <span class="cd" id="cdot"></span><span id="ctxt">Disconnected</span>
+    <div style="margin-top:4px;font-size:9px">FUN XPro Admin v4.1</div>
+  </div>
 </div>
 
-<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="page-title" id="ptitle">📊 Dashboard</div>
-    <div class="tb-search"><span>🔍</span><input id="gsearch" placeholder="Search users, mobile…" oninput="gSearch(this.value)"></div>
-    <button class="btn bo bsm" onclick="refreshAll()">↻ Refresh</button>
+    <div class="pt" id="ptitle">📊 Dashboard</div>
+    <div class="sbar"><span>🔍</span><input id="gs" placeholder="Search mobile, UID…" oninput="gSrch(this.value)"></div>
+    <button class="btn bgh bsm" onclick="refreshAll()">↻ Refresh</button>
+    <button class="btn bg bsm" onclick="open2('md')">+ Deposit</button>
   </div>
-  <div class="content" id="content"><div class="empty"><div class="spin"></div><br><br>Connecting…</div></div>
-</div>
-
-<!-- ═══ MODALS ═══ -->
-
-<!-- Edit User -->
-<div class="mo" id="m-user">
-  <div class="mdl">
-    <div class="mt">✏️ Edit User</div><div class="ms" id="m-user-sub">Edit user data</div>
-    <input type="hidden" id="eu-mobile">
-    <div class="fr">
-      <div class="fg"><label class="fl">Mobile</label><input class="fi" id="eu-mob" readonly style="opacity:.5"></div>
-      <div class="fg"><label class="fl">Account Status</label>
-        <select class="fs" id="eu-status"><option value="ACTIVE">ACTIVE</option><option value="BLOCKED">BLOCKED</option><option value="SUSPENDED">SUSPENDED</option></select>
-      </div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Balance</label><input class="fi" id="eu-bal" type="number" step="0.01"></div>
-      <div class="fg"><label class="fl">Brand</label><input class="fi" id="eu-brand"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Referral Code</label><input class="fi" id="eu-ref"></div>
-      <div class="fg"><label class="fl">Referred By</label><input class="fi" id="eu-refby"></div>
-    </div>
-    <div class="fg"><label class="fl">Suspend Until (optional)</label><input class="fi" id="eu-suspuntil" type="datetime-local" placeholder="Suspend expiry"></div>
-    <div class="fg"><label class="fl">Admin Note</label><textarea class="fta" id="eu-note" rows="2" placeholder="Reason for action…"></textarea></div>
-    <div class="ma">
-      <button class="btn bo bsm" onclick="close2('m-user')">Cancel</button>
-      <button class="btn bg bsm" onclick="saveUser()">💾 Save</button>
-    </div>
+  <div class="content" id="C">
+    <div class="empty"><div class="spin"></div><br><br>Connecting…</div>
   </div>
 </div>
 
-<!-- View User -->
-<div class="mo" id="m-view">
-  <div class="mdl mdl-lg">
-    <div class="mt" id="vt">👤 User</div><div class="ms" id="vs"></div>
-    <div id="vc"></div>
-    <div class="ma"><button class="btn bo bsm" onclick="close2('m-view')">Close</button></div>
-  </div>
-</div>
+<!-- MODALS -->
+<div class="mo" id="m-eu"><div class="mdl ml"><div class="mt">✏️ Edit User</div><div class="msb" id="eu-sub"></div><input type="hidden" id="eu-k"><div class="fr2"><div class="fg2"><label>Mobile (Full)</label><input class="fi mono" id="eu-m" readonly style="opacity:.5"></div><div class="fg2"><label>Account Status</label><select class="fsl" id="eu-s"><option value="ACTIVE">✅ ACTIVE</option><option value="SUSPENDED">⚠️ SUSPENDED</option><option value="BLOCKED">⛔ BLOCKED</option></select></div></div><div class="fr2"><div class="fg2"><label>Balance (₹)</label><input class="fi" id="eu-b" type="number" step="0.01"></div><div class="fg2"><label>Brand</label><input class="fi" id="eu-br"></div></div><div class="fr2"><div class="fg2"><label>Referral Code</label><input class="fi mono" id="eu-rc"></div><div class="fg2"><label>Referred By</label><input class="fi" id="eu-rb"></div></div><div class="fg2"><label>Admin Note</label><textarea class="fta" id="eu-n" placeholder="Reason…"></textarea></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-eu')">Cancel</button><button class="btn bg bsm" onclick="saveUser()">💾 Save</button></div></div></div>
 
-<!-- Deposit Request -->
-<div class="mo" id="m-depreq">
-  <div class="mdl">
-    <div class="mt">💰 Create Deposit Request</div><div class="ms">Send deposit offer to a specific user</div>
-    <div class="fg"><label class="fl">Mobile Number *</label><input class="fi" id="dr-mobile" placeholder="User's mobile number"></div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Required Amount (₹) *</label><input class="fi" id="dr-amount" type="number" placeholder="500"></div>
-      <div class="fg"><label class="fl">VIP Validity *</label>
-        <select class="fs" id="dr-validity">
-          <option value="1day">1 Day</option><option value="7days">7 Days</option>
-          <option value="14days">14 Days</option><option value="30days">30 Days</option>
-          <option value="lifetime">Lifetime ♾️</option>
-        </select>
-      </div>
-    </div>
-    <div class="fg"><label class="fl">Message to User</label><textarea class="fta" id="dr-msg" placeholder="Optional message…"></textarea></div>
-    <div class="ma">
-      <button class="btn bo bsm" onclick="close2('m-depreq')">Cancel</button>
-      <button class="btn bg bsm" onclick="createDepositRequest()">📤 Send Request</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="m-view"><div class="mdl ml"><div class="mt" id="vt">👤 Details</div><div class="msb" id="vs"></div><div id="vc"></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-view')">Close</button><button class="btn bp bsm" id="ve-btn">✏️ Edit</button></div></div></div>
 
-<!-- Confirm Deposit -->
-<div class="mo" id="m-confirm-dep">
-  <div class="mdl" style="width:380px">
-    <div class="mt">✅ Confirm Deposit</div>
-    <div class="ms" id="cd-sub">Confirm and activate VIP entitlement for user</div>
-    <input type="hidden" id="cd-reqid">
-    <div id="cd-info" style="margin-bottom:16px"></div>
-    <div class="ma">
-      <button class="btn bo bsm" onclick="close2('m-confirm-dep')">Cancel</button>
-      <button class="btn bgrn bsm" onclick="confirmDeposit()">✅ Confirm & Activate VIP</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="md"><div class="mdl"><div class="mt">💰 Create Deposit Request</div><div class="msb">Send deposit offer to user</div><div class="fg2"><label>Mobile *</label><input class="fi mono" id="dd-m" placeholder="Full mobile number"></div><div class="fr2"><div class="fg2"><label>Amount (₹) *</label><input class="fi" id="dd-a" type="number" placeholder="500"></div><div class="fg2"><label>VIP Validity</label><select class="fsl" id="dd-v"><option value="1day">1 Day</option><option value="3days">3 Days</option><option value="7days">7 Days</option><option value="14days">14 Days</option><option value="30days">30 Days</option><option value="lifetime">Lifetime ♾️</option></select></div></div><div class="fg2"><label>Message</label><textarea class="fta" id="dd-msg" placeholder="Optional message…"></textarea></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('md')">Cancel</button><button class="btn bg bsm" onclick="createDep()">📤 Send</button></div></div></div>
 
-<!-- VIP Action -->
-<div class="mo" id="m-vip">
-  <div class="mdl">
-    <div class="mt">🔑 VIP Entitlement</div><div class="ms" id="va-sub"></div>
-    <div id="va-content"></div>
-    <div class="ma" id="va-actions"></div>
-  </div>
-</div>
+<div class="mo" id="m-cf"><div class="mdl" style="width:380px"><div class="mt">✅ Confirm Deposit</div><div class="msb" id="cf-sub"></div><input type="hidden" id="cf-id"><div id="cf-info" style="margin-bottom:13px"></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-cf')">Cancel</button><button class="btn bgn bsm" onclick="confirmDep()">✅ Confirm & Activate VIP</button></div></div></div>
 
-<!-- Demo Add -->
-<div class="mo" id="m-demo">
-  <div class="mdl">
-    <div class="mt">🎯 Add Demo Account</div><div class="ms">Create pre-configured demo user</div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Mobile *</label><input class="fi" id="dm-mob" type="number" placeholder="10-digit mobile"></div>
-      <div class="fg"><label class="fl">Password *</label><input class="fi" id="dm-code" placeholder="Code/Password"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Balance</label><input class="fi" id="dm-bal" type="number" value="500"></div>
-      <div class="fg"><label class="fl">VIP Validity</label>
-        <select class="fs" id="dm-vipval"><option value="7days">7 Days</option><option value="14days">14 Days</option><option value="30days">30 Days</option><option value="lifetime">Lifetime</option></select>
-      </div>
-    </div>
-    <div class="ma">
-      <button class="btn bo bsm" onclick="close2('m-demo')">Cancel</button>
-      <button class="btn bgrn bsm" onclick="addDemo()">✅ Create Demo</button>
-    </div>
-  </div>
-</div>
+<div class="mo" id="m-key"><div class="mdl" style="width:430px"><div class="mt">🔑 VIP Key Manager</div><div class="msb" id="key-sub"></div><input type="hidden" id="key-mob"><div class="fg2"><label>Generated Key</label><div class="keybox"><span id="key-val">—</span><button class="btn bgh bxs" onclick="genKey()">🔄 New</button></div></div><div class="fg2"><label>VIP Duration</label><select class="fsl" id="key-dur"><option value="1day">1 Day</option><option value="7days">7 Days</option><option value="30days">30 Days</option><option value="lifetime">Lifetime ♾️</option></select></div><div id="key-info" style="margin-bottom:4px"></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-key')">Cancel</button><button class="btn bre bsm" onclick="resetDevice()">🔓 Reset Device</button><button class="btn bg bsm" onclick="assignKey()">🔑 Assign Key</button></div></div></div>
 
-<!-- Confirm destructive -->
-<div class="mo" id="m-del">
-  <div class="mdl" style="width:360px">
-    <div class="mt" style="color:#EF4444">⚠️ Confirm Action</div>
-    <div class="ms" id="del-msg">This cannot be undone.</div>
-    <div class="ma"><button class="btn bo bsm" onclick="close2('m-del')">Cancel</button><button class="btn br bsm" id="del-yes">Delete</button></div>
-  </div>
-</div>
+<div class="mo" id="m-ext"><div class="mdl" style="width:340px"><div class="mt">📅 Extend VIP</div><div class="msb" id="ext-sub"></div><input type="hidden" id="ext-mob"><div class="fg2"><label>New Valid Until</label><input class="fi" id="ext-d" type="datetime-local"></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-ext')">Cancel</button><button class="btn bg bsm" onclick="extVip()">Extend</button></div></div></div>
 
-<!-- Extend VIP -->
-<div class="mo" id="m-ext">
-  <div class="mdl" style="width:360px">
-    <div class="mt">📅 Extend VIP</div><div class="ms" id="ext-sub"></div>
-    <input type="hidden" id="ext-mobile">
-    <div class="fg"><label class="fl">New Valid Until</label><input class="fi" id="ext-date" type="datetime-local"></div>
-    <div class="ma"><button class="btn bo bsm" onclick="close2('m-ext')">Cancel</button><button class="btn bg bsm" onclick="extendVip()">Extend VIP</button></div>
-  </div>
-</div>
+<div class="mo" id="m-dm"><div class="mdl"><div class="mt">🎭 Add Demo Account</div><div class="msb">Pre-configured demo user</div><div class="fr2"><div class="fg2"><label>Mobile *</label><input class="fi mono" id="dm-m" type="number"></div><div class="fg2"><label>Password *</label><input class="fi" id="dm-p"></div></div><div class="fr2"><div class="fg2"><label>Balance</label><input class="fi" id="dm-b" type="number" value="500"></div><div class="fg2"><label>VIP</label><select class="fsl" id="dm-v"><option value="7days">7 Days</option><option value="30days">30 Days</option><option value="lifetime">Lifetime</option></select></div></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-dm')">Cancel</button><button class="btn bgn bsm" onclick="addDemo()">✅ Create</button></div></div></div>
 
-<!-- Toast -->
+<div class="mo" id="m-nf"><div class="mdl"><div class="mt">🔔 Send Notification</div><div class="msb">Push in-app message to users</div><div class="fg2"><label>Target</label><select class="fsl" id="nf-t" onchange="nfTarget(this.value)"><option value="single">Single User</option><option value="all">All Users</option><option value="vip">VIP Active Only</option><option value="novip">Non-VIP Only</option></select></div><div id="nf-mw" class="fg2"><label>Mobile</label><input class="fi mono" id="nf-m" placeholder="Full mobile number"></div><div class="fg2"><label>Message</label><textarea class="fta" id="nf-msg" placeholder="Message…"></textarea></div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-nf')">Cancel</button><button class="btn bbl bsm" onclick="sendNotif()">🔔 Send</button></div></div></div>
+
+<div class="mo" id="m-del"><div class="mdl" style="width:350px"><div class="mt" style="color:var(--err)">⚠️ Confirm Delete</div><div class="msb" id="del-msg">This cannot be undone.</div><div class="mf2"><button class="btn bgh bsm" onclick="close2('m-del')">Cancel</button><button class="btn bre bsm" id="del-yes">Confirm</button></div></div></div>
+
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════
-//  CONFIG — Edit in Settings
-// ═══════════════════════════════════
-const DEFAULT = {
-  apiKey:"YOUR_API_KEY",
-  authDomain:"jashcore-official.firebaseapp.com",
-  databaseURL:"https://jashcore-official-default-rtdb.firebaseio.com",
-  projectId:"jashcore-official",
-  appId:"YOUR_APP_ID"
-};
+const DEF={apiKey:"YOUR_API_KEY",authDomain:"jashcore-official.firebaseapp.com",databaseURL:"https://jashcore-official-default-rtdb.firebaseio.com",projectId:"jashcore-official",appId:"YOUR_APP_ID"};
+let db=null,AC={};
+let U={},V={},D={},E={},R={},AL=[];
+let sec='dash',sq='';
 
-let db, cfg = null, section = 'dashboard';
-let users={}, vipData={}, deposits={}, referCodes={}, audit=[];
-
-function maskMobile(m) {
-  if (!m || m.length < 5) return m||'';
-  const n = m.replace(/\D/g,'');
-  if (n.length < 5) return n;
-  return n.slice(0,2)+' 666 '+n.slice(-3);
-}
-
-// ═══════════ FIREBASE INIT ═══════════
-function initFB() {
-  const saved = localStorage.getItem('funxpro_cfg');
-  cfg = saved ? JSON.parse(saved) : DEFAULT;
-  try {
-    if (firebase.apps.length) { firebase.apps[0].delete().then(_fb); return; }
-    _fb();
-  } catch(e) { _fb(); }
-}
-function _fb() {
-  try {
-    firebase.initializeApp(cfg);
-    db = firebase.database();
-    db.ref('.info/connected').on('value', s => {
-      const el = document.getElementById('conn');
-      if (s.val()) { el.textContent='● Connected'; el.style.color='#10B981'; loadAll(); }
-      else { el.textContent='● Disconnected'; el.style.color='#EF4444'; }
-    });
-  } catch(e) { toast('Firebase error: '+e.message,'e'); }
-}
-
-// ═══════════ LOAD DATA ═══════════
-function loadAll() {
-  db.ref('Users').on('value', s => { users = s.val()||{}; refresh(); });
-  db.ref('VipEntitlements').on('value', s => { vipData = s.val()||{}; refresh(); });
-  db.ref('DepositRequests').on('value', s => { deposits = s.val()||{}; refresh(); });
-  db.ref('ReferralCodes').on('value', s => { referCodes = s.val()||{}; refresh(); });
-  db.ref('AuditLogs').orderByChild('timestamp').limitToLast(200).on('value', s => {
-    audit = [];
-    s.forEach(c => audit.unshift({id:c.key,...c.val()}));
-    if (section==='audit') renderAudit();
-  });
-}
-function refresh() {
-  const fns={dashboard:renderDash,users:renderUsers,demo:renderDemo,deposit:renderDeposit,vip:renderVip,refer:renderRefer,audit:renderAudit,settings:renderSettings};
-  if (fns[section]) fns[section]();
-}
-function refreshAll() { loadAll(); toast('Refreshed','i'); }
-
-// ═══════════ NAVIGATION ═══════════
-const titles={dashboard:'📊 Dashboard',users:'👥 All Users',demo:'🎯 Demo Accounts',deposit:'💰 Deposit Requests',vip:'🔑 VIP Entitlements',refer:'🔗 Referrals',audit:'📋 Audit Log',settings:'⚙️ Settings'};
-function nav(name) {
-  section = name;
-  document.querySelectorAll('.ni').forEach(e=>e.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(e=>{if(e.getAttribute('onclick')&&e.getAttribute('onclick').includes("'"+name+"'"))e.classList.add('active');});
-  document.getElementById('ptitle').textContent = titles[name]||name;
-  refresh();
-}
-
-// ═══════════ HELPERS ═══════════
-function vipBdg(st) {
-  if (!st||st===''||st==='NONE') return '<span class="bdg bdg-gy">NONE</span>';
-  if (st==='ACTIVE') return '<span class="bdg bdg-grn">ACTIVE</span>';
-  if (st==='AVAILABLE') return '<span class="bdg bdg-bl">AVAILABLE</span>';
-  if (st==='CLAIMED'||st==='CONSUMED') return '<span class="bdg bdg-p">USED</span>';
-  if (st==='EXPIRED') return '<span class="bdg bdg-r">EXPIRED</span>';
-  if (st==='REVOKED'||st==='BLOCKED') return '<span class="bdg bdg-r">${st}</span>';
-  return `<span class="bdg bdg-gy">${st}</span>`;
-}
-function depBdg(st) {
-  if (st==='PENDING') return '<span class="bdg bdg-am">PENDING</span>';
-  if (st==='CONFIRMED') return '<span class="bdg bdg-grn">CONFIRMED</span>';
-  if (st==='COMPLETED') return '<span class="bdg bdg-p">COMPLETED</span>';
-  if (st==='EXPIRED') return '<span class="bdg bdg-r">EXPIRED</span>';
-  if (st==='CANCELLED') return '<span class="bdg bdg-gy">CANCELLED</span>';
-  return `<span class="bdg bdg-gy">${st||'-'}</span>`;
-}
-function accBdg(st) {
-  if (st==='ACTIVE'||!st) return '<span class="bdg bdg-grn">ACTIVE</span>';
-  if (st==='BLOCKED') return '<span class="bdg bdg-r">BLOCKED</span>';
-  if (st==='SUSPENDED') return '<span class="bdg bdg-am">SUSPENDED</span>';
-  return `<span class="bdg bdg-gy">${st}</span>`;
-}
-function fmtDate(ts) {
-  if (!ts||ts===0) return '-';
-  return new Date(parseInt(ts)).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
-}
-function fmtTime(ts) { return ts ? new Date(parseInt(ts)).toLocaleString() : '-'; }
-function ir(label,value) { return `<div class="ir"><span class="irl">${label}</span><span class="irv">${value}</span></div>`; }
-
-// ═══════════ DASHBOARD ═══════════
-function renderDash() {
-  const ua = Object.entries(users);
-  const total = ua.length;
-  const va = Object.entries(vipData);
-  const activeVip = va.filter(([,v])=>v.status==='ACTIVE').length;
-  const availVip = va.filter(([,v])=>v.status==='AVAILABLE').length;
-  const expVip = va.filter(([,v])=>v.status==='EXPIRED').length;
-  const da = Object.entries(deposits);
-  const pend = da.filter(([,d])=>d.status==='PENDING').length;
-  const conf = da.filter(([,d])=>d.status==='CONFIRMED').length;
-  const blocked = ua.filter(([,u])=>u.accountStatus==='BLOCKED').length;
-  const susp = ua.filter(([,u])=>u.accountStatus==='SUSPENDED').length;
-  const recent = ua.slice(-5).reverse();
-
-  document.getElementById('content').innerHTML = `
-  <div class="stats">
-    <div class="scard" style="--ac:#A78BFA" onclick="nav('users')"><div class="sicon">👥</div><div class="slabel">Total Users</div><div class="sval">${total}</div><div class="ssub">Registered</div></div>
-    <div class="scard" style="--ac:#FFD700" onclick="nav('vip')"><div class="sicon">👑</div><div class="slabel">Active VIP</div><div class="sval">${activeVip}</div><div class="ssub">${availVip} available</div></div>
-    <div class="scard" style="--ac:#10B981" onclick="nav('deposit')"><div class="sicon">💰</div><div class="slabel">Pending</div><div class="sval">${pend}</div><div class="ssub">Deposit requests</div></div>
-    <div class="scard" style="--ac:#EF4444" onclick="nav('users')"><div class="sicon">⛔</div><div class="slabel">Blocked</div><div class="sval">${blocked}</div><div class="ssub">${susp} suspended</div></div>
-    <div class="scard" style="--ac:#F59E0B" onclick="nav('vip')"><div class="sicon">⏰</div><div class="slabel">Expired VIP</div><div class="sval">${expVip}</div><div class="ssub">Needs renewal</div></div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-    <div class="card">
-      <div class="ch"><div class="ct">👥 Recent Users</div><button class="btn bo bsm" onclick="nav('users')">View All</button></div>
-      <div class="tw"><table><thead><tr><th>Mobile (Masked)</th><th>Status</th><th>VIP</th><th>Balance</th></tr></thead><tbody>
-      ${recent.map(([k,u])=>`<tr><td><span class="msk">${maskMobile(k)}</span></td><td>${accBdg(u.accountStatus)}</td><td>${vipBdg((vipData[k]||{}).status)}</td><td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(0)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty" style="padding:20px">No users</td></tr>'}
-      </tbody></table></div>
-    </div>
-    <div class="card">
-      <div class="ch"><div class="ct">💰 Pending Deposits</div><button class="btn bg bsm" onclick="open2('m-depreq')">+ New</button></div>
-      <div class="tw"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
-      ${Object.entries(deposits).filter(([,d])=>d.status==='PENDING').slice(0,6).map(([k,d])=>`<tr><td><span class="msk">${maskMobile(d.mobile)}</span></td><td>₹${d.amount}</td><td>${depBdg(d.status)}</td><td><button class="btn bgrn bxs" onclick="openConfirmDep('${k}')">Confirm</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty" style="padding:20px">No pending</td></tr>'}
-      </tbody></table></div>
-    </div>
-  </div>`;
-}
-
-// ═══════════ USERS ═══════════
-let usrQ='';
-function renderUsers(q) {
-  if (q!==undefined) usrQ=q;
-  const ua = Object.entries(users).filter(([k,u])=>{
-    const s=(usrQ||'').toLowerCase();
-    return !s||k.includes(s)||(u.brand||'').toLowerCase().includes(s)||(u.referralCode||'').toLowerCase().includes(s)||(u.accountStatus||'').toLowerCase().includes(s);
-  });
-  document.getElementById('content').innerHTML = `
-  <div class="card">
-    <div class="ch"><div class="ct">👥 All Users <span class="bdg bdg-p" style="margin-left:6px">${ua.length}</span></div>
-      <div style="display:flex;gap:7px"><button class="btn br bsm" onclick="confirm2('allusers','all','Delete ALL users?')">🗑 All</button><button class="btn bgrn bsm" onclick="open2('m-demo')">+ Demo</button></div>
-    </div>
-    <div class="sb2">
-      <input class="fi" placeholder="Search mobile, brand, status…" oninput="renderUsers(this.value)" value="${usrQ}" style="max-width:280px">
-      <button class="btn bo bsm" onclick="usrQ='';renderUsers()">Clear</button>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>#</th><th>Mobile (Masked)</th><th>Balance</th><th>Brand</th><th>Status</th><th>VIP</th><th>Refer Code</th><th>Referred By</th><th>Last Active</th><th>Actions</th></tr></thead>
-      <tbody>
-      ${ua.map(([k,u],i)=>`<tr>
-        <td style="color:#374151">${i+1}</td>
-        <td><span class="msk">${maskMobile(k)}</span></td>
-        <td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(2)}</td>
-        <td>${u.brand||'-'}</td>
-        <td>${accBdg(u.accountStatus)}</td>
-        <td>${vipBdg((vipData[k]||{}).status)}</td>
-        <td style="font-family:monospace;font-size:11px;color:#10B981">${u.referralCode||'-'}</td>
-        <td style="font-size:11px;color:#4B5563">${u.referredBy||'-'}</td>
-        <td style="font-size:11px;color:#374151">${u.time||'-'}</td>
-        <td><div style="display:flex;gap:4px">
-          <button class="btn bo bxs" onclick="viewUser('${k}')">👁</button>
-          <button class="btn bo bxs" onclick="editUser('${k}')">✏️</button>
-          <button class="btn bg bxs" onclick="openDepModal('${k}')">💰</button>
-          <button class="btn br bxs" onclick="confirm2('user','${k}','Delete user ${maskMobile(k)}?')">🗑</button>
-        </div></td>
-      </tr>`).join('')||'<tr><td colspan="10" class="empty"><div class="ei">👥</div><p>No users found</p></td></tr>'}
-      </tbody>
-    </table></div>
-  </div>`;
-}
-
-function viewUser(mobile) {
-  const u=users[mobile]||{}, v=vipData[mobile]||{};
-  const ud=Object.entries(deposits).find(([,d])=>d.mobile===mobile&&d.status==='PENDING');
-  document.getElementById('vt').textContent='📱 '+maskMobile(mobile);
-  document.getElementById('vs').textContent='Full account details';
-  document.getElementById('vc').innerHTML=`
-    ${ir('Mobile (Masked)',`<span class="msk">${maskMobile(mobile)}</span>`)}
-    ${ir('Account Status',accBdg(u.accountStatus))}
-    ${ir('Balance','₹'+parseFloat(u.balance||u.currentBalance||0).toFixed(2))}
-    ${ir('Brand',u.brand||'-')}
-    ${ir('Referral Code',`<span style="font-family:monospace;color:#10B981">${u.referralCode||'-'}</span>`)}
-    ${ir('Referred By',u.referredBy||'None')}
-    ${ir('Referral Used',u.referralUsed?'✅ Yes':'❌ No')}
-    ${ir('VIP Status',vipBdg(v.status))}
-    ${ir('VIP Valid Until',fmtDate(v.validUntil))}
-    ${ir('Deposit Pending',ud?`₹${ud[1].amount} — ${ud[1].vipDuration}`:'None')}
-    ${ir('Device',u.deviceId||'-')}
-    ${ir('Battery',u.battery||'-')}
-    ${ir('Registered',fmtDate(u.createdAt))}
-    ${ir('Last Active',u.time||'-')}`;
-  open2('m-view');
-}
-
-function editUser(mobile) {
-  const u=users[mobile]||{};
-  document.getElementById('eu-mobile').value=mobile;
-  document.getElementById('m-user-sub').textContent='Masked: '+maskMobile(mobile);
-  document.getElementById('eu-mob').value=mobile;
-  document.getElementById('eu-status').value=u.accountStatus||'ACTIVE';
-  document.getElementById('eu-bal').value=u.balance||u.currentBalance||0;
-  document.getElementById('eu-brand').value=u.brand||'';
-  document.getElementById('eu-ref').value=u.referralCode||'';
-  document.getElementById('eu-refby').value=u.referredBy||'';
-  document.getElementById('eu-note').value='';
-  open2('m-user');
-}
-
-function saveUser() {
-  const mobile=document.getElementById('eu-mobile').value;
-  const status=document.getElementById('eu-status').value;
-  const note=document.getElementById('eu-note').value;
-  if (!mobile||!db) return;
-  const updates={
-    accountStatus:status,
-    balance:document.getElementById('eu-bal').value,
-    brand:document.getElementById('eu-brand').value,
-    referralCode:document.getElementById('eu-ref').value,
-    referredBy:document.getElementById('eu-refby').value,
-    updatedAt:Date.now()
-  };
-  if (note) updates.adminNote=note;
-  db.ref('Users/'+mobile).update(updates);
-  db.ref('dbRef/'+mobile).update(updates);
-  // Audit
-  logAudit('ADMIN','USER_UPDATED',mobile,{status,note});
-  close2('m-user'); toast('User updated ✅','s');
-}
-
-// ═══════════ DEPOSIT REQUESTS ═══════════
-let depTab='ALL';
-function renderDeposit(tab) {
-  if(tab) depTab=tab;
-  const all=Object.entries(deposits);
-  const filtered = depTab==='ALL' ? all : all.filter(([,d])=>d.status===depTab);
-  const counts={PENDING:all.filter(([,d])=>d.status==='PENDING').length,CONFIRMED:all.filter(([,d])=>d.status==='CONFIRMED').length,COMPLETED:all.filter(([,d])=>d.status==='COMPLETED').length,EXPIRED:all.filter(([,d])=>d.status==='EXPIRED').length,CANCELLED:all.filter(([,d])=>d.status==='CANCELLED').length};
-
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">💰 Deposit Requests</div><button class="btn bg bsm" onclick="open2('m-depreq')">+ Create Request</button></div>
-    <div class="tabs">
-      ${['ALL','PENDING','CONFIRMED','COMPLETED','EXPIRED','CANCELLED'].map(t=>`<div class="tab ${depTab===t?'active':''}" onclick="renderDeposit('${t}')">${t} ${counts[t]!==undefined?'('+counts[t]+')':''}</div>`).join('')}
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Request ID</th><th>Mobile</th><th>Amount</th><th>VIP Duration</th><th>Status</th><th>Created</th><th>Confirmed</th><th>Actions</th></tr></thead>
-      <tbody>
-      ${filtered.map(([k,d])=>`<tr>
-        <td style="font-family:monospace;font-size:11px;color:#4B5563">${k.slice(0,10)}…</td>
-        <td><span class="msk">${maskMobile(d.mobile)}</span></td>
-        <td style="font-weight:700;color:#FFD700">₹${d.amount}</td>
-        <td>${d.vipDuration||'-'}</td>
-        <td>${depBdg(d.status)}</td>
-        <td style="font-size:11px">${fmtDate(d.createdAt)}</td>
-        <td style="font-size:11px">${fmtDate(d.confirmedAt)}</td>
-        <td><div style="display:flex;gap:4px">
-          ${d.status==='PENDING'?`<button class="btn bgrn bxs" onclick="openConfirmDep('${k}')">✅ Confirm</button><button class="btn br bxs" onclick="cancelDep('${k}')">✗ Cancel</button>`:''}
-          ${d.status==='CONFIRMED'||d.status==='COMPLETED'?`<button class="btn bp bxs" onclick="viewDep('${k}')">View</button>`:''}
-        </div></td>
-      </tr>`).join('')||'<tr><td colspan="8" class="empty"><p>No deposits in this category</p></td></tr>'}
-      </tbody>
-    </table></div>
-  </div>`;
-}
-
-function openDepModal(mobile) {
-  document.getElementById('dr-mobile').value=mobile;
-  open2('m-depreq');
-}
-
-function createDepositRequest() {
-  const mobile=document.getElementById('dr-mobile').value.trim();
-  const amount=document.getElementById('dr-amount').value;
-  const validity=document.getElementById('dr-validity').value;
-  const msg=document.getElementById('dr-msg').value;
-  if (!mobile||!amount||!db) { toast('Fill required fields','e'); return; }
-  if (!users[mobile]) { toast('User not found: '+mobile,'e'); return; }
-  const req={
-    mobile, amount, vipDuration:validity,
-    status:'PENDING', message:msg,
-    createdAt:Date.now()
-  };
-  const newRef=db.ref('DepositRequests').push();
-  newRef.set(req).then(()=>{
-    logAudit('ADMIN','DEPOSIT_REQUESTED',mobile,{amount,validity});
-    close2('m-depreq'); toast('Request sent to user ✅','s');
-  });
-}
-
-function openConfirmDep(reqId) {
-  const d=deposits[reqId]; if (!d) return;
-  document.getElementById('cd-reqid').value=reqId;
-  document.getElementById('cd-sub').textContent='Mobile: '+maskMobile(d.mobile);
-  document.getElementById('cd-info').innerHTML=`
-    ${ir('Amount','₹'+d.amount)}
-    ${ir('VIP Duration',d.vipDuration||'-')}
-    ${ir('Message',d.message||'-')}`;
-  open2('m-confirm-dep');
-}
-
-function confirmDeposit() {
-  const reqId=document.getElementById('cd-reqid').value;
-  const d=deposits[reqId]; if (!d) return;
-  const mobile=d.mobile;
-  // Idempotency: check if already confirmed
-  if (d.status!=='PENDING') { toast('Already processed','e'); return; }
-  
-  const now=Date.now();
-  let expiresAt=0;
-  if (d.vipDuration==='1day') expiresAt=now+86400000;
-  else if (d.vipDuration==='7days') expiresAt=now+604800000;
-  else if (d.vipDuration==='14days') expiresAt=now+1209600000;
-  else if (d.vipDuration==='30days') expiresAt=now+2592000000;
-  // lifetime = 0 (never expires)
-
-  const entId=db.ref('VipEntitlements').push().key;
-  const ent={
-    mobile, depositRequestId:reqId,
-    status:'AVAILABLE',
-    createdAt:now, validFrom:now, validUntil:expiresAt,
-    activatedAt:0, claimedAt:0
-  };
-
-  const updates={};
-  updates['DepositRequests/'+reqId+'/status']='CONFIRMED';
-  updates['DepositRequests/'+reqId+'/confirmedAt']=now;
-  updates['VipEntitlements/'+entId]=ent;
-  updates['VIP/'+mobile+'/status']='ACTIVE';
-  updates['VIP/'+mobile+'/validUntil']=expiresAt;
-  updates['VIP/'+mobile+'/entitlementId']=entId;
-  updates['VIP/'+mobile+'/activatedAt']=now;
-  updates['Users/'+mobile+'/updatedAt']=now;
-
-  db.ref().update(updates).then(()=>{
-    logAudit('ADMIN','DEPOSIT_CONFIRMED',mobile,{reqId,entId,amount:d.amount});
-    close2('m-confirm-dep'); toast('VIP activated for '+maskMobile(mobile)+' ✅','s');
-  });
-}
-
-function cancelDep(reqId) {
-  confirm2('dep',reqId,'Cancel deposit request?');
-}
-function viewDep(reqId) {
-  const d=deposits[reqId]||{};
-  document.getElementById('vt').textContent='💰 Deposit Request';
-  document.getElementById('vs').textContent=reqId;
-  document.getElementById('vc').innerHTML=`
-    ${ir('Mobile',`<span class="msk">${maskMobile(d.mobile)}</span>`)}
-    ${ir('Amount','₹'+d.amount)}
-    ${ir('VIP Duration',d.vipDuration)}
-    ${ir('Status',depBdg(d.status))}
-    ${ir('Message',d.message||'-')}
-    ${ir('Created',fmtDate(d.createdAt))}
-    ${ir('Confirmed',fmtDate(d.confirmedAt))}`;
-  open2('m-view');
-}
-
-// ═══════════ VIP ENTITLEMENTS ═══════════
-function renderVip() {
-  const va=Object.entries(vipData);
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">🔑 VIP Entitlements <span class="bdg bdg-g" style="margin-left:6px">${va.length}</span></div>
-      <div style="display:flex;gap:7px">
-        <span class="bdg bdg-grn">${va.filter(([,v])=>v.status==='ACTIVE').length} Active</span>
-        <span class="bdg bdg-bl">${va.filter(([,v])=>v.status==='AVAILABLE').length} Available</span>
-        <span class="bdg bdg-r">${va.filter(([,v])=>v.status==='EXPIRED').length} Expired</span>
-      </div>
-    </div>
-    <div class="tw"><table>
-      <thead><tr><th>Mobile</th><th>Status</th><th>Activated</th><th>Valid Until</th><th>Entitlement ID</th><th>Actions</th></tr></thead>
-      <tbody>
-      ${va.map(([k,v])=>`<tr>
-        <td><span class="msk">${maskMobile(k)}</span></td>
-        <td>${vipBdg(v.status)}</td>
-        <td style="font-size:11px">${fmtDate(v.activatedAt)}</td>
-        <td style="font-size:11px;${v.validUntil&&v.validUntil<Date.now()?'color:#EF4444':''}">${v.validUntil===0?'♾️ Lifetime':fmtDate(v.validUntil)}</td>
-        <td style="font-family:monospace;font-size:10px;color:#4B5563">${v.entitlementId||k}</td>
-        <td><div style="display:flex;gap:4px">
-          <button class="btn bp bxs" onclick="extendVip2('${k}')">📅 Extend</button>
-          <button class="btn br bxs" onclick="revokeVip('${k}')">Revoke</button>
-          <button class="btn bo bxs" onclick="viewVip('${k}')">View</button>
-        </div></td>
-      </tr>`).join('')||'<tr><td colspan="6" class="empty"><p>No VIP data</p></td></tr>'}
-      </tbody>
-    </table></div>
-  </div>`;
-}
-
-function viewVip(mobile) {
-  const v=vipData[mobile]||{};
-  document.getElementById('va-sub').textContent='Mobile: '+maskMobile(mobile);
-  document.getElementById('va-content').innerHTML=`
-    ${ir('Mobile',`<span class="msk">${maskMobile(mobile)}</span>`)}
-    ${ir('Status',vipBdg(v.status))}
-    ${ir('Activated',fmtDate(v.activatedAt))}
-    ${ir('Valid Until',v.validUntil===0?'♾️ Lifetime':fmtDate(v.validUntil))}
-    ${ir('Entitlement',v.entitlementId||'-')}`;
-  document.getElementById('va-actions').innerHTML=`
-    <button class="btn bo bsm" onclick="close2('m-vip')">Close</button>
-    <button class="btn br bsm" onclick="revokeVip('${mobile}');close2('m-vip')">Revoke</button>
-    <button class="btn bg bsm" onclick="close2('m-vip');extendVip2('${mobile}')">Extend</button>`;
-  open2('m-vip');
-}
-
-function extendVip2(mobile) {
-  document.getElementById('ext-mobile').value=mobile;
-  document.getElementById('ext-sub').textContent='Extend VIP for '+maskMobile(mobile);
-  const v=vipData[mobile]||{};
-  if (v.validUntil&&v.validUntil>0) {
-    const d=new Date(v.validUntil);
-    document.getElementById('ext-date').value=d.toISOString().slice(0,16);
+// ── FIREBASE ──
+function initFB(){
+  const s=localStorage.getItem('fxa_cfg4');
+  const c=s?JSON.parse(s):DEF;
+  try{if(firebase.apps.length)firebase.apps[0].delete().then(conn);else conn();}catch(e){conn();}
+  function conn(){
+    try{
+      firebase.initializeApp(c);db=firebase.database();
+      db.ref('.info/connected').on('value',snap=>{
+        const ok=snap.val();
+        document.getElementById('cdot').className='cd'+(ok?' ok':'');
+        document.getElementById('ctxt').textContent=ok?'Connected':'Disconnected';
+        if(ok)listen();
+      });
+    }catch(e){toast('Firebase error: '+e.message,'e');}
   }
-  open2('m-ext');
 }
-
-function extendVip() {
-  const mobile=document.getElementById('ext-mobile').value;
-  const newDate=document.getElementById('ext-date').value;
-  if (!mobile||!newDate||!db) return;
-  const newTs=new Date(newDate).getTime();
-  db.ref('VIP/'+mobile).update({validUntil:newTs,status:'ACTIVE'});
-  logAudit('ADMIN','VIP_EXTENDED',mobile,{newUntil:newTs});
-  close2('m-ext'); toast('VIP extended for '+maskMobile(mobile),'s');
+function listen(){
+  db.ref('Users').on('value',s=>{U=s.val()||{};onData();});
+  db.ref('VIP').on('value',s=>{V=s.val()||{};onData();});
+  db.ref('DepositRequests').on('value',s=>{D=s.val()||{};onData();});
+  db.ref('VipEntitlements').on('value',s=>{E=s.val()||{};onData();});
+  db.ref('ReferralCodes').on('value',s=>{R=s.val()||{};onData();});
+  db.ref('Config').on('value',s=>{AC=s.val()||{};});
+  db.ref('AuditLogs').orderByChild('timestamp').limitToLast(300).on('value',s=>{AL=[];s.forEach(c=>AL.unshift({id:c.key,...c.val()}));if(sec==='audit')render();});
 }
-
-function revokeVip(mobile) {
-  if (!db||!mobile) return;
-  const v=vipData[mobile]||{};
-  db.ref('VIP/'+mobile).update({status:'REVOKED'});
-  if (v.entitlementId) db.ref('VipEntitlements/'+v.entitlementId).update({status:'REVOKED'});
-  logAudit('ADMIN','VIP_REVOKED',mobile,{});
-  toast('VIP revoked for '+maskMobile(mobile),'s');
+function onData(){
+  const p=Object.values(D).filter(d=>d.status==='PENDING').length;
+  const pb=document.getElementById('pbd');if(pb){pb.textContent=p;pb.style.display=p?'':'none';}
+  if(AC.autoConfirm)runAuto();
+  render();
 }
+function refreshAll(){if(db)listen();toast('Refreshed','i');}
 
-// ═══════════ DEMO ═══════════
-function renderDemo() {
-  const demos=Object.entries(users).filter(([,u])=>u.brand==='Demo');
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">🎯 Demo Accounts</div><button class="btn bg bsm" onclick="open2('m-demo')">+ Add Demo</button></div>
-    <div class="tw"><table>
-      <thead><tr><th>Mobile</th><th>Code</th><th>Balance</th><th>VIP</th><th>Referral</th><th>Actions</th></tr></thead>
-      <tbody>
-      ${demos.map(([k,u])=>`<tr>
-        <td><span class="msk">${maskMobile(k)}</span></td>
-        <td style="font-family:monospace">${u.code||'-'}</td>
-        <td>₹${parseFloat(u.balance||u.currentBalance||0).toFixed(2)}</td>
-        <td>${vipBdg((vipData[k]||{}).status)}</td>
-        <td style="font-family:monospace;color:#10B981;font-size:11px">${u.referralCode||'-'}</td>
-        <td><div style="display:flex;gap:4px">
-          <button class="btn bo bxs" onclick="editUser('${k}')">✏️</button>
-          <button class="btn br bxs" onclick="confirm2('user','${k}','Delete demo ${maskMobile(k)}?')">🗑</button>
-        </div></td>
-      </tr>`).join('')||'<tr><td colspan="6" class="empty"><div class="ei">🎯</div><p>No demo accounts. Add one above.</p></td></tr>'}
-      </tbody>
-    </table></div>
+// ── NAV ──
+const TITLES={dash:'📊 Dashboard',users:'👥 All Users',demo:'🎭 Demo Accounts',dep:'💰 Deposits',auto:'🤖 Auto System',vip:'👑 VIP Status',keys:'🔑 VIP Keys',ref:'🔗 Referrals',notif:'🔔 Notifications',audit:'📋 Audit Log',cfg:'⚙️ App Config',fb:'🔧 Firebase'};
+function nav(n){
+  sec=n;sq='';
+  document.querySelectorAll('.ni').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(e=>{if(e.getAttribute('onclick')?.includes("'"+n+"'"))e.classList.add('on');});
+  document.getElementById('ptitle').textContent=TITLES[n]||n;
+  render();
+}
+function render(){({dash:rDash,users:rUsers,demo:rDemo,dep:rDep,auto:rAuto,vip:rVip,keys:rKeys,ref:rRef,notif:rNotif,audit:rAudit,cfg:rCfg,fb:rFb})[sec]?.();}
+
+// ── HELPERS ──
+function dt(ts){if(!ts||ts===0||ts==='0')return'—';return new Date(+ts).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function ir(l,v){return`<div class="irow"><span class="il">${l}</span><span class="iv">${v}</span></div>`;}
+function vb(s){if(!s||s==='NONE')return'<span class="bdg bg-dim">NONE</span>';if(s==='ACTIVE')return'<span class="bdg bg-gold">👑 ACTIVE</span>';if(s==='AVAILABLE')return'<span class="bdg bg-blue">AVAIL</span>';if(s==='CLAIMED')return'<span class="bdg bg-pur">USED</span>';if(s==='EXPIRED')return'<span class="bdg bg-err">EXPIRED</span>';if(s==='REVOKED')return'<span class="bdg bg-err">REVOKED</span>';return`<span class="bdg bg-dim">${s}</span>`;}
+function ab(s){if(!s||s==='ACTIVE')return'<span class="bdg bg-ok">✅ ACTIVE</span>';if(s==='BLOCKED')return'<span class="bdg bg-err">⛔ BLOCKED</span>';if(s==='SUSPENDED')return'<span class="bdg bg-amb">⚠️ SUSPENDED</span>';return`<span class="bdg bg-dim">${s}</span>`;}
+function db2(s){if(s==='PENDING')return'<span class="bdg bg-amb">⏳ PENDING</span>';if(s==='CONFIRMED')return'<span class="bdg bg-ok">✅ CONF</span>';if(s==='AUTO_CONFIRMED')return'<span class="bdg bg-blue">🤖 AUTO</span>';if(s==='SUSPICIOUS')return'<span class="bdg bg-sus">⚠️ SUS</span>';if(s==='CANCELLED')return'<span class="bdg bg-dim">CANCEL</span>';if(s==='EXPIRED')return'<span class="bdg bg-err">EXPIRED</span>';return`<span class="bdg bg-dim">${s||'—'}</span>`;}
+function kst(u){if(!u.vipKey)return'<span class="bdg bg-dim">No Key</span>';if(u.vipKeyStatus==='USED')return'<span class="bdg bg-pur">🔒 USED</span>';if(u.vipKeyStatus==='ACTIVE')return'<span class="bdg bg-ok">✅ ACTIVE</span>';return'<span class="bdg bg-dim">—</span>';}
+function vu2d(dur){const n=Date.now();if(dur==='1day')return n+86400000;if(dur==='3days')return n+259200000;if(dur==='7days')return n+604800000;if(dur==='14days')return n+1209600000;if(dur==='30days')return n+2592000000;return 0;}
+function mkKey(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',sg=()=>Array.from({length:5},()=>c[Math.floor(Math.random()*c.length)]).join('');return`FUN-${sg()}-${sg()}-${sg()}`;}
+function msToH(ms){if(!ms||ms<=0)return'Expired';const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000),m=Math.floor((ms%3600000)/60000);return d>0?`${d}d ${h}h`:h>0?`${h}h ${m}m`:`${m}m`;}
+function logA(action,target,details){if(!db)return;db.ref('AuditLogs').push({actor:'ADMIN',action,target:String(target||''),details:details||{},timestamp:Date.now()});}
+
+// ── DASHBOARD ──
+function rDash(){
+  const ua=Object.entries(U),da=Object.entries(D),va=Object.entries(V);
+  const tot=ua.length,avip=va.filter(([,v])=>v.status==='ACTIVE').length;
+  const pend=da.filter(([,d])=>d.status==='PENDING').length;
+  const sus=da.filter(([,d])=>d.status==='SUSPICIOUS').length;
+  const blk=ua.filter(([,u])=>u.accountStatus==='BLOCKED').length;
+  const ts=new Date();ts.setHours(0,0,0,0);
+  const ntd=ua.filter(([,u])=>u.createdAt>ts.getTime()).length;
+  document.getElementById('C').innerHTML=`
+  <div class="sg">
+    <div class="sc" style="--ac:var(--pur)" onclick="nav('users')"><div class="sc-ic">👥</div><div class="sc-l">Total Users</div><div class="sc-v">${tot}</div><div class="sc-s">+${ntd} today</div></div>
+    <div class="sc" style="--ac:var(--gold)" onclick="nav('vip')"><div class="sc-ic">👑</div><div class="sc-l">VIP Active</div><div class="sc-v">${avip}</div><div class="sc-s">${tot?((avip/tot*100).toFixed(0)):0}% users</div></div>
+    <div class="sc" style="--ac:var(--amb)" onclick="nav('dep')"><div class="sc-ic">⏳</div><div class="sc-l">Pending</div><div class="sc-v">${pend}</div><div class="sc-s">Awaiting</div></div>
+    <div class="sc" style="--ac:var(--err)" onclick="nav('dep')"><div class="sc-ic">⚠️</div><div class="sc-l">Suspicious</div><div class="sc-v">${sus}</div><div class="sc-s">Review needed</div></div>
+    <div class="sc" style="--ac:#6B7280" onclick="nav('users')"><div class="sc-ic">⛔</div><div class="sc-l">Blocked</div><div class="sc-v">${blk}</div></div>
+    <div class="sc" style="--ac:var(--cyan)" onclick="nav('ref')"><div class="sc-ic">🔗</div><div class="sc-l">Ref Codes</div><div class="sc-v">${Object.keys(R).length}</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+    <div class="card"><div class="ch"><div class="ct">👥 Recent Users</div><button class="btn bgh bsm" onclick="nav('users')">All →</button></div>
+    <div class="tw"><table><thead><tr><th>Mobile (Full)</th><th>UID</th><th>Balance</th><th>VIP</th><th>Status</th></tr></thead><tbody>
+    ${ua.slice(-7).reverse().map(([k,u])=>`<tr><td class="mono fg">${k}</td><td class="mono fc">${u.uid||'—'}</td><td>₹${parseFloat(u.balance||0).toFixed(0)}</td><td>${vb((V[k]||{}).status)}</td><td>${ab(u.accountStatus)}</td></tr>`).join('')||'<tr><td colspan="5"><div class="empty" style="padding:16px"><p>No users</p></div></td></tr>'}
+    </tbody></table></div></div>
+    <div class="card"><div class="ch"><div class="ct">💰 Pending Deposits</div><button class="btn bg bsm" onclick="open2('md')">+ New</button></div>
+    <div class="tw"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    ${da.filter(([,d])=>d.status==='PENDING'||d.status==='SUSPICIOUS').slice(0,6).map(([k,d])=>`<tr><td class="mono fg">${d.mobile}</td><td class="fg">₹${d.amount}</td><td>${db2(d.status)}</td><td><button class="btn bgn bxs" onclick="openConf('${k}')">✅</button></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty" style="padding:16px"><p>None</p></div></td></tr>'}
+    </tbody></table></div></div>
   </div>`;
 }
 
-function addDemo() {
-  const mobile=document.getElementById('dm-mob').value.trim();
-  const code=document.getElementById('dm-code').value.trim();
-  const bal=document.getElementById('dm-bal').value||'500';
-  const vipval=document.getElementById('dm-vipval').value;
-  if (!mobile||mobile.length<4) { toast('Enter valid mobile','e'); return; }
-  if (!code) { toast('Enter password','e'); return; }
-  const refCode='FUNJASCORE'+mobile.slice(-4);
-  const now=Date.now();
-  let exp=0;
-  if (vipval==='1day') exp=now+86400000;
-  else if (vipval==='7days') exp=now+604800000;
-  else if (vipval==='14days') exp=now+1209600000;
-  else if (vipval==='30days') exp=now+2592000000;
-
-  const u={mobile,code,brand:'Demo',balance:bal,currentBalance:bal,lastBalance:'0',loginCount:0,referralCode:refCode,referredBy:'',referralUsed:false,accountStatus:'ACTIVE',createdAt:now,time:new Date().toLocaleDateString()};
-  db.ref('Users/'+mobile).update(u);
-  db.ref('dbRef/'+mobile).update(u);
-  db.ref('ReferralCodes/'+refCode).update({mobile,active:true});
-  db.ref('VIP/'+mobile).update({status:'ACTIVE',validUntil:exp,activatedAt:now,entitlementId:'demo-'+mobile});
-  logAudit('ADMIN','DEMO_CREATED',mobile,{vipval});
-  close2('m-demo'); toast('Demo account created ✅','s');
+// ── USERS ──
+function rUsers(q){
+  if(q!==undefined)sq=q;
+  const ua=Object.entries(U).filter(([k,u])=>{const s=(sq||'').toLowerCase();return !s||k.includes(s)||(u.uid||'').includes(s)||(u.brand||'').toLowerCase().includes(s)||(u.referralCode||'').includes(s);});
+  document.getElementById('C').innerHTML=`
+  <div class="card"><div class="ch"><div class="ct">👥 All Users <span class="bdg bg-pur" style="margin-left:5px">${ua.length}</span></div>
+    <div class="ca"><div class="sbar"><span>🔍</span><input placeholder="Search…" oninput="rUsers(this.value)" value="${sq}" style="width:150px"></div>
+    <button class="btn bgh bsm" onclick="open2('m-dm')">+ Demo</button>
+    <button class="btn bre bsm" onclick="confirm2('all-u','','Delete ALL users?')">🗑</button></div></div>
+  <div class="tw"><table><thead><tr><th>#</th><th>Mobile (Full)</th><th>UID</th><th>Balance</th><th>Brand</th><th>Status</th><th>VIP</th><th>Key Status</th><th>Ref Code</th><th>Referred By</th><th>Registered</th><th>Actions</th></tr></thead><tbody>
+  ${ua.map(([k,u],i)=>`<tr>
+    <td class="fd">${i+1}</td>
+    <td class="mono fg">${k}</td>
+    <td class="mono fc">${u.uid||'—'}</td>
+    <td>₹${parseFloat(u.balance||0).toFixed(2)}</td>
+    <td class="fd">${u.brand||'—'}</td>
+    <td>${ab(u.accountStatus)}</td>
+    <td>${vb((V[k]||{}).status)}</td>
+    <td>${kst(u)}</td>
+    <td class="mono fo">${u.referralCode||'—'}</td>
+    <td class="fd" style="font-size:10px">${u.referredBy||'—'}</td>
+    <td class="fd" style="font-size:10px">${dt(u.createdAt)}</td>
+    <td><div style="display:flex;gap:3px">
+      <button class="btn bgh bxs" onclick="viewUser('${k}')">👁</button>
+      <button class="btn bgh bxs" onclick="editUser('${k}')">✏️</button>
+      <button class="btn bg bxs" onclick="depFor('${k}')">💰</button>
+      <button class="btn bp bxs" onclick="openKey('${k}')">🔑</button>
+      <button class="btn bre bxs" onclick="confirm2('u','${k}','Delete ${k}?')">🗑</button>
+    </div></td>
+  </tr>`).join('')||'<tr><td colspan="12"><div class="empty"><div class="ei">👥</div><p>No users</p></div></td></tr>'}
+  </tbody></table></div></div>`;
 }
 
-// ═══════════ REFER ═══════════
-function renderRefer() {
-  const ra=Object.entries(referCodes);
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">🔗 Referral Codes <span class="bdg bdg-p" style="margin-left:6px">${ra.length}</span></div></div>
-    <div class="tw"><table>
-      <thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th><th>Users Referred</th><th>Actions</th></tr></thead>
-      <tbody>
-      ${ra.map(([k,v])=>{
-        const cnt=Object.values(users).filter(u=>u.referredBy===k).length;
-        return `<tr>
-          <td style="font-family:monospace;color:#10B981;font-weight:700">${k}</td>
-          <td><span class="msk">${maskMobile(v.mobile)}</span></td>
-          <td>${v.active!==false?'<span class="bdg bdg-grn">Active</span>':'<span class="bdg bdg-r">Inactive</span>'}</td>
-          <td><span class="bdg bdg-${cnt>0?'grn':'gy'}">${cnt} users</span></td>
-          <td><button class="btn br bxs" onclick="confirm2('refer','${k}','Remove refer code?')">Remove</button></td>
-        </tr>`;
-      }).join('')||'<tr><td colspan="5" class="empty"><p>No referral codes</p></td></tr>'}
-      </tbody>
-    </table></div>
+function viewUser(mob){
+  const u=U[mob]||{},v=V[mob]||{};
+  document.getElementById('vt').textContent='📱 '+mob;
+  document.getElementById('vs').textContent='Full user profile';
+  document.getElementById('vc').innerHTML=
+    ir('Mobile (Full)',`<span class="mono fg">${mob}</span>`)+
+    ir('UID',`<span class="mono fc">${u.uid||'Not captured'}</span>`)+
+    ir('Account Status',ab(u.accountStatus))+
+    ir('Balance','₹'+parseFloat(u.balance||0).toFixed(2))+
+    ir('Brand',u.brand||'—')+ir('Device ID',u.deviceId||'—')+ir('Battery',u.battery||'—')+
+    ir('Referral Code',`<span class="mono fo">${u.referralCode||'—'}</span>`)+
+    ir('Referred By',u.referredBy||'None')+ir('Referral Used',u.referralUsed?'✅ Yes':'❌ No')+
+    ir('VIP Status',vb(v.status))+
+    ir('VIP Until',!v.validUntil||v.validUntil===0?'♾️ Lifetime':dt(v.validUntil))+
+    ir('VIP Key',u.vipKey?`<span class="mono fg" style="font-size:10px">${u.vipKey}</span>`:'—')+
+    ir('Key Status',kst(u))+
+    ir('Key Device',u.vipKeyDeviceId?`<span class="mono" style="font-size:10px">${u.vipKeyDeviceId}</span>`:'—')+
+    ir('Key Brand',u.vipKeyBrand||'—')+ir('Key Model',u.vipKeyModel||'—')+
+    ir('Key Used At',dt(u.vipKeyUsedAt))+
+    ir('Registered',dt(u.createdAt))+ir('Login Code',u.code?`<span class="mono">${u.code}</span>`:'—')+
+    ir('Admin Note',u.adminNote||'—');
+  document.getElementById('ve-btn').onclick=()=>{close2('m-view');editUser(mob);};
+  open2('m-view');
+}
+
+function editUser(mob){
+  const u=U[mob]||{};
+  document.getElementById('eu-k').value=mob;document.getElementById('eu-sub').textContent='Mobile: '+mob;document.getElementById('eu-m').value=mob;document.getElementById('eu-s').value=u.accountStatus||'ACTIVE';document.getElementById('eu-b').value=u.balance||0;document.getElementById('eu-br').value=u.brand||'';document.getElementById('eu-rc').value=u.referralCode||'';document.getElementById('eu-rb').value=u.referredBy||'';document.getElementById('eu-n').value='';
+  open2('m-eu');
+}
+function saveUser(){
+  const mob=document.getElementById('eu-k').value;if(!mob||!db)return;
+  const upd={accountStatus:document.getElementById('eu-s').value,balance:document.getElementById('eu-b').value,currentBalance:document.getElementById('eu-b').value,brand:document.getElementById('eu-br').value,referralCode:document.getElementById('eu-rc').value,referredBy:document.getElementById('eu-rb').value,updatedAt:Date.now()};
+  const note=document.getElementById('eu-n').value;if(note)upd.adminNote=note;
+  db.ref('Users/'+mob).update(upd);db.ref('dbRef/'+mob).update(upd);
+  logA('USER_UPDATED',mob,{status:upd.accountStatus});close2('m-eu');toast('User updated ✅','s');
+}
+function depFor(mob){document.getElementById('dd-m').value=mob;open2('md');}
+
+// ── DEMO ──
+function rDemo(){
+  const demos=Object.entries(U).filter(([,u])=>u.brand==='Demo'||u.isDemo);
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">🎭 Demo Accounts <span class="bdg bg-blue" style="margin-left:5px">${demos.length}</span></div><button class="btn bg bsm" onclick="open2('m-dm')">+ Add</button></div>
+  <div class="tw"><table><thead><tr><th>Mobile</th><th>Code</th><th>Balance</th><th>VIP</th><th>Created</th><th>Actions</th></tr></thead><tbody>
+  ${demos.map(([k,u])=>`<tr><td class="mono fg">${k}</td><td class="mono fd">${u.code||'—'}</td><td>₹${parseFloat(u.balance||0).toFixed(2)}</td><td>${vb((V[k]||{}).status)}</td><td class="fd" style="font-size:10px">${dt(u.createdAt)}</td><td><div style="display:flex;gap:3px"><button class="btn bgh bxs" onclick="editUser('${k}')">✏️</button><button class="btn bp bxs" onclick="openKey('${k}')">🔑</button><button class="btn bre bxs" onclick="confirm2('u','${k}','Delete demo?')">🗑</button></div></td></tr>`).join('')||'<tr><td colspan="6"><div class="empty"><div class="ei">🎭</div><p>No demos</p></div></td></tr>'}
+  </tbody></table></div></div>`;
+}
+function addDemo(){
+  const mob=document.getElementById('dm-m').value.trim(),pass=document.getElementById('dm-p').value.trim(),bal=document.getElementById('dm-b').value||'500',vd=document.getElementById('dm-v').value;
+  if(!mob||mob.length<4){toast('Valid mobile required','e');return;}if(!pass){toast('Enter password','e');return;}
+  const ref='FUNJASCORE'+mob.slice(-4),now=Date.now(),vu=vu2d(vd);
+  const u={mobile:mob,code:pass,brand:'Demo',isDemo:true,balance:bal,currentBalance:bal,lastBalance:'0',loginCount:0,referralCode:ref,referredBy:'',referralUsed:false,accountStatus:'ACTIVE',createdAt:now,time:new Date().toLocaleDateString()};
+  db.ref('Users/'+mob).update(u);db.ref('dbRef/'+mob).update(u);db.ref('ReferralCodes/'+ref).set({mobile:mob,active:true});
+  db.ref('VIP/'+mob).set({status:'ACTIVE',validUntil:vu,activatedAt:now,entitlementId:'demo-'+mob});
+  logA('DEMO_CREATED',mob,{vd});close2('m-dm');toast('Demo created ✅','s');
+}
+
+// ── DEPOSITS ──
+let dTab='ALL';
+function rDep(tab){
+  if(tab)dTab=tab;
+  const all=Object.entries(D);
+  const fl=dTab==='ALL'?all:all.filter(([,d])=>d.status===dTab);
+  const cnt={};['PENDING','CONFIRMED','AUTO_CONFIRMED','SUSPICIOUS','CANCELLED','EXPIRED'].forEach(s=>cnt[s]=all.filter(([,d])=>d.status===s).length);
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">💰 Deposits</div><button class="btn bg bsm" onclick="open2('md')">+ New</button></div>
+  <div class="tabs">${['ALL','PENDING','CONFIRMED','AUTO_CONFIRMED','SUSPICIOUS','CANCELLED','EXPIRED'].map(t=>`<div class="tab ${dTab===t?'on':''}" onclick="rDep('${t}')">${t}${cnt[t]?` (${cnt[t]})`:''}</div>`).join('')}</div>
+  <div class="tw"><table><thead><tr><th>ID</th><th>Mobile (Full)</th><th>Amount</th><th>Validity</th><th>Status</th><th>Reason</th><th>Created</th><th>Confirmed</th><th>Actions</th></tr></thead><tbody>
+  ${fl.map(([k,d])=>`<tr><td class="mono fd" style="font-size:9px">${k.slice(0,8)}…</td><td class="mono fg">${d.mobile}</td><td class="fg" style="font-weight:700">₹${d.amount}</td><td class="fd">${d.vipDuration||'—'}</td><td>${db2(d.status)}</td><td style="font-size:9.5px;color:var(--err)">${d.suspiciousReason||'—'}</td><td class="fd" style="font-size:10px">${dt(d.createdAt)}</td><td class="fd" style="font-size:10px">${dt(d.confirmedAt)}</td><td><div style="display:flex;gap:3px">${d.status==='PENDING'||d.status==='SUSPICIOUS'?`<button class="btn bgn bxs" onclick="openConf('${k}')">✅</button>`:''} ${d.status==='PENDING'||d.status==='SUSPICIOUS'?`<button class="btn bre bxs" onclick="confirm2('dep','${k}','Cancel deposit?')">✗</button>`:''}<button class="btn bgh bxs" onclick="viewDep('${k}')">👁</button></div></td></tr>`).join('')||'<tr><td colspan="9"><div class="empty"><div class="ei">💰</div><p>No deposits</p></div></td></tr>'}
+  </tbody></table></div></div>`;
+}
+
+function createDep(){
+  const mob=document.getElementById('dd-m').value.trim(),amt=document.getElementById('dd-a').value,val=document.getElementById('dd-v').value,msg=document.getElementById('dd-msg').value.trim();
+  if(!mob||!amt){toast('Fill required fields','e');return;}
+  if(!U[mob]){toast('User not found','e');return;}
+  db.ref('DepositRequests').push({mobile:mob,amount:amt,vipDuration:val,status:'PENDING',message:msg,createdAt:Date.now()});
+  logA('DEPOSIT_REQUESTED',mob,{amt,val});close2('md');toast('Request sent ✅','s');
+}
+function openConf(rid){
+  const d=D[rid];if(!d)return;
+  document.getElementById('cf-id').value=rid;document.getElementById('cf-sub').textContent='Mobile: '+d.mobile;
+  document.getElementById('cf-info').innerHTML=ir('Mobile',`<span class="mono fg">${d.mobile}</span>`)+ir('Amount','₹'+d.amount)+ir('Duration',d.vipDuration)+ir('Message',d.message||'—');
+  open2('m-cf');
+}
+function confirmDep(){
+  const rid=document.getElementById('cf-id').value;const d=D[rid];if(!d)return;
+  if(d.status==='CONFIRMED'||d.status==='AUTO_CONFIRMED'){toast('Already confirmed','w');return;}
+  doConf(rid,d);close2('m-cf');
+}
+function doConf(rid,d){
+  const mob=d.mobile,now=Date.now(),vu=vu2d(d.vipDuration);
+  const eid=db.ref('VipEntitlements').push().key;
+  const vk=mkKey();
+  const upd={};
+  upd['DepositRequests/'+rid+'/status']='CONFIRMED';
+  upd['DepositRequests/'+rid+'/confirmedAt']=now;
+  upd['VipEntitlements/'+eid]={mobile:mob,depositRequestId:rid,status:'AVAILABLE',createdAt:now,validFrom:now,validUntil:vu,activatedAt:0,claimedAt:0};
+  upd['VIP/'+mob+'/status']='ACTIVE';upd['VIP/'+mob+'/validUntil']=vu;upd['VIP/'+mob+'/entitlementId']=eid;upd['VIP/'+mob+'/activatedAt']=now;
+  upd['Users/'+mob+'/vipKey']=vk;upd['Users/'+mob+'/vipKeyStatus']='ACTIVE';upd['Users/'+mob+'/vipKeyDeviceId']='';upd['Users/'+mob+'/vipKeyAssignedAt']=now;upd['Users/'+mob+'/updatedAt']=now;
+  upd['Notifications/'+mob+'/count']=firebase.database.ServerValue.increment(1);
+  db.ref().update(upd).then(()=>{giveReward(mob);logA('DEPOSIT_CONFIRMED',mob,{rid,amt:d.amount,vk});toast('VIP activated! Key: '+vk,'s');});
+}
+function viewDep(rid){
+  const d=D[rid]||{};
+  document.getElementById('vt').textContent='💰 Deposit';document.getElementById('vs').textContent=rid;
+  document.getElementById('vc').innerHTML=ir('Mobile',`<span class="mono fg">${d.mobile}</span>`)+ir('Amount','₹'+d.amount)+ir('Duration',d.vipDuration)+ir('Status',db2(d.status))+ir('Message',d.message||'—')+ir('Reason',d.suspiciousReason||'—')+ir('Created',dt(d.createdAt))+ir('Confirmed',dt(d.confirmedAt));
+  document.getElementById('ve-btn').style.display='none';open2('m-view');
+}
+
+// ── AUTO SYSTEM ──
+function rAuto(){
+  const ao=AC.autoConfirm===true,del=AC.autoDelay||60,max=AC.suspiciousMaxAmount||5000,rd=AC.referralRewardDays||1;
+  const pend=Object.entries(D).filter(([,d])=>d.status==='PENDING');
+  const sus=Object.entries(D).filter(([,d])=>d.status==='SUSPICIOUS');
+  document.getElementById('C').innerHTML=`
+  <div class="card"><div class="ch"><div class="ct">🤖 Auto-Confirm Engine</div><span class="bdg ${ao?'bg-ok':'bg-dim'}">${ao?'● RUNNING':'● STOPPED'}</span></div>
+    <div class="arow"><div><div class="arow-t">Auto-Confirm Deposits</div><div class="arow-s">Automatically confirm non-suspicious deposits after delay</div></div><label class="tgl"><input type="checkbox" id="ac-on" ${ao?'checked':''} onchange="saveAC()"><span class="tgl-s"></span></label></div>
+    <div class="arow"><div><div class="arow-t">Confirm Delay (seconds)</div><div class="arow-s">Wait before auto-confirming</div></div><input class="fi" type="number" id="ac-dl" value="${del}" style="width:85px;text-align:center" onchange="saveAC()"></div>
+    <div class="arow"><div><div class="arow-t">Suspicious Threshold (₹)</div><div class="arow-s">Above this = flagged for review</div></div><input class="fi" type="number" id="ac-mx" value="${max}" style="width:100px;text-align:center" onchange="saveAC()"></div>
+    <div class="arow"><div><div class="arow-t">Referral Reward Days</div><div class="arow-s">VIP days added to referrer per confirmed deposit</div></div><input class="fi" type="number" id="ac-rd" value="${rd}" style="width:85px;text-align:center" onchange="saveAC()"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+    <div class="card"><div class="ch"><div class="ct">⚠️ Suspicious <span class="bdg bg-err" style="margin-left:5px">${sus.length}</span></div></div>
+    <div class="tw"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Reason</th><th>Actions</th></tr></thead><tbody>
+    ${sus.map(([k,d])=>`<tr><td class="mono fg">${d.mobile}</td><td class="fr" style="font-weight:700">₹${d.amount}</td><td><span class="bdg bg-sus">${d.suspiciousReason||'Flagged'}</span></td><td><div style="display:flex;gap:3px"><button class="btn bgn bxs" onclick="openConf('${k}')">✅</button><button class="btn bre bxs" onclick="confirm2('dep','${k}','Cancel?')">✗</button></div></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty" style="padding:14px">None</div></td></tr>'}
+    </tbody></table></div></div>
+    <div class="card"><div class="ch"><div class="ct">⏳ Pending <span class="bdg bg-amb" style="margin-left:5px">${pend.length}</span></div></div>
+    <div class="tw"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Auto</th><th>Actions</th></tr></thead><tbody>
+    ${pend.map(([k,d])=>`<tr><td class="mono fg">${d.mobile}</td><td style="font-weight:700">₹${d.amount}</td><td>${ao?'<span class="bdg bg-blue">⏱ Auto</span>':'<span class="bdg bg-dim">Manual</span>'}</td><td><button class="btn bgn bxs" onclick="openConf('${k}')">✅ Confirm</button></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty" style="padding:14px">None</div></td></tr>'}
+    </tbody></table></div></div>
   </div>`;
 }
-
-// ═══════════ AUDIT LOG ═══════════
-function renderAudit() {
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">📋 Audit Log <span class="bdg bdg-gy" style="margin-left:6px">${audit.length}</span></div></div>
-    <div class="tw"><table>
-      <thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
-      <tbody>
-      ${audit.slice(0,100).map(a=>`<tr>
-        <td style="font-size:11px;color:#374151">${fmtDate(a.timestamp)}</td>
-        <td style="color:#A78BFA;font-size:11px">${a.actor}</td>
-        <td style="font-family:monospace;font-size:11px;color:#FFD700">${a.action}</td>
-        <td><span class="msk">${maskMobile(a.target)||a.target||'-'}</span></td>
-        <td style="font-size:11px;color:#4B5563">${a.details?JSON.stringify(a.details).slice(0,60):'-'}</td>
-      </tr>`).join('')||'<tr><td colspan="5" class="empty"><p>No audit records yet</p></td></tr>'}
-      </tbody>
-    </table></div>
-  </div>`;
+function saveAC(){
+  if(!db)return;
+  const c={autoConfirm:document.getElementById('ac-on').checked,autoDelay:+document.getElementById('ac-dl').value||60,suspiciousMaxAmount:+document.getElementById('ac-mx').value||5000,referralRewardDays:+document.getElementById('ac-rd').value||1};
+  db.ref('Config').update(c);Object.assign(AC,c);toast('Auto config saved','s');
+}
+function runAuto(){
+  if(!db||!AC.autoConfirm)return;
+  const del=(AC.autoDelay||60)*1000,max=AC.suspiciousMaxAmount||5000,now=Date.now();
+  Object.entries(D).forEach(([rid,d])=>{
+    if(d.status!=='PENDING')return;if(now-(d.createdAt||now)<del)return;
+    const amt=parseFloat(d.amount||0),mob=d.mobile;
+    const prev=Object.values(D).filter(x=>x.mobile===mob&&(x.status==='CONFIRMED'||x.status==='AUTO_CONFIRMED')&&(now-(x.confirmedAt||0)<86400000)).length;
+    const noU=!U[mob];
+    if(amt>max||prev>=2||noU){
+      const reason=noU?'Unknown user':amt>max?`Amount ₹${amt} over threshold`:'Multiple deposits 24h';
+      db.ref('DepositRequests/'+rid).update({status:'SUSPICIOUS',suspiciousReason:reason});
+    }else{
+      db.ref('DepositRequests/'+rid+'/status').once('value').then(s=>{if(s.val()==='PENDING'){doConf(rid,d);toast('🤖 Auto: '+mob,'i');}});
+    }
+  });
+}
+function giveReward(mob){
+  if(!db||!U[mob])return;
+  const rb=U[mob].referredBy;if(!rb)return;
+  const days=AC.referralRewardDays||1,addMs=days*86400000;
+  db.ref('ReferralCodes/'+rb).once('value').then(s=>{
+    if(!s.exists())return;const rm=String(s.val().mobile||'');if(!rm)return;
+    db.ref('VIP/'+rm).once('value').then(vs=>{
+      const vd=vs.val()||{},cur=vd.validUntil||0,nw=cur>Date.now()?cur+addMs:Date.now()+addMs;
+      db.ref('VIP/'+rm).update({status:'ACTIVE',validUntil:nw});
+      db.ref('Notifications/'+rm+'/count').set(firebase.database.ServerValue.increment(1));
+      logA('REFERRAL_REWARD',rm,{mob,days});
+    });
+  });
 }
 
-// ═══════════ SETTINGS ═══════════
-function renderSettings() {
-  const c=cfg||DEFAULT;
-  document.getElementById('content').innerHTML=`
-  <div class="card">
-    <div class="ch"><div class="ct">🔥 Firebase Config</div></div>
-    <div style="background:#030310;border:1px solid #1A1A3A;border-radius:9px;padding:14px;margin-bottom:14px">
-      <div style="font-size:11px;color:#4B5563">Database URL</div>
-      <div style="font-size:13px;color:#10B981;font-family:monospace;margin-top:3px">${c.databaseURL}</div>
+// ── VIP STATUS ──
+function rVip(){
+  const va=Object.entries(V);
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">👑 VIP Status</div><div style="display:flex;gap:5px"><span class="bdg bg-gold">${va.filter(([,v])=>v.status==='ACTIVE').length} Active</span><span class="bdg bg-err">${va.filter(([,v])=>v.status==='EXPIRED').length} Expired</span></div></div>
+  <div class="tw"><table><thead><tr><th>Mobile (Full)</th><th>Status</th><th>Activated</th><th>Valid Until</th><th>Remaining</th><th>Ent. ID</th><th>Actions</th></tr></thead><tbody>
+  ${va.map(([k,v])=>{const now=Date.now(),rem=v.validUntil&&v.validUntil>0?v.validUntil-now:Infinity;return`<tr>
+    <td class="mono fg">${k}</td>
+    <td>${vb(v.status)}</td>
+    <td class="fd" style="font-size:10px">${dt(v.activatedAt)}</td>
+    <td class="fd" style="font-size:10px;${v.validUntil&&v.validUntil<now&&v.validUntil>0?'color:var(--err)':''}">${!v.validUntil||v.validUntil===0?'♾️ Lifetime':dt(v.validUntil)}</td>
+    <td style="font-size:10px;color:${rem===Infinity?'var(--ok)':rem<0?'var(--err)':rem<86400000?'var(--amb)':'var(--ok)'}">${rem===Infinity?'♾️':rem<0?'Expired':msToH(rem)}</td>
+    <td class="mono fd" style="font-size:9px">${(v.entitlementId||'—').slice(0,10)}…</td>
+    <td><div style="display:flex;gap:3px"><button class="btn bg bxs" onclick="extOpen('${k}')">📅 Ext</button><button class="btn bre bxs" onclick="revokeV('${k}')">Revoke</button></div></td>
+  </tr>`}).join('')||'<tr><td colspan="7"><div class="empty"><div class="ei">👑</div><p>No VIP data</p></div></td></tr>'}
+  </tbody></table></div></div>`;
+}
+function extOpen(mob){const v=V[mob]||{};document.getElementById('ext-mob').value=mob;document.getElementById('ext-sub').textContent='Mobile: '+mob;if(v.validUntil&&v.validUntil>0)document.getElementById('ext-d').value=new Date(v.validUntil).toISOString().slice(0,16);open2('m-ext');}
+function extVip(){const mob=document.getElementById('ext-mob').value,nd=document.getElementById('ext-d').value;if(!mob||!nd||!db)return;db.ref('VIP/'+mob).update({validUntil:new Date(nd).getTime(),status:'ACTIVE'});logA('VIP_EXTENDED',mob,{});close2('m-ext');toast('VIP extended ✅','s');}
+function revokeV(mob){if(!db)return;const v=V[mob]||{};db.ref('VIP/'+mob).update({status:'REVOKED'});if(v.entitlementId)db.ref('VipEntitlements/'+v.entitlementId).update({status:'REVOKED'});logA('VIP_REVOKED',mob,{});toast('VIP revoked','s');}
+
+// ── VIP KEYS ──
+function rKeys(){
+  const ua=Object.entries(U);
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">🔑 VIP Keys</div><div class="ca"><button class="btn bg bsm" onclick="bulkGen()">⚡ Bulk Generate</button></div></div>
+  <div class="tw"><table><thead><tr><th>Mobile (Full)</th><th>VIP Key</th><th>Status</th><th>Device ID</th><th>Device Brand</th><th>Used At</th><th>Actions</th></tr></thead><tbody>
+  ${ua.map(([k,u])=>`<tr>
+    <td class="mono fg">${k}</td>
+    <td class="mono" style="color:var(--gold);font-size:10px;letter-spacing:1px">${u.vipKey||'<span style="color:var(--dim)">No key</span>'}</td>
+    <td>${kst(u)}</td>
+    <td class="mono fd" style="font-size:9.5px">${u.vipKeyDeviceId?u.vipKeyDeviceId.slice(0,16)+'…':'<span style="color:var(--dim)">—</span>'}</td>
+    <td class="fd">${u.vipKeyBrand||'—'} ${u.vipKeyModel?'/ '+u.vipKeyModel:''}</td>
+    <td class="fd" style="font-size:10px">${dt(u.vipKeyUsedAt)}</td>
+    <td><div style="display:flex;gap:3px">
+      <button class="btn bg bxs" onclick="openKey('${k}')">🔑 ${u.vipKey?'Change':'Assign'}</button>
+      ${u.vipKey?`<button class="btn bgh bxs" onclick="cpKey('${u.vipKey}')">📋</button>`:''}
+      ${u.vipKeyDeviceId&&u.vipKeyDeviceId!==''?`<button class="btn bre bxs" onclick="resetDev('${k}')">🔓 Reset</button>`:''}
+      ${u.vipKey?`<button class="btn bre bxs" onclick="removeKey('${k}')">✗</button>`:''}
+    </div></td>
+  </tr>`).join('')||'<tr><td colspan="7"><div class="empty"><div class="ei">🔑</div><p>No users</p></div></td></tr>'}
+  </tbody></table></div></div>`;
+}
+function openKey(mob){
+  const u=U[mob]||{};
+  document.getElementById('key-mob').value=mob;document.getElementById('key-sub').textContent='Mobile: '+mob;genKey();
+  document.getElementById('key-dur').value='lifetime';
+  // Show current key info
+  let info='';
+  if(u.vipKey){
+    info=`<div style="background:#06061A;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:4px">
+    <div style="font-size:9px;color:var(--dim);margin-bottom:6px;font-weight:700">CURRENT KEY INFO</div>
+    ${ir('Current Key',`<span class="mono fg" style="font-size:10px;letter-spacing:1px">${u.vipKey}</span>`)}
+    ${ir('Key Status',kst(u))}
+    ${ir('Locked Device',u.vipKeyDeviceId?`<span class="mono" style="font-size:10px">${u.vipKeyDeviceId}</span>`:'Not locked yet')}
+    ${ir('Device Brand',u.vipKeyBrand||'—')}</div>`;
+  }
+  document.getElementById('key-info').innerHTML=info;
+  open2('m-key');
+}
+function genKey(){document.getElementById('key-val').textContent=mkKey();}
+function assignKey(){
+  const mob=document.getElementById('key-mob').value,key=document.getElementById('key-val').textContent,dur=document.getElementById('key-dur').value;
+  if(!mob||!key||!db)return;
+  const vu=vu2d(dur);
+  const upd={vipKey:key,vipKeyStatus:'ACTIVE',vipKeyDeviceId:'',vipKeyAssignedAt:Date.now(),vipKeyUsedAt:0};
+  db.ref('Users/'+mob).update(upd);
+  if(vu>0){db.ref('VIP/'+mob).update({status:'ACTIVE',validUntil:vu,activatedAt:Date.now()});}
+  logA('VIP_KEY_ASSIGNED',mob,{key,dur});close2('m-key');toast('Key assigned ✅','s');
+}
+function resetDevice(){
+  const mob=document.getElementById('key-mob').value;if(!mob||!db)return;
+  db.ref('Users/'+mob).update({vipKeyDeviceId:'',vipKeyUsedAt:0,vipKeyStatus:'ACTIVE'});
+  logA('VIP_KEY_DEVICE_RESET',mob,{});close2('m-key');toast('Device lock reset ✅ — user can now use key on new device','s');
+}
+function resetDev(mob){if(!mob||!db)return;db.ref('Users/'+mob).update({vipKeyDeviceId:'',vipKeyUsedAt:0,vipKeyStatus:'ACTIVE'});logA('VIP_KEY_DEVICE_RESET',mob,{});toast('Device lock reset for '+mob,'s');}
+function cpKey(key){navigator.clipboard?.writeText(key).then(()=>toast('Key copied ✅','s')).catch(()=>toast('Copy failed','e'));}
+function removeKey(mob){if(!db)return;db.ref('Users/'+mob).update({vipKey:'',vipKeyStatus:'REMOVED',vipKeyDeviceId:''});logA('VIP_KEY_REMOVED',mob,{});toast('Key removed','s');}
+function bulkGen(){
+  const noKey=Object.entries(U).filter(([,u])=>!u.vipKey&&(V[String(u.mobile||u.mobile||'')]||{}).status==='ACTIVE');
+  const need=Object.keys(U).filter(k=>!U[k].vipKey&&(V[k]||{}).status==='ACTIVE');
+  if(!need.length){toast('All VIP users have keys','i');return;}
+  const upd={};need.forEach(k=>{upd['Users/'+k+'/vipKey']=mkKey();upd['Users/'+k+'/vipKeyStatus']='ACTIVE';upd['Users/'+k+'/vipKeyDeviceId']='';});
+  db.ref().update(upd);logA('BULK_KEY_GENERATED','SYSTEM',{count:need.length});toast(`Keys generated for ${need.length} users ✅`,'s');
+}
+
+// ── REFERRALS ──
+function rRef(){
+  const ra=Object.entries(R);
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">🔗 Referral Codes <span class="bdg bg-blue" style="margin-left:5px">${ra.length}</span></div></div>
+  <div class="tw"><table><thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th><th>Referred</th><th>Deposited</th><th>VIP Rewards</th><th>Actions</th></tr></thead><tbody>
+  ${ra.map(([code,v])=>{const refs=Object.values(U).filter(u=>u.referredBy===code);const wd=refs.filter(u=>Object.values(D).some(d=>d.mobile===u.mobile&&(d.status==='CONFIRMED'||d.status==='AUTO_CONFIRMED'))).length;return`<tr><td class="mono fo" style="font-weight:700">${code}</td><td class="mono fg">${v.mobile||'—'}</td><td>${v.active!==false?'<span class="bdg bg-ok">Active</span>':'<span class="bdg bg-err">Off</span>'}</td><td><span class="bdg bg-blue">${refs.length}</span></td><td><span class="bdg bg-gold">${wd}</span></td><td><span class="bdg bg-pur">${wd}×${AC.referralRewardDays||1}d</span></td><td><button class="btn bre bxs" onclick="confirm2('ref','${code}','Remove code?')">Remove</button></td></tr>`;}).join('')||'<tr><td colspan="7"><div class="empty"><div class="ei">🔗</div><p>No codes</p></div></td></tr>'}
+  </tbody></table></div></div>`;
+}
+
+// ── NOTIFICATIONS ──
+function rNotif(){
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">🔔 Notifications</div><button class="btn bbl bsm" onclick="open2('m-nf')">📤 Send</button></div>
+  <div class="tw"><table><thead><tr><th>Mobile (Full)</th><th>Unread</th><th>Last Message</th><th>Actions</th></tr></thead><tbody id="nfb"><tr><td colspan="4" class="empty" style="padding:16px">Loading…</td></tr></tbody></table></div></div>`;
+  db.ref('Notifications').once('value').then(s=>{
+    const n=s.val()||{};
+    document.getElementById('nfb').innerHTML=Object.entries(n).map(([mob,d])=>`<tr><td class="mono fg">${mob}</td><td>${d.count>0?`<span class="bdg bg-err">${d.count}</span>`:'<span class="bdg bg-dim">0</span>'}</td><td class="fd" style="font-size:10px">${d.lastMsg||'—'}</td><td><button class="btn bgh bxs" onclick="clrNf('${mob}')">Clear</button></td></tr>`).join('')||'<tr><td colspan="4"><div class="empty" style="padding:14px">No data</div></td></tr>';
+  });
+}
+function nfTarget(v){document.getElementById('nf-mw').style.display=v==='single'?'':'none';}
+function clrNf(mob){db.ref('Notifications/'+mob).set({count:0});toast('Cleared','s');}
+function sendNotif(){
+  const tgt=document.getElementById('nf-t').value,msg=document.getElementById('nf-msg').value.trim();
+  if(!msg){toast('Enter message','e');return;}
+  const upd={};
+  if(tgt==='single'){const mob=document.getElementById('nf-m').value.trim();if(!mob){toast('Enter mobile','e');return;}upd['Notifications/'+mob+'/count']=firebase.database.ServerValue.increment(1);upd['Notifications/'+mob+'/lastMsg']=msg;}
+  else{let ts=Object.keys(U);if(tgt==='vip')ts=ts.filter(m=>(V[m]||{}).status==='ACTIVE');if(tgt==='novip')ts=ts.filter(m=>(V[m]||{}).status!=='ACTIVE');ts.forEach(m=>{upd['Notifications/'+m+'/count']=firebase.database.ServerValue.increment(1);upd['Notifications/'+m+'/lastMsg']=msg;});toast(`Sending to ${ts.length} users…`,'i');}
+  db.ref().update(upd).then(()=>{close2('m-nf');toast('Sent ✅','s');});
+}
+
+// ── AUDIT ──
+function rAudit(){
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">📋 Audit Log</div><div class="sbar"><span>🔍</span><input id="as" placeholder="Search…" oninput="fAudit(this.value)" style="width:150px"></div></div>
+  <div class="tw"><table><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target (Full)</th><th>Details</th></tr></thead><tbody id="ab"></tbody></table></div></div>`;
+  renderAudit('');
+}
+function renderAudit(q){
+  const rows=AL.filter(a=>!q||(a.action||'').toLowerCase().includes(q)||(a.target||'').includes(q));
+  document.getElementById('ab').innerHTML=rows.slice(0,200).map(a=>`<tr><td class="fd" style="font-size:10px">${dt(a.timestamp)}</td><td style="font-size:10px;color:var(--pur)">${a.actor||'—'}</td><td class="mono fg" style="font-size:10px">${a.action||'—'}</td><td class="mono fg" style="font-size:10px">${a.target||'—'}</td><td class="fd" style="font-size:10px">${a.details?JSON.stringify(a.details).slice(0,55):'—'}</td></tr>`).join('')||'<tr><td colspan="5"><div class="empty" style="padding:14px">No records</div></td></tr>';
+}
+function fAudit(q){renderAudit(q.toLowerCase());}
+
+// ── APP CONFIG ──
+function rCfg(){
+  document.getElementById('C').innerHTML=`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:13px">
+    <div class="card"><div class="ch"><div class="ct">📱 App Links</div></div>
+      <div class="fg2"><label>Download URL (used in Share message)</label><input class="fi" id="c-dl" value="${AC.downloadUrl||'https://jashcore.funofficial.workers.dev/'}"><div style="font-size:9px;color:var(--dim);margin-top:4px">Admin can change anytime — updates share link immediately</div></div>
+      <div class="fg2"><label>Telegram Support Link</label><input class="fi" id="c-tg" value="${AC.telegramLink||'https://t.me/yourchannel'}"></div>
+      <div class="fg2"><label>VIP Overlay Title</label><input class="fi" id="c-ot" value="${AC.overlayTitle||'FUN VIP ACCESS'}"></div>
+      <button class="btn bg bsm" onclick="saveLinks()">💾 Save Links</button>
     </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">API Key</label><input class="fi" id="c-apikey" value="${c.apiKey}"></div>
-      <div class="fg"><label class="fl">Project ID</label><input class="fi" id="c-projid" value="${c.projectId}"></div>
-    </div>
-    <div class="fr">
-      <div class="fg"><label class="fl">Database URL</label><input class="fi" id="c-dburl" value="${c.databaseURL}"></div>
-      <div class="fg"><label class="fl">App ID</label><input class="fi" id="c-appid" value="${c.appId}"></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn bg bsm" onclick="saveConfig()">💾 Save & Reconnect</button>
-      <button class="btn bo bsm" onclick="resetConfig()">↺ Reset</button>
+    <div class="card"><div class="ch"><div class="ct">🤖 Auto System</div></div>
+      <div class="fg2"><label>Auto-Confirm</label><label class="tgl" style="margin-top:6px"><input type="checkbox" id="c-auto" ${AC.autoConfirm?'checked':''} onchange="saveFullCfg()"><span class="tgl-s"></span></label></div>
+      <div class="fr2"><div class="fg2"><label>Delay (sec)</label><input class="fi" type="number" id="c-del" value="${AC.autoDelay||60}"></div><div class="fg2"><label>Suspicious Max (₹)</label><input class="fi" type="number" id="c-max" value="${AC.suspiciousMaxAmount||5000}"></div></div>
+      <div class="fg2"><label>Referral Reward (days)</label><input class="fi" type="number" id="c-rd" value="${AC.referralRewardDays||1}"></div>
+      <button class="btn bg bsm" onclick="saveFullCfg()">💾 Save Auto Config</button>
     </div>
   </div>
-  <div class="card">
-    <div class="ch"><div class="ct" style="color:#EF4444">🗑 Danger Zone</div></div>
-    <div class="danger-zone"><div><div style="font-weight:700">Delete All Users</div><div style="font-size:11px;color:#4B5563">Removes all users permanently</div></div><button class="btn br bsm" onclick="confirm2('allusers','all','Delete ALL users? Cannot undo!')">Delete All</button></div>
-    <div class="danger-zone"><div><div style="font-weight:700">Clear All VIP Data</div><div style="font-size:11px;color:#4B5563">Remove all VIP entitlements</div></div><button class="btn br bsm" onclick="confirm2('allvip','all','Clear ALL VIP data?')">Clear VIP</button></div>
-    <div class="danger-zone"><div><div style="font-weight:700">Clear Deposit Requests</div><div style="font-size:11px;color:#4B5563">Remove all deposit requests</div></div><button class="btn br bsm" onclick="confirm2('alldeposit','all','Clear ALL deposit requests?')">Clear Deposits</button></div>
+  <div class="card"><div class="ch"><div class="ct">📊 Firebase Config Preview</div></div>
+    <div style="background:#02020E;border:1px solid var(--border);border-radius:8px;padding:13px;font-family:monospace;font-size:11px;color:var(--dim)">
+      <div style="color:var(--gold)">Config/ {</div>
+      <div style="padding-left:16px">downloadUrl: <span style="color:var(--cyan)">"${AC.downloadUrl||''}"</span></div>
+      <div style="padding-left:16px">telegramLink: <span style="color:var(--cyan)">"${AC.telegramLink||''}"</span></div>
+      <div style="padding-left:16px">overlayTitle: <span style="color:var(--cyan)">"${AC.overlayTitle||''}"</span></div>
+      <div style="padding-left:16px">autoConfirm: <span style="color:var(--amb)">${AC.autoConfirm||false}</span></div>
+      <div style="padding-left:16px">autoDelay: <span style="color:var(--amb)">${AC.autoDelay||60}</span></div>
+      <div style="padding-left:16px">suspiciousMaxAmount: <span style="color:var(--amb)">${AC.suspiciousMaxAmount||5000}</span></div>
+      <div style="padding-left:16px">referralRewardDays: <span style="color:var(--amb)">${AC.referralRewardDays||1}</span></div>
+      <div style="color:var(--gold)">}</div>
+    </div>
   </div>`;
 }
+function saveLinks(){if(!db)return;const upd={downloadUrl:document.getElementById('c-dl').value.trim(),telegramLink:document.getElementById('c-tg').value.trim(),overlayTitle:document.getElementById('c-ot').value.trim()};db.ref('Config').update(upd);Object.assign(AC,upd);toast('Links saved ✅','s');}
+function saveFullCfg(){if(!db)return;const upd={autoConfirm:document.getElementById('c-auto').checked,autoDelay:+document.getElementById('c-del').value||60,suspiciousMaxAmount:+document.getElementById('c-max').value||5000,referralRewardDays:+document.getElementById('c-rd').value||1};db.ref('Config').update(upd);Object.assign(AC,upd);toast('Config saved ✅','s');}
 
-function saveConfig() {
-  const c={apiKey:document.getElementById('c-apikey').value,projectId:document.getElementById('c-projid').value,databaseURL:document.getElementById('c-dburl').value,appId:document.getElementById('c-appid').value};
-  c.authDomain=c.projectId+'.firebaseapp.com';
-  localStorage.setItem('funxpro_cfg',JSON.stringify(c));
-  toast('Saved! Reloading…','i');
-  setTimeout(()=>location.reload(),1000);
+// ── FIREBASE ──
+function rFb(){
+  const s=localStorage.getItem('fxa_cfg4');const c=s?JSON.parse(s):DEF;
+  document.getElementById('C').innerHTML=`<div class="card"><div class="ch"><div class="ct">🔧 Firebase Connection</div></div>
+    <div style="background:#02020E;border:1px solid rgba(0,200,255,.18);border-radius:8px;padding:11px 13px;margin-bottom:13px">
+      <div style="font-size:9px;color:var(--dim);margin-bottom:4px">DATABASE URL</div>
+      <div class="mono fc">${c.databaseURL}</div>
+    </div>
+    <div class="fr2"><div class="fg2"><label>API Key</label><input class="fi" id="fb-k" value="${c.apiKey}"></div><div class="fg2"><label>Project ID</label><input class="fi" id="fb-p" value="${c.projectId}"></div></div>
+    <div class="fr2"><div class="fg2"><label>Database URL</label><input class="fi" id="fb-d" value="${c.databaseURL}"></div><div class="fg2"><label>App ID</label><input class="fi" id="fb-a" value="${c.appId}"></div></div>
+    <div style="display:flex;gap:7px;margin-top:8px"><button class="btn bg bsm" onclick="saveFb()">💾 Save & Reconnect</button><button class="btn bgh bsm" onclick="resetFb()">↺ Reset</button></div>
+  </div>
+  <div class="card"><div class="ch"><div class="ct" style="color:var(--err)">🗑 Danger Zone</div></div>
+    <div class="dz"><div><div style="font-weight:700;font-size:11.5px">Delete All Users</div><div style="font-size:9.5px;color:var(--mut)">Removes all user data permanently</div></div><button class="btn bre bsm" onclick="confirm2('all-u','','DELETE ALL USERS?')">Delete All</button></div>
+    <div class="dz"><div><div style="font-weight:700;font-size:11.5px">Clear All VIP</div></div><button class="btn bre bsm" onclick="confirm2('all-v','','Clear ALL VIP?')">Clear VIP</button></div>
+    <div class="dz"><div><div style="font-weight:700;font-size:11.5px">Clear All Deposits</div></div><button class="btn bre bsm" onclick="confirm2('all-d','','Clear ALL deposits?')">Clear</button></div>
+    <div class="dz"><div><div style="font-weight:700;font-size:11.5px">Clear Audit Logs</div></div><button class="btn bre bsm" onclick="confirm2('all-al','','Clear ALL audit?')">Clear</button></div>
+  </div>`;
 }
-function resetConfig() { localStorage.removeItem('funxpro_cfg'); toast('Reset!','i'); setTimeout(()=>location.reload(),800); }
+function saveFb(){const c={apiKey:document.getElementById('fb-k').value.trim(),projectId:document.getElementById('fb-p').value.trim(),databaseURL:document.getElementById('fb-d').value.trim(),appId:document.getElementById('fb-a').value.trim()};c.authDomain=c.projectId+'.firebaseapp.com';localStorage.setItem('fxa_cfg4',JSON.stringify(c));toast('Saved! Reloading…','i');setTimeout(()=>location.reload(),900);}
+function resetFb(){localStorage.removeItem('fxa_cfg4');toast('Reset','i');setTimeout(()=>location.reload(),700);}
 
-// ═══════════ DELETE & CONFIRM ═══════════
-function confirm2(type,key,msg) {
-  document.getElementById('del-msg').textContent=msg||'This cannot be undone.';
-  document.getElementById('del-yes').onclick=()=>{ doDelete(type,key); close2('m-del'); };
-  open2('m-del');
-}
-function doDelete(type,key) {
-  if (!db) return;
-  if (type==='user') { db.ref('Users/'+key).remove(); db.ref('dbRef/'+key).remove(); db.ref('depositControls/'+key).remove(); db.ref('VIP/'+key).remove(); logAudit('ADMIN','USER_DELETED',key,{}); toast('User deleted','s'); }
-  else if (type==='dep') { db.ref('DepositRequests/'+key).update({status:'CANCELLED',cancelledAt:Date.now()}); toast('Request cancelled','s'); }
-  else if (type==='refer') { db.ref('ReferralCodes/'+key).remove(); toast('Refer code removed','s'); }
-  else if (type==='allusers') { db.ref('Users').remove(); db.ref('dbRef').remove(); db.ref('VIP').remove(); toast('All users deleted','s'); }
-  else if (type==='allvip') { db.ref('VIP').remove(); db.ref('VipEntitlements').remove(); toast('VIP cleared','s'); }
-  else if (type==='alldeposit') { db.ref('DepositRequests').remove(); toast('Deposits cleared','s'); }
+// ── DELETE ──
+function confirm2(type,key,msg){document.getElementById('del-msg').textContent=msg||'Cannot undo.';document.getElementById('del-yes').onclick=()=>{doDelete(type,key);close2('m-del');};open2('m-del');}
+function doDelete(type,key){
+  if(!db)return;
+  if(type==='u'){db.ref('Users/'+key).remove();db.ref('dbRef/'+key).remove();db.ref('VIP/'+key).remove();db.ref('Notifications/'+key).remove();logA('USER_DELETED',key,{});toast('Deleted','s');}
+  else if(type==='dep'){db.ref('DepositRequests/'+key).update({status:'CANCELLED',cancelledAt:Date.now()});toast('Cancelled','s');}
+  else if(type==='ref'){db.ref('ReferralCodes/'+key).remove();toast('Removed','s');}
+  else if(type==='all-u'){db.ref('Users').remove();db.ref('dbRef').remove();db.ref('VIP').remove();toast('All users deleted','s');}
+  else if(type==='all-v'){db.ref('VIP').remove();db.ref('VipEntitlements').remove();toast('VIP cleared','s');}
+  else if(type==='all-d'){db.ref('DepositRequests').remove();toast('Deposits cleared','s');}
+  else if(type==='all-al'){db.ref('AuditLogs').remove();toast('Audit cleared','s');}
 }
 
-// ═══════════ AUDIT HELPER ═══════════
-function logAudit(actor,action,target,details) {
-  if (!db) return;
-  db.ref('AuditLogs').push({actor,action,target,details:details||{},timestamp:Date.now()});
-}
+// ── MODAL ──
+function open2(id){document.getElementById(id).classList.add('open');}
+function close2(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
 
-// ═══════════ GLOBAL SEARCH ═══════════
-function gSearch(q) { if (section==='users') renderUsers(q); }
+// ── SEARCH ──
+function gSrch(q){if(sec==='users')rUsers(q);}
 
-// ═══════════ MODAL ═══════════
-function open2(id) { document.getElementById(id).classList.add('open'); }
-function close2(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.mo').forEach(e=>e.addEventListener('click',function(ev){if(ev.target===this)this.classList.remove('open');}));
-
-// ═══════════ TOAST ═══════════
+// ── TOAST ──
 let tt;
-function toast(msg,type='i') {
-  const el=document.getElementById('toast');
-  el.textContent=(type==='s'?'✅ ':type==='e'?'❌ ':type==='w'?'⚠️ ':'ℹ️ ')+msg;
-  el.className='show t'+type;
-  clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3200);
-}
+function toast(msg,type='i'){const el=document.getElementById('toast');el.textContent=(type==='s'?'✅ ':type==='e'?'❌ ':type==='w'?'⚠️ ':'ℹ️ ')+msg;el.className='show '+type;clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),3200);}
 
-// ═══════════ BOOT ═══════════
-window.onload=()=>{ initFB(); setTimeout(()=>{ if(!db) renderSettings(); },3000); };
+window.onload=()=>{
+  initFB();
+  const s=localStorage.getItem('fxa_cfg4');
+  if(!s)setTimeout(()=>toast('⚙️ Set Firebase credentials in Firebase Settings','w'),3000);
+};
 </script>
 </body>
 </html>
