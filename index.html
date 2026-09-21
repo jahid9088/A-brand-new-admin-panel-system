@@ -567,7 +567,6 @@ const VIDEO_SRC = "https://raw.githubusercontent.com/jahid9088/A-brand-new-admin
 const bgVideo = document.getElementById('bgVideo');
 const mediaToggle = document.getElementById('mediaToggle');
 let videoWorking = false;
-let soundBlockedByBrowser = false;
 
 try{
   bgVideo.src = VIDEO_SRC;
@@ -577,108 +576,59 @@ try{
     bgVideo.classList.add('ready');
     videoWorking = true;
     mediaToggle.classList.add('show');
-    attemptSoundOnLoad();
   });
 
   bgVideo.addEventListener('error', ()=>{ bgVideo.style.display='none'; });
 
-  // Seamless loop — force a clean restart if the native loop attribute stutters
-  bgVideo.addEventListener('ended', function(){
+  // FIX: video must NEVER visibly pause. If the browser ever pauses it for
+  // any reason (buffering stall, background/foreground switch on some
+  // devices, etc.) — resume it immediately, silently.
+  bgVideo.addEventListener('pause', ()=>{
+    if(videoWorking) bgVideo.play().catch(()=>{});
+  });
+
+  // Seamless loop — clean restart in case the native loop attribute stutters
+  bgVideo.addEventListener('ended', ()=>{
     bgVideo.currentTime = 0;
     bgVideo.play().catch(()=>{});
   });
 
+  // Initial autoplay — always starts muted, which every browser allows
+  // unconditionally. This call happens exactly once, on load.
+  bgVideo.play().catch(()=>{});
+
 }catch(e){}
 
-// Try playing WITH sound immediately — succeeds only if the browser already
-// trusts this site. Almost always blocked on first visit (expected) — falls
-// back to muted silently here; the person unlocks it with one tap below.
-function attemptSoundOnLoad(){
-  bgVideo.muted = false;
-  const p = bgVideo.play();
-  if (p !== undefined) {
-    p.then(()=>{ mediaToggle.textContent = '🔊'; })
-     .catch(()=>{
-        bgVideo.muted = true;
-        bgVideo.play().catch(()=>{});
-        mediaToggle.textContent = '🔇';
-      });
-  }
-}
+// Resume playback if the tab comes back into focus and it somehow stopped
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden && videoWorking && bgVideo.paused) bgVideo.play().catch(()=>{});
+});
 
-// FIX: much more forceful unmute — sets every relevant property, replays,
-// then VERIFIES after a short delay whether the browser actually honored it.
-// If Chrome's site-level "Sound: Block/Mute" permission is silently
-// overriding us, .muted flips back to true on its own — we now detect
-// that instead of pretending it worked, and tell the person exactly
-// what to tap to fix it (this can't be forced from JavaScript; it's a
-// per-site browser permission, same as camera/location).
-// Shared by: (1) the very first tap/click ANYWHERE on the page — including
-// the login form, so sound starts during login itself without the person
-// needing to find the speaker icon — and (2) the explicit 🔊/🔇 toggle.
-function unlockSound(reportResult){
+// FIX: sound turns on with the very FIRST tap/click ANYWHERE on the page —
+// dock items, form fields, buttons, doesn't matter what's tapped. This is
+// as close to "fully automatic" as browsers allow (a page can never play
+// sound with zero interaction — that's a hard rule on every browser, not
+// something any code can bypass). Runs exactly ONCE, and — critically —
+// it only flips `.muted`. It never calls .play() again, because the video
+// is already playing; re-calling play() while already playing is exactly
+// what was causing the pause/stutter before.
+function firstGestureUnmute(){
+  if(!videoWorking) return;
   bgVideo.muted = false;
-  bgVideo.volume = 1.0;
-  bgVideo.play().catch(()=>{});
-  setTimeout(()=>{
-    if (bgVideo.muted) {
-      // Browser silently re-muted us — this is Chrome's per-site
-      // Sound permission, not our code and not the video file.
-      soundBlockedByBrowser = true;
-      mediaToggle.textContent = '🔇';
-      if (reportResult) {
-        mediaToggle.style.animation = 'soundPulse 1.4s ease-in-out 3';
-        toastErr('Blocked by Chrome — tap ⓘ or 🔒 next to the URL → Site settings → Sound → Allow');
-      }
-    } else {
-      mediaToggle.textContent = '🔊';
-      if (reportResult) toastOk('Sound on');
-    }
-  }, 400);
+  mediaToggle.textContent = '🔊';
+  document.removeEventListener('pointerdown', firstGestureUnmute, true);
+  document.removeEventListener('keydown', firstGestureUnmute, true);
 }
+document.addEventListener('pointerdown', firstGestureUnmute, true);
+document.addEventListener('keydown', firstGestureUnmute, true);
 
-// FIX: sound unlocks automatically — tries on EVERY tap/keystroke anywhere
-// on the page (typing the DB URL, tapping password, "Unlock Console", any
-// button afterward) and KEEPS RETRYING until it's actually confirmed on —
-// not just a single silent attempt. Once confirmed unmuted, it stops trying
-// and the person is in full manual control via the 🔊/🔇 toggle from then on.
-let soundAutoUnlockDone = false;
-function firstGestureUnlock(){
-  if(soundAutoUnlockDone) return;
-  if(!videoWorking) return; // video not loaded yet — try again on next tap
-  bgVideo.muted = false;
-  bgVideo.volume = 1.0;
-  bgVideo.play().catch(()=>{});
-  setTimeout(()=>{
-    if(!bgVideo.muted){
-      // Confirmed — sound is genuinely on. Stop retrying, hand control to the user.
-      soundAutoUnlockDone = true;
-      mediaToggle.textContent = '🔊';
-      document.removeEventListener('pointerdown', firstGestureUnlock, true);
-      document.removeEventListener('touchstart', firstGestureUnlock, true);
-      document.removeEventListener('keydown', firstGestureUnlock, true);
-    }
-    // else: browser blocked it again — leave listeners attached, next tap retries
-  }, 250);
-}
-document.addEventListener('pointerdown', firstGestureUnlock, true);
-document.addEventListener('touchstart', firstGestureUnlock, true);
-document.addEventListener('keydown', firstGestureUnlock, true);
-
+// Manual toggle — ONLY flips the mute flag. Never touches play()/pause().
+// This is what stops the toggle button itself from ever causing a stutter.
 function toggleMedia(){
   clickSound();
   if(!videoWorking)return;
-  mediaToggle.style.animation = '';
-  const wantUnmute = bgVideo.muted;
-  if (wantUnmute) {
-    soundAutoUnlockDone = false; // allow retry logic to confirm this manual unmute too
-    unlockSound(true);
-    soundAutoUnlockDone = true;  // and stop the background auto-retry once user has taken control
-  } else {
-    bgVideo.muted = true;
-    mediaToggle.textContent = '🔇';
-    soundAutoUnlockDone = true; // user explicitly muted — don't auto-unmute on next tap
-  }
+  bgVideo.muted = !bgVideo.muted;
+  mediaToggle.textContent = bgVideo.muted ? '🔇' : '🔊';
 }
 
 // ═══ CLICK SOUND (synthesized — no file needed) ═══
@@ -733,7 +683,7 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa15_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
@@ -743,11 +693,11 @@ function doLogin(){
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa15_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  localStorage.setItem('fxa16_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa15_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
