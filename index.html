@@ -281,6 +281,12 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
   display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .more-item .mi-t{font-size:13.5px;font-weight:800}
 .more-item .mi-s{font-size:11px;color:var(--ink-dim);margin-top:1px}
+.nav-badge{position:absolute;top:2px;right:2px;min-width:15px;height:15px;padding:0 3px;border-radius:var(--r-pill);
+  background:var(--danger);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 2px rgba(10,8,18,.9)}
+.ti{position:relative}
+.more-item{position:relative}
+.more-item .nav-badge{position:absolute;top:8px;right:8px}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .card-pad{padding:clamp(18px,4.5vw,24px)}
@@ -371,6 +377,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="dock-item" data-sec="users" onclick="goSec('users')"><span class="di-ic">👥</span><span>Users</span></div>
     <div class="dock-item" data-sec="deps" onclick="goSec('deps')"><span class="di-ic">💰</span><span>Deposits</span></div>
     <div class="dock-item" data-sec="vip" onclick="goSec('vip')"><span class="di-ic">👑</span><span>VIP</span></div>
+    <div class="dock-item" data-sec="requests" onclick="goSec('requests')"><span class="di-ic">🔔</span><span>Requests</span><span class="nav-badge" id="reqBadgeDock" style="display:none">0</span></div>
     <div class="dock-item" data-sec="refs" onclick="goSec('refs')"><span class="di-ic">🔗</span><span>Refers</span></div>
     <div class="dock-item" data-sec="audit" onclick="goSec('audit')"><span class="di-ic">📜</span><span>Audit</span></div>
     <div class="dock-item" data-sec="config" onclick="goSec('config')"><span class="di-ic">⚙️</span><span>Config</span></div>
@@ -396,6 +403,8 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
           <div class="stat-ic" style="background:rgba(0,227,168,.16);color:var(--mint)">💰</div><div class="stat-val" id="stDep">₹0</div><div class="stat-lbl">Total Deposited</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--danger)"></div>
           <div class="stat-ic" style="background:rgba(255,75,92,.16);color:var(--danger)">⛔</div><div class="stat-val" id="stBlocked">0</div><div class="stat-lbl">Blocked</div></div>
+        <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)" onclick="goSec('requests')" style="cursor:pointer"><div class="stat-orb" style="background:var(--amber)"></div>
+          <div class="stat-ic" style="background:rgba(255,149,0,.16);color:var(--amber)">🔔</div><div class="stat-val" id="stReq">0</div><div class="stat-lbl">Pending Requests</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--amber)"></div>
           <div class="stat-ic" style="background:rgba(255,149,0,.16);color:var(--amber)">🔗</div><div class="stat-val" id="stRefs">0</div><div class="stat-lbl">Referral Codes</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--rose)"></div>
@@ -441,7 +450,25 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
       </div>
     </div>
 
-    <div class="section" id="sec-refs">
+    <div class="section" id="sec-requests">
+      <div class="topbar"><div><div class="pg-title">Requests</div><div class="pg-sub">Users flagged "more deposit required" — review and resolve</div></div></div>
+      <div class="card3d card-pad" style="margin-bottom:16px" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
+        <p style="font-size:12.5px;color:var(--ink-dim);line-height:1.6;margin:0">
+          These users tried to claim VIP but were held back with <b style="color:var(--amber)">MORE_DEPOSIT_REQUIRED</b> — either
+          their live wallet balance fell short of the threshold, or you flagged them manually from the VIP Keys tab.
+          <b style="color:var(--ink)">Clear</b> lets them try again normally on their next deposit. <b style="color:var(--danger)">Block</b> stops them from getting VIP at all.
+        </p>
+      </div>
+      <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Mobile</th><th>UID</th><th>Live Balance</th><th>Deposited</th><th style="text-align:right">Actions</th></tr></thead>
+          <tbody id="requestsBody"></tbody>
+        </table></div>
+        <div id="requestsEmpty" class="empty" style="display:none"><div class="ic">🔔</div><p>No pending requests — all clear</p></div>
+      </div>
+    </div>
+
+        <div class="section" id="sec-refs">
       <div class="topbar"><div><div class="pg-title">Referrals</div><div class="pg-sub">Referral code ownership and usage</div></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
         <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th><th style="text-align:right">Manage</th></tr></thead><tbody id="refsBody"></tbody></table></div>
@@ -490,6 +517,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="sheet-head"><div class="sheet-title">More</div><button class="sheet-close" onclick="closeOv('ovMore')">✕</button></div>
     <div class="more-item" onclick="goSec('refs');closeOv('ovMore')"><span class="mi-ic">🔗</span><div><div class="mi-t">Referrals</div><div class="mi-s">Referral code ownership &amp; usage</div></div></div>
     <div class="more-item" onclick="goSec('audit');closeOv('ovMore')"><span class="mi-ic">📜</span><div><div class="mi-t">Audit Log</div><div class="mi-s">Every admin &amp; system action</div></div></div>
+    <div class="more-item" onclick="goSec('requests');closeOv('ovMore')"><span class="mi-ic">🔔</span><div><div class="mi-t">Requests</div><div class="mi-s">Users pending "more deposit required"</div></div><span class="nav-badge" id="reqBadgeMore" style="display:none">0</span></div>
     <div class="more-item" onclick="goSec('config');closeOv('ovMore')"><span class="mi-ic">⚙️</span><div><div class="mi-t">Config</div><div class="mi-s">App-wide VIP &amp; deposit settings</div></div></div>
   </div></div>
 </div>
@@ -705,7 +733,7 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa14_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa15_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
@@ -715,11 +743,11 @@ function doLogin(){
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa14_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  localStorage.setItem('fxa15_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa14_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa15_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
@@ -750,7 +778,7 @@ function openOv(id){document.getElementById(id).classList.add('show');}
 function closeOv(id){document.getElementById(id).classList.remove('show');}
 
 function loadAll(){
-  db.ref('Users').on('value',s=>{allUsers=s.val()||{};renderUsers();renderVip();renderDash();});
+  db.ref('Users').on('value',s=>{allUsers=s.val()||{};renderUsers();renderVip();renderRequests();renderDash();});
   db.ref('DepositLogs').on('value',s=>{allDeposits=s.val()||{};renderDeposits();renderDash();});
   db.ref('ReferralCodes').on('value',s=>{allRefs=s.val()||{};renderRefs();renderDash();});
   db.ref('AuditLogs').limitToLast(200).on('value',s=>{allAudit=s.val()||{};renderAudit();});
@@ -903,6 +931,7 @@ function renderVip(){
       const ksBadge = u.vipKeyStatus==='ACTIVE'?'<span class="badge badge-vip">Active</span>'
         : u.vipKeyStatus==='USED'?'<span class="badge badge-active">Used</span>'
         : u.vipKeyStatus==='BLOCKED'?'<span class="badge badge-blocked">Blocked</span>'
+        : u.vipKeyStatus==='MORE_DEPOSIT_REQUIRED'?'<span class="badge badge-warn">🔔 Deposit Req.</span>'
         : '<span class="badge badge-none">'+(u.vipKeyStatus||'None')+'</span>';
       const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
       tr.innerHTML=`<td class="mono">${m}</td><td class="mono" style="font-size:11px;color:var(--gold)">${u.vipKey||'—'}</td>
@@ -911,6 +940,7 @@ function renderVip(){
         <td><div class="act-row" style="justify-content:flex-end">
           <button class="ibtn" title="Block key" onclick="setKeyStatus('${m}','BLOCKED')">🚫</button>
           <button class="ibtn" title="Reset device" onclick="resetDevice('${m}')">🔄</button>
+          <button class="ibtn" title="Flag: more deposit required" onclick="flagMoreDeposit('${m}')" style="color:var(--amber)">🔔</button>
           <button class="ibtn gold" title="Revoke VIP" onclick="openRevoke('${m}')">👑</button></div></td>`;
       tbody.appendChild(tr);
     });
@@ -918,6 +948,41 @@ function renderVip(){
 }
 function setKeyStatus(m,status){db.ref('Users/'+m+'/vipKeyStatus').set(status).then(()=>{logAudit('KEY_STATUS_'+status,m);toastOk('Key '+status.toLowerCase()+' for '+m);});}
 function resetDevice(m){db.ref('Users/'+m).update({vipKeyDeviceId:'',vipKeyStatus:'ACTIVE'}).then(()=>{logAudit('DEVICE_RESET',m);toastOk('Device reset for '+m);});}
+
+// ── "Request Required" management: flag / clear / block a pending deposit request ──
+function flagMoreDeposit(m){
+  db.ref('Users/'+m+'/vipKeyStatus').set('MORE_DEPOSIT_REQUIRED').then(()=>{
+    logAudit('FLAGGED_MORE_DEPOSIT_REQUIRED',m);toastOk(m+' flagged — more deposit required');
+  });
+}
+function clearRequest(m){
+  db.ref('Users/'+m+'/vipKeyStatus').set('NONE').then(()=>{
+    logAudit('REQUEST_CLEARED',m);toastOk('Cleared for '+m+' — can try again normally');
+  });
+}
+function renderRequests(){
+  const tbody=document.getElementById('requestsBody');tbody.innerHTML='';
+  const pending = Object.keys(allUsers).filter(m=>allUsers[m].vipKeyStatus==='MORE_DEPOSIT_REQUIRED');
+  document.getElementById('requestsEmpty').style.display = pending.length?'none':'block';
+  pending.forEach((m,i)=>{
+    const u=allUsers[m];let dep=0;Object.values((allDeposits[m])||{}).forEach(d=>dep+=parseFloat(d.amount||0));
+    const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
+    tr.innerHTML=`<td class="mono">${m}</td><td class="mono">${u.uid||'—'}</td>
+      <td class="mono" style="color:var(--gold)">₹${u.balance||0}</td>
+      <td class="mono">₹${dep.toLocaleString('en-IN')}</td>
+      <td><div class="act-row" style="justify-content:flex-end">
+        <button class="ibtn" title="View" onclick="viewUser('${m}')">👁</button>
+        <button class="ibtn gold" title="Clear — let them try again" onclick="clearRequest('${m}')">✓</button>
+        <button class="ibtn danger" title="Block instead" onclick="setKeyStatus('${m}','BLOCKED')">🚫</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+  });
+  // Update pending-count badges everywhere they appear
+  const cnt = pending.length;
+  const dockB=document.getElementById('reqBadgeDock'), moreB=document.getElementById('reqBadgeMore');
+  [dockB,moreB].forEach(b=>{ if(!b)return; if(cnt>0){b.textContent=cnt>9?'9+':cnt;b.style.display='flex';} else {b.style.display='none';} });
+  animateNum('stReq', cnt);
+}
 
 function renderRefs(){
   const tbody=document.getElementById('refsBody');tbody.innerHTML='';
