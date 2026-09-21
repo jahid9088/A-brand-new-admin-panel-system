@@ -444,7 +444,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="section" id="sec-refs">
       <div class="topbar"><div><div class="pg-title">Referrals</div><div class="pg-sub">Referral code ownership and usage</div></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th></tr></thead><tbody id="refsBody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th><th style="text-align:right">Manage</th></tr></thead><tbody id="refsBody"></tbody></table></div>
       </div>
     </div>
 
@@ -472,6 +472,17 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
       </div>
     </div>
   </div>
+</div>
+
+<div class="overlay" id="ovRefUsers" onclick="if(event.target===this)closeOv('ovRefUsers')">
+  <div class="sheet" style="max-width:430px"><div class="sheet-strip"></div><div class="sheet-body">
+    <div class="sheet-head">
+      <div><div class="sheet-title mono" id="refUsersTitle" style="color:var(--violet)">—</div>
+        <div style="font-size:11px;color:var(--ink-dim);margin-top:2px" id="refUsersOwner"></div></div>
+      <button class="sheet-close" onclick="closeOv('ovRefUsers')">✕</button>
+    </div>
+    <div id="refUsersBody" style="max-height:52vh;overflow-y:auto"></div>
+  </div></div>
 </div>
 
 <div class="overlay" id="ovMore" onclick="if(event.target===this)closeOv('ovMore')">
@@ -598,18 +609,32 @@ function unlockSound(reportResult){
   }, 400);
 }
 
-// FIX: unlock sound on the very FIRST interaction anywhere on the page —
-// typing the DB URL, tapping the password field, tapping "Unlock Console"
-// all count. This is what makes sound "just start" during login itself.
-// Runs once only; silent (no toast) so it doesn't interrupt the login flow —
-// the explicit 🔊 toggle still reports errors loudly if this quiet attempt
-// didn't work.
+// FIX: sound unlocks automatically — tries on EVERY tap/keystroke anywhere
+// on the page (typing the DB URL, tapping password, "Unlock Console", any
+// button afterward) and KEEPS RETRYING until it's actually confirmed on —
+// not just a single silent attempt. Once confirmed unmuted, it stops trying
+// and the person is in full manual control via the 🔊/🔇 toggle from then on.
+let soundAutoUnlockDone = false;
 function firstGestureUnlock(){
-  if(videoWorking) unlockSound(false);
-  document.removeEventListener('pointerdown', firstGestureUnlock, true);
-  document.removeEventListener('keydown', firstGestureUnlock, true);
+  if(soundAutoUnlockDone) return;
+  if(!videoWorking) return; // video not loaded yet — try again on next tap
+  bgVideo.muted = false;
+  bgVideo.volume = 1.0;
+  bgVideo.play().catch(()=>{});
+  setTimeout(()=>{
+    if(!bgVideo.muted){
+      // Confirmed — sound is genuinely on. Stop retrying, hand control to the user.
+      soundAutoUnlockDone = true;
+      mediaToggle.textContent = '🔊';
+      document.removeEventListener('pointerdown', firstGestureUnlock, true);
+      document.removeEventListener('touchstart', firstGestureUnlock, true);
+      document.removeEventListener('keydown', firstGestureUnlock, true);
+    }
+    // else: browser blocked it again — leave listeners attached, next tap retries
+  }, 250);
 }
 document.addEventListener('pointerdown', firstGestureUnlock, true);
+document.addEventListener('touchstart', firstGestureUnlock, true);
 document.addEventListener('keydown', firstGestureUnlock, true);
 
 function toggleMedia(){
@@ -618,10 +643,13 @@ function toggleMedia(){
   mediaToggle.style.animation = '';
   const wantUnmute = bgVideo.muted;
   if (wantUnmute) {
+    soundAutoUnlockDone = false; // allow retry logic to confirm this manual unmute too
     unlockSound(true);
+    soundAutoUnlockDone = true;  // and stop the background auto-retry once user has taken control
   } else {
     bgVideo.muted = true;
     mediaToggle.textContent = '🔇';
+    soundAutoUnlockDone = true; // user explicitly muted — don't auto-unmute on next tap
   }
 }
 
@@ -677,7 +705,7 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa13_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa14_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
@@ -687,11 +715,11 @@ function doLogin(){
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa13_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  localStorage.setItem('fxa14_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa13_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa14_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
@@ -896,9 +924,43 @@ function renderRefs(){
   Object.entries(allRefs).forEach(([code,d],i)=>{
     const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
     tr.innerHTML=`<td class="mono" style="color:var(--violet)">${code}</td><td class="mono">${d.mobile||'—'}</td>
-      <td>${d.active?'<span class="badge badge-active">● Active</span>':'<span class="badge badge-none">Inactive</span>'}</td>`;
+      <td>${d.active?'<span class="badge badge-active">● Active</span>':'<span class="badge badge-none">Inactive</span>'}</td>
+      <td><div class="act-row" style="justify-content:flex-end">
+        <button class="ibtn gold" title="View referred users" onclick="showRefCodeUsers('${code}','${d.mobile||''}')">👥</button>
+      </div></td>`;
     tbody.appendChild(tr);
   });
+}
+
+// ── Referral management: who did THIS code bring in, with full management actions ──
+function showRefCodeUsers(code, ownerMobile){
+  const referred = Object.keys(allUsers).filter(m => allUsers[m].referredBy === code);
+  const body = document.getElementById('refUsersBody');
+  document.getElementById('refUsersTitle').textContent = code;
+  document.getElementById('refUsersOwner').textContent = ownerMobile ? ('Owned by '+ownerMobile) : '';
+  if(referred.length === 0){
+    body.innerHTML = '<div class="empty" style="padding:36px 10px"><div class="ic">🔗</div><p>No one has used this code yet</p></div>';
+    openOv('ovRefUsers'); return;
+  }
+  body.innerHTML = referred.map(m=>{
+    const u = allUsers[m];
+    let dep=0; Object.values(allDeposits[m]||{}).forEach(d=>dep+=parseFloat(d.amount||0));
+    const vipOn = u.vipKeyStatus==='ACTIVE'||u.vipKeyStatus==='USED';
+    const stBlocked = u.accountStatus==='BLOCKED'||u.accountStatus==='SUSPENDED';
+    return `<div class="more-item" style="cursor:default">
+      <span class="mi-ic" style="background:${vipOn?'rgba(255,216,77,.14)':'rgba(255,255,255,.05)'}">${vipOn?'👑':'👤'}</span>
+      <div style="flex:1;min-width:0">
+        <div class="mi-t mono">${m}</div>
+        <div class="mi-s">₹${dep.toLocaleString('en-IN')} deposited ${stBlocked?'· <span style="color:var(--danger)">Blocked</span>':''}</div>
+      </div>
+      <div class="act-row">
+        <button class="ibtn" title="View" onclick="closeOv('ovRefUsers');viewUser('${m}')">👁</button>
+        <button class="ibtn gold" title="Revoke VIP" onclick="closeOv('ovRefUsers');openRevoke('${m}')">👑</button>
+        <button class="ibtn danger" title="Delete" onclick="closeOv('ovRefUsers');openDelete('${m}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+  openOv('ovRefUsers');
 }
 function renderAudit(){
   const tbody=document.getElementById('auditBody');tbody.innerHTML='';
