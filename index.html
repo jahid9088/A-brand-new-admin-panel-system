@@ -8,9 +8,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════
-   FUN XPro — NOVA Admin v9
-   Live GitHub-hosted background video · custom crown mark
-   Consistent radius scale · true mobile stability
+   FUN XPro — NOVA Admin v10
+   Sound-unlock + seamless loop background video
+   Custom crown mark · unified radius · mobile-stable
    ═══════════════════════════════════════════════════ */
 :root{
   --bg0:#030308; --bg1:#07050F; --bg2:#0B0716;
@@ -63,14 +63,16 @@ body{
 #mediaToggle.show{display:flex}
 #mediaToggle:hover{transform:scale(1.08)}
 #mediaToggle:active{transform:scale(.9)}
+@keyframes soundPulse{
+  0%,100%{transform:scale(1);box-shadow:0 14px 34px rgba(0,0,0,.45)}
+  50%{transform:scale(1.14);box-shadow:0 14px 34px rgba(255,180,0,.55)}
+}
 
 .holo-text{background:var(--holo);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;
   color:transparent;animation:holoShift 6s linear infinite}
 @keyframes holoShift{to{background-position:300% 0}}
 
-/* ═══ CROWN MARK (custom SVG "king" icon) ═══ */
 .crown-mark{display:inline-flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 10px rgba(255,180,0,.45))}
-.crown-mark svg{width:60%;height:60%}
 @keyframes crownFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-2deg)}}
 
 /* ═══ AUTH GATE ═══ */
@@ -307,14 +309,13 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 </head>
 <body>
 
-<div id="bgVideoWrap"><video id="bgVideo" muted loop autoplay playsinline></video></div>
+<div id="bgVideoWrap"><video id="bgVideo" muted loop autoplay playsinline preload="auto"></video></div>
 <div id="bgVideoTint"></div>
 <canvas id="pField"></canvas>
 <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
 <div class="grain"></div>
 <div id="mediaToggle" onclick="toggleMedia()" title="Toggle background sound">🔇</div>
 
-<!-- Reusable crown SVG def -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <linearGradient id="crownGrad" x1="0" y1="0" x2="1" y2="1">
@@ -329,7 +330,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="gate-holo-strip"></div>
     <div class="gate-inner">
       <div class="gate-logo"><div class="crown-mark" style="width:100%;height:100%;animation:crownFloat 3s ease-in-out infinite">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:60%;height:60%">
           <path d="M8 46L4 20L18 30L32 12L46 30L60 20L56 46H8Z" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2" stroke-linejoin="round"/>
           <rect x="8" y="46" width="48" height="7" rx="2" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2"/>
           <circle cx="32" cy="12" r="3.2" fill="#FF5E9E"/><circle cx="4" cy="20" r="2.6" fill="#4FE3D8"/><circle cx="60" cy="20" r="2.6" fill="#4FE3D8"/>
@@ -498,28 +499,69 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 
 <script>
 // ═══════════════════════════════════════════
-//  BACKGROUND VIDEO — hosted on your GitHub repo
-//  (raw.githubusercontent.com serves it directly,
-//  no virus-scan interstitial like Drive)
+//  BACKGROUND VIDEO — sound-unlock + seamless loop
+//  Hosted on GitHub (raw.githubusercontent.com serves
+//  raw bytes directly — no Drive virus-scan wall)
 // ═══════════════════════════════════════════
 const VIDEO_SRC = "https://raw.githubusercontent.com/jahid9088/A-brand-new-admin-panel-system/main/1777899277608.mp4";
 const bgVideo = document.getElementById('bgVideo');
 const mediaToggle = document.getElementById('mediaToggle');
 let videoWorking = false;
+
 try{
   bgVideo.src = VIDEO_SRC;
-  bgVideo.addEventListener('canplaythrough',()=>{ bgVideo.classList.add('ready'); videoWorking=true; mediaToggle.classList.add('show'); });
-  bgVideo.addEventListener('error',()=>{ bgVideo.style.display='none'; });
-  bgVideo.play().catch(()=>{});
+
+  // Show fade-in + attempt sound as soon as first frame is ready
+  // (not "canplaythrough" — that waits for the WHOLE video and can take a while)
+  bgVideo.addEventListener('loadeddata', ()=>{
+    bgVideo.classList.add('ready');
+    videoWorking = true;
+    mediaToggle.classList.add('show');
+    attemptSoundOnLoad();
+  });
+
+  bgVideo.addEventListener('error', ()=>{ bgVideo.style.display='none'; });
+
+  // Seamless loop — force a clean restart if the native loop attribute stutters
+  bgVideo.addEventListener('ended', function(){
+    bgVideo.currentTime = 0;
+    bgVideo.play().catch(()=>{});
+  });
+
 }catch(e){}
+
+// Try playing WITH sound immediately — succeeds if the browser already
+// trusts this site (e.g. user interacted with it before, or PWA context).
+// If blocked (the common case on first visit), fall back to muted and
+// nudge the person to tap the toggle once.
+function attemptSoundOnLoad(){
+  bgVideo.muted = false;
+  const p = bgVideo.play();
+  if (p !== undefined) {
+    p.then(()=>{
+      mediaToggle.textContent = '🔊';
+    }).catch(()=>{
+      bgVideo.muted = true;
+      bgVideo.play().catch(()=>{});
+      mediaToggle.textContent = '🔇';
+      pulseSoundHint();
+    });
+  }
+}
+function pulseSoundHint(){
+  mediaToggle.style.animation = 'soundPulse 1.4s ease-in-out 3';
+  toastInfo('Tap 🔊 once to enable video sound');
+}
 function toggleMedia(){
   clickSound();
   if(!videoWorking)return;
+  mediaToggle.style.animation = '';
   bgVideo.muted = !bgVideo.muted;
+  if(!bgVideo.muted && bgVideo.paused) bgVideo.play().catch(()=>{});
   mediaToggle.textContent = bgVideo.muted ? '🔇' : '🔊';
 }
 
-// ═══ CLICK SOUND ═══
+// ═══ CLICK SOUND (synthesized — no file needed) ═══
 let actx=null;
 function clickSound(){
   try{
@@ -571,7 +613,7 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa9_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa10_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
@@ -581,11 +623,11 @@ function doLogin(){
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa9_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  localStorage.setItem('fxa10_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa9_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa10_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
