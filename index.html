@@ -8,9 +8,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 /* ═══════════════════════════════════════════════════
-   FUN XPro — NOVA Admin v8
+   FUN XPro — NOVA Admin v9
+   Live GitHub-hosted background video · custom crown mark
    Consistent radius scale · true mobile stability
-   Video background layer · click sound · polished FX
    ═══════════════════════════════════════════════════ */
 :root{
   --bg0:#030308; --bg1:#07050F; --bg2:#0B0716;
@@ -21,7 +21,6 @@
   --ink:#F5F3FC; --ink-dim:#A7A2C4; --ink-faint:#5D5980;
   --sp:cubic-bezier(.16,1,.3,1); --sp2:cubic-bezier(.22,1,.36,1);
   --holo: linear-gradient(115deg,#FFD84D,#FF9500,#FF5E9E,#8B7CFF,#4FE3D8,#FFD84D);
-  /* ── Unified radius scale — every rounded corner in the app uses one of these ── */
   --r-xs:10px; --r-sm:14px; --r-md:18px; --r-lg:24px; --r-xl:30px; --r-pill:999px;
   --sa-top: env(safe-area-inset-top, 0px);
   --sa-bot: env(safe-area-inset-bottom, 0px);
@@ -32,18 +31,17 @@ body{
   margin:0;overflow-x:hidden;min-height:100vh;color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',system-ui,sans-serif;
   background:linear-gradient(180deg,var(--bg0),var(--bg1) 50%,var(--bg2));
-  -webkit-font-smoothing:antialiased;
-  font-size:14px;
+  -webkit-font-smoothing:antialiased;font-size:14px;
 }
 ::-webkit-scrollbar{width:7px;height:7px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:var(--r-pill)}
 ::selection{background:rgba(255,216,77,.28)}
 
-/* ═══ LAYERED BACKGROUND: video (optional) + particles + orbs ═══ */
+/* ═══ LAYERED BACKGROUND ═══ */
 #bgVideoWrap{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
 #bgVideo{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;
-  transform:translate(-50%,-50%);object-fit:cover;opacity:0;transition:opacity 1.2s var(--sp2)}
-#bgVideo.ready{opacity:.28}
+  transform:translate(-50%,-50%);object-fit:cover;opacity:0;transition:opacity 1.4s var(--sp2)}
+#bgVideo.ready{opacity:.3}
 #bgVideoTint{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,rgba(3,3,8,.55),rgba(7,5,15,.75) 50%,rgba(11,7,22,.9));pointer-events:none}
 #pField{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
 .orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
@@ -56,7 +54,6 @@ body{
 .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-/* ── Media control pill (mute/unmute the bg video) ── */
 #mediaToggle{position:fixed;z-index:150;bottom:calc(18px + var(--sa-bot));right:18px;
   width:48px;height:48px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;
   background:linear-gradient(160deg,rgba(22,18,36,.75),rgba(10,8,18,.85));
@@ -71,6 +68,11 @@ body{
   color:transparent;animation:holoShift 6s linear infinite}
 @keyframes holoShift{to{background-position:300% 0}}
 
+/* ═══ CROWN MARK (custom SVG "king" icon) ═══ */
+.crown-mark{display:inline-flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 10px rgba(255,180,0,.45))}
+.crown-mark svg{width:60%;height:60%}
+@keyframes crownFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-2deg)}}
+
 /* ═══ AUTH GATE ═══ */
 #gate{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;
   padding:20px;padding-top:calc(20px + var(--sa-top));padding-bottom:calc(20px + var(--sa-bot))}
@@ -84,9 +86,9 @@ body{
 @keyframes gateShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-11px) rotate(-.6deg)}30%{transform:translateX(9px) rotate(.5deg)}45%{transform:translateX(-7px)}60%{transform:translateX(6px)}75%{transform:translateX(-4px)}90%{transform:translateX(3px)}}
 .gate-holo-strip{height:4px;background:var(--holo);background-size:300% 100%;animation:holoShift 4s linear infinite}
 .gate-inner{padding:clamp(28px,7vw,38px) clamp(22px,6vw,32px) 30px}
-.gate-logo{width:64px;height:64px;border-radius:var(--r-lg);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-  font-size:28px;background:linear-gradient(135deg,var(--gold),var(--amber));position:relative;
-  box-shadow:0 10px 32px rgba(255,190,0,.35);animation:logoFloat 3.5s ease-in-out infinite}
+.gate-logo{width:68px;height:68px;border-radius:var(--r-lg);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#241a08,#0d0902);position:relative;border:1px solid rgba(255,216,77,.35);
+  box-shadow:0 10px 32px rgba(255,190,0,.28), inset 0 1px 0 rgba(255,255,255,.06);animation:logoFloat 3.5s ease-in-out infinite}
 @keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-3deg)}}
 .gate-title{text-align:center;font-size:clamp(19px,5vw,22px);font-weight:800;letter-spacing:-.2px}
 .gate-sub{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:26px;margin-top:4px}
@@ -94,15 +96,13 @@ body{
 .field label{display:block;font-size:10.5px;color:var(--ink-faint);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
 .field input{width:100%;padding:14px 15px;border-radius:var(--r-sm);border:1px solid var(--glass-brd);
   background:rgba(255,255,255,.03);color:var(--ink);font-size:15px;outline:none;
-  transition:border-color .25s var(--sp), background .25s var(--sp), box-shadow .25s var(--sp);
-  -webkit-appearance:none}
+  transition:border-color .25s var(--sp), background .25s var(--sp), box-shadow .25s var(--sp);-webkit-appearance:none}
 .field input:focus{border-color:rgba(255,216,77,.5);background:rgba(255,255,255,.06);box-shadow:0 0 0 4px rgba(255,216,77,.08)}
 .field.err input{border-color:rgba(255,75,92,.6);animation:fieldFlash .5s var(--sp)}
 @keyframes fieldFlash{0%,100%{box-shadow:0 0 0 0 rgba(255,75,92,0)}30%{box-shadow:0 0 0 5px rgba(255,75,92,.18)}}
 .btn{cursor:pointer;border:none;border-radius:var(--r-sm);padding:14px 18px;font-weight:800;font-size:14px;
   transition:transform .16s var(--sp), box-shadow .3s var(--sp), filter .2s;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px;position:relative;overflow:hidden;
-  -webkit-appearance:none}
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px;position:relative;overflow:hidden;-webkit-appearance:none}
 .btn:active{transform:scale(.955)}
 .btn-primary{width:100%;background:linear-gradient(135deg,var(--gold),var(--amber));color:#1A1204;
   box-shadow:0 12px 32px rgba(255,180,0,.3);margin-top:8px}
@@ -110,18 +110,15 @@ body{
 .btn-primary.loading{pointer-events:none}
 .gate-err{color:var(--danger);font-size:11.5px;margin-top:11px;text-align:center;min-height:14px}
 
-/* ═══ SUCCESS BURST (login success transition) ═══ */
-#successBurst{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;
-  pointer-events:none;opacity:0}
+#successBurst{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
 #successBurst.play{opacity:1}
 .burst-check{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,var(--mint),#00A87A);
-  display:flex;align-items:center;justify-content:center;font-size:32px;color:#04241A;
-  transform:scale(0);box-shadow:0 0 0 0 rgba(0,227,168,.5)}
+  display:flex;align-items:center;justify-content:center;font-size:32px;color:#04241A;transform:scale(0);box-shadow:0 0 0 0 rgba(0,227,168,.5)}
 #successBurst.play .burst-check{animation:burstPop .6s var(--sp) forwards, burstRing 1s var(--sp2) forwards}
 @keyframes burstPop{0%{transform:scale(0)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
 @keyframes burstRing{0%{box-shadow:0 0 0 0 rgba(0,227,168,.5)}100%{box-shadow:0 0 0 60px rgba(0,227,168,0)}}
 
-/* ═══ APP SHELL — desktop dock, mobile bottom-tabs ═══ */
+/* ═══ APP SHELL ═══ */
 #app{display:none;position:relative;z-index:2;min-height:100vh}
 #app.show{display:block}
 #app.entering{animation:appEnter .55s var(--sp)}
@@ -131,21 +128,18 @@ body{
   display:flex;align-items:center;gap:4px;padding:7px;border-radius:var(--r-lg);
   background:linear-gradient(160deg,rgba(22,18,36,.68),rgba(10,8,18,.78));
   border:1px solid var(--glass-brd);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
-  box-shadow:0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
-  max-width:96vw}
+  box-shadow:0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);max-width:96vw}
 .dock-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;
   padding:8px 13px;border-radius:var(--r-md);cursor:pointer;color:var(--ink-dim);font-size:9.5px;font-weight:700;
   transition:all .3s var(--sp);white-space:nowrap;flex-shrink:0}
 .dock-item .di-ic{font-size:16px;transition:transform .3s var(--sp)}
 .dock-item:hover .di-ic{transform:translateY(-2px) scale(1.1)}
-.dock-item.active{color:#1A1204;background:linear-gradient(135deg,var(--gold),var(--amber));
-  box-shadow:0 8px 22px rgba(255,180,0,.35)}
+.dock-item.active{color:#1A1204;background:linear-gradient(135deg,var(--gold),var(--amber));box-shadow:0 8px 22px rgba(255,180,0,.35)}
 .dock-brand{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 6px;margin-right:2px;border-right:1px solid rgba(255,255,255,.08)}
-.dock-brand .dbm{width:28px;height:28px;border-radius:var(--r-xs);background:linear-gradient(135deg,var(--gold),var(--amber));
-  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.dock-brand .dbm{width:30px;height:30px;border-radius:var(--r-xs);background:linear-gradient(135deg,#241a08,#0d0902);
+  border:1px solid rgba(255,216,77,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dock-brand .dbt{font-size:11px;font-weight:800;white-space:nowrap}
 
-/* Bottom tab bar for phones — dock hides, this takes over */
 .tabbar{display:none}
 
 .main{max-width:1360px;margin:0 auto;padding:106px 26px 70px}
@@ -162,14 +156,11 @@ body{
 .section.active{display:block;animation:morphIn .5s var(--sp2)}
 @keyframes morphIn{from{opacity:0;transform:scale(.98) translateY(6px)}to{opacity:1;transform:none}}
 
-.card3d{
-  --mx:50%; --my:50%;
+.card3d{--mx:50%; --my:50%;
   position:relative;border-radius:var(--r-lg);background:var(--glass);border:1px solid var(--glass-brd);
   backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);
   box-shadow:0 24px 60px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.06);
-  transform-style:preserve-3d;transition:transform .25s var(--sp2), box-shadow .3s var(--sp2);
-  overflow:hidden;
-}
+  transform-style:preserve-3d;transition:transform .25s var(--sp2), box-shadow .3s var(--sp2);overflow:hidden}
 .card3d::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
   background:radial-gradient(320px circle at var(--mx) var(--my), rgba(255,255,255,.09), transparent 55%)}
 .card3d:hover::before{opacity:1}
@@ -200,8 +191,6 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
 .mono{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 .row-in{opacity:0;animation:rowSlide .45s var(--sp) forwards}
 @keyframes rowSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
-
-/* skeleton rows shown before first Firebase snapshot resolves */
 .skel-row td{padding:13px 16px}
 .skel-bar{height:13px;border-radius:var(--r-xs)}
 
@@ -222,10 +211,8 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
 .ibtn.danger:hover{background:rgba(255,75,92,.15);color:var(--danger);border-color:rgba(255,75,92,.35)}
 .ibtn.gold:hover{background:rgba(255,216,77,.15);color:var(--gold);border-color:rgba(255,216,77,.35)}
 
-/* ═══ MODAL — desktop 3D card, mobile bottom sheet ═══ */
 .overlay{position:fixed;inset:0;background:rgba(3,2,8,.75);backdrop-filter:blur(8px);z-index:200;
-  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;
-  transition:opacity .35s var(--sp);perspective:1200px;padding:16px}
+  display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s var(--sp);perspective:1200px;padding:16px}
 .overlay.show{opacity:1;pointer-events:auto}
 .sheet{width:430px;max-width:100%;max-height:86vh;overflow-y:auto;border-radius:var(--r-xl);
   background:linear-gradient(165deg,rgba(22,17,36,.97),rgba(8,6,16,.99));
@@ -245,8 +232,7 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
 .kv b{color:var(--ink-dim);font-weight:600;flex-shrink:0}
 .kv span{font-weight:700;font-family:'SF Mono',ui-monospace,monospace;text-align:right;word-break:break-word}
 
-.danger-box{background:rgba(255,75,92,.08);border:1px solid rgba(255,75,92,.22);border-radius:var(--r-md);
-  padding:15px;margin:16px 0;font-size:12px;color:#FFB3BC;line-height:1.6}
+.danger-box{background:rgba(255,75,92,.08);border:1px solid rgba(255,75,92,.22);border-radius:var(--r-md);padding:15px;margin:16px 0;font-size:12px;color:#FFB3BC;line-height:1.6}
 .danger-box b{color:var(--danger)}
 .confirm-input{width:100%;padding:13px 15px;border-radius:var(--r-sm);border:1.5px solid rgba(255,75,92,.32);
   background:rgba(255,75,92,.05);color:var(--ink);font-size:13.5px;margin-top:10px;outline:none;
@@ -273,8 +259,7 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
 .toast{min-width:220px;max-width:100%;padding:13px 18px;border-radius:var(--r-pill);
   background:linear-gradient(135deg,rgba(24,20,36,.97),rgba(12,10,22,.98));
   border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 44px rgba(0,0,0,.5);
-  display:flex;align-items:center;gap:11px;font-size:12.5px;font-weight:700;
-  animation:toastDrop .45s var(--sp);pointer-events:auto}
+  display:flex;align-items:center;gap:11px;font-size:12.5px;font-weight:700;animation:toastDrop .45s var(--sp);pointer-events:auto}
 @keyframes toastDrop{from{opacity:0;transform:translateY(-30px) scale(.9)}to{opacity:1;transform:none}}
 .toast.out{animation:toastLift .3s var(--sp) forwards}
 @keyframes toastLift{to{opacity:0;transform:translateY(-20px) scale(.94)}}
@@ -297,40 +282,31 @@ select.field-i,input.field-i{width:100%;padding:12px 14px;border-radius:var(--r-
 select.field-i:focus,input.field-i:focus{border-color:rgba(255,216,77,.45);background:rgba(255,255,255,.07)}
 label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
 
-/* ═══════════ MOBILE — bottom tab bar takes over, dock hides ═══════════ */
 @media(max-width:780px){
   .dock-wrap{display:none}
   .main{padding:20px 14px calc(96px + var(--sa-bot))}
-  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:100;
-    padding:8px 10px calc(8px + var(--sa-bot));gap:3px;
-    background:linear-gradient(180deg,rgba(10,8,18,.5),rgba(8,6,16,.96) 40%);
-    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:100;padding:8px 10px calc(8px + var(--sa-bot));gap:3px;
+    background:linear-gradient(180deg,rgba(10,8,18,.5),rgba(8,6,16,.96) 40%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
     border-top:1px solid var(--glass-brd)}
-  .tabbar .ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;
-    border-radius:var(--r-sm);color:var(--ink-faint);cursor:pointer;transition:all .25s var(--sp)}
+  .tabbar .ti{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;border-radius:var(--r-sm);color:var(--ink-faint);cursor:pointer;transition:all .25s var(--sp)}
   .tabbar .ti .ti-ic{font-size:19px;transition:transform .25s var(--sp)}
   .tabbar .ti .ti-lbl{font-size:9px;font-weight:700}
   .tabbar .ti.active{color:var(--gold)}
   .tabbar .ti.active .ti-ic{transform:translateY(-3px) scale(1.15)}
-  .tabbar .ti.active .ti-lbl{opacity:1}
   .stats{grid-template-columns:repeat(2,1fr)}
   .grid2{grid-template-columns:1fr}
   .overlay{align-items:flex-end;padding:0}
   .sheet{width:100%;max-width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;max-height:88vh;
     transform:translateY(100%);transition:transform .38s var(--sp), opacity .3s var(--sp)}
   .overlay.show .sheet{transform:translateY(0)}
-  .card3d{transform:none !important} /* no 3D tilt jank on touch devices */
+  .card3d{transform:none !important}
   #mediaToggle{bottom:calc(90px + var(--sa-bot))}
 }
-@media(max-width:420px){
-  .stat-val{font-size:19px}
-  table{min-width:640px}
-}
+@media(max-width:420px){ .stat-val{font-size:19px} table{min-width:640px} }
 </style>
 </head>
 <body>
 
-<!-- Optional transparent background video — swap VIDEO_SRC below with your own hosted mp4 for guaranteed playback -->
 <div id="bgVideoWrap"><video id="bgVideo" muted loop autoplay playsinline></video></div>
 <div id="bgVideoTint"></div>
 <canvas id="pField"></canvas>
@@ -338,12 +314,28 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 <div class="grain"></div>
 <div id="mediaToggle" onclick="toggleMedia()" title="Toggle background sound">🔇</div>
 
+<!-- Reusable crown SVG def -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="crownGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFE98A"/><stop offset="45%" stop-color="#FFD84D"/><stop offset="100%" stop-color="#FF9500"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 <!-- ═══ AUTH GATE ═══ -->
 <div id="gate">
   <div class="gate-card" id="gateCard">
     <div class="gate-holo-strip"></div>
     <div class="gate-inner">
-      <div class="gate-logo">👑</div>
+      <div class="gate-logo"><div class="crown-mark" style="width:100%;height:100%;animation:crownFloat 3s ease-in-out infinite">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 46L4 20L18 30L32 12L46 30L60 20L56 46H8Z" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2" stroke-linejoin="round"/>
+          <rect x="8" y="46" width="48" height="7" rx="2" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2"/>
+          <circle cx="32" cy="12" r="3.2" fill="#FF5E9E"/><circle cx="4" cy="20" r="2.6" fill="#4FE3D8"/><circle cx="60" cy="20" r="2.6" fill="#4FE3D8"/>
+          <circle cx="32" cy="36" r="3" fill="#FF5E9E" opacity=".9"/>
+        </svg>
+      </div></div>
       <div class="gate-title holo-text">FUN XPro Nova</div>
       <div class="gate-sub">Sign in to your command center</div>
       <div class="field" id="fUrl"><label>Firebase Database URL</label>
@@ -360,7 +352,13 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 <!-- ═══ APP SHELL ═══ -->
 <div id="app">
   <div class="dock-wrap">
-    <div class="dock-brand"><div class="dbm">👑</div><div class="dbt holo-text">NOVA</div></div>
+    <div class="dock-brand"><div class="dbm"><div class="crown-mark" style="width:70%;height:70%">
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 46L4 20L18 30L32 12L46 30L60 20L56 46H8Z" fill="url(#crownGrad)"/>
+        <rect x="8" y="46" width="48" height="7" rx="2" fill="url(#crownGrad)"/>
+        <circle cx="32" cy="12" r="3.2" fill="#FF5E9E"/><circle cx="4" cy="20" r="2.6" fill="#4FE3D8"/><circle cx="60" cy="20" r="2.6" fill="#4FE3D8"/>
+      </svg>
+    </div></div><div class="dbt holo-text">NOVA</div></div>
     <div class="dock-item active" data-sec="dash" onclick="goSec('dash')"><span class="di-ic">◎</span><span>Dash</span></div>
     <div class="dock-item" data-sec="users" onclick="goSec('users')"><span class="di-ic">👥</span><span>Users</span></div>
     <div class="dock-item" data-sec="deps" onclick="goSec('deps')"><span class="di-ic">💰</span><span>Deposits</span></div>
@@ -370,7 +368,6 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="dock-item" data-sec="config" onclick="goSec('config')"><span class="di-ic">⚙️</span><span>Config</span></div>
   </div>
 
-  <!-- Mobile bottom tab bar -->
   <div class="tabbar">
     <div class="ti active" data-sec="dash" onclick="goSec('dash')"><span class="ti-ic">◎</span><span class="ti-lbl">Dash</span></div>
     <div class="ti" data-sec="users" onclick="goSec('users')"><span class="ti-ic">👥</span><span class="ti-lbl">Users</span></div>
@@ -380,119 +377,84 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
   </div>
 
   <div class="main">
-    <!-- DASHBOARD -->
     <div class="section active" id="sec-dash">
       <div class="topbar"><div><div class="pg-title">Command Center</div><div class="pg-sub">Live pulse of your VIP ecosystem</div></div></div>
       <div class="stats" id="statGrid">
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--violet)"></div>
-          <div class="stat-ic" style="background:rgba(139,124,255,.16);color:var(--violet)">👥</div>
-          <div class="stat-val" id="stUsers">0</div><div class="stat-lbl">Total Users</div></div>
+          <div class="stat-ic" style="background:rgba(139,124,255,.16);color:var(--violet)">👥</div><div class="stat-val" id="stUsers">0</div><div class="stat-lbl">Total Users</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--gold)"></div>
-          <div class="stat-ic" style="background:rgba(255,216,77,.16);color:var(--gold)">👑</div>
-          <div class="stat-val" id="stVip">0</div><div class="stat-lbl">Active VIPs</div></div>
+          <div class="stat-ic" style="background:rgba(255,216,77,.16);color:var(--gold)">👑</div><div class="stat-val" id="stVip">0</div><div class="stat-lbl">Active VIPs</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--mint)"></div>
-          <div class="stat-ic" style="background:rgba(0,227,168,.16);color:var(--mint)">💰</div>
-          <div class="stat-val" id="stDep">₹0</div><div class="stat-lbl">Total Deposited</div></div>
+          <div class="stat-ic" style="background:rgba(0,227,168,.16);color:var(--mint)">💰</div><div class="stat-val" id="stDep">₹0</div><div class="stat-lbl">Total Deposited</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--danger)"></div>
-          <div class="stat-ic" style="background:rgba(255,75,92,.16);color:var(--danger)">⛔</div>
-          <div class="stat-val" id="stBlocked">0</div><div class="stat-lbl">Blocked</div></div>
+          <div class="stat-ic" style="background:rgba(255,75,92,.16);color:var(--danger)">⛔</div><div class="stat-val" id="stBlocked">0</div><div class="stat-lbl">Blocked</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--amber)"></div>
-          <div class="stat-ic" style="background:rgba(255,149,0,.16);color:var(--amber)">🔗</div>
-          <div class="stat-val" id="stRefs">0</div><div class="stat-lbl">Referral Codes</div></div>
+          <div class="stat-ic" style="background:rgba(255,149,0,.16);color:var(--amber)">🔗</div><div class="stat-val" id="stRefs">0</div><div class="stat-lbl">Referral Codes</div></div>
         <div class="card3d stat" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)"><div class="stat-orb" style="background:var(--rose)"></div>
-          <div class="stat-ic" style="background:rgba(255,94,158,.16);color:var(--rose)">📥</div>
-          <div class="stat-val" id="stDepCount">0</div><div class="stat-lbl">Deposit Events</div></div>
+          <div class="stat-ic" style="background:rgba(255,94,158,.16);color:var(--rose)">📥</div><div class="stat-val" id="stDepCount">0</div><div class="stat-lbl">Deposit Events</div></div>
       </div>
       <div class="card3d card-pad" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
         <div class="hdr-row"><h3>⚡ Recent Activity</h3></div>
-        <div id="dashAudit"><div class="skel" style="height:46px;margin-bottom:9px"></div>
-          <div class="skel" style="height:46px;margin-bottom:9px"></div><div class="skel" style="height:46px"></div></div>
+        <div id="dashAudit"><div class="skel" style="height:46px;margin-bottom:9px"></div><div class="skel" style="height:46px;margin-bottom:9px"></div><div class="skel" style="height:46px"></div></div>
       </div>
     </div>
 
-    <!-- USERS -->
     <div class="section" id="sec-users">
-      <div class="topbar">
-        <div><div class="pg-title">All Users</div><div class="pg-sub">Manage accounts, VIP, and full deletions</div></div>
-        <div class="search-box"><span class="ic">🔍</span><input id="userSearch" placeholder="Search mobile or UID…" oninput="renderUsers()"></div>
-      </div>
+      <div class="topbar"><div><div class="pg-title">All Users</div><div class="pg-sub">Manage accounts, VIP, and full deletions</div></div>
+        <div class="search-box"><span class="ic">🔍</span><input id="userSearch" placeholder="Search mobile or UID…" oninput="renderUsers()"></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Mobile</th><th>UID</th><th>Deposited</th><th>VIP</th><th>Status</th><th>Referral</th><th style="text-align:right">Actions</th></tr></thead>
+        <div class="tbl-wrap"><table><thead><tr><th>Mobile</th><th>UID</th><th>Deposited</th><th>VIP</th><th>Status</th><th>Referral</th><th style="text-align:right">Actions</th></tr></thead>
           <tbody id="usersBody"><tr class="skel-row"><td colspan="7"><div class="skel skel-bar"></div></td></tr>
           <tr class="skel-row"><td colspan="7"><div class="skel skel-bar"></div></td></tr>
-          <tr class="skel-row"><td colspan="7"><div class="skel skel-bar"></div></td></tr></tbody>
-        </table></div>
+          <tr class="skel-row"><td colspan="7"><div class="skel skel-bar"></div></td></tr></tbody></table></div>
         <div id="usersEmpty" class="empty" style="display:none"><div class="ic">👥</div><p>No users found</p></div>
       </div>
     </div>
 
-    <!-- DEPOSITS -->
     <div class="section" id="sec-deps">
       <div class="topbar"><div><div class="pg-title">Deposits</div><div class="pg-sub">Auto-detected (live wallet balance) + manual entries</div></div></div>
       <div class="card3d card-pad" style="margin-bottom:16px" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
         <div class="hdr-row"><h3>➕ Add Manual Deposit</h3></div>
-        <div class="grid2">
-          <div><label class="f-lbl">Mobile Number</label><input class="field-i" id="mdMobile" placeholder="10-digit mobile"></div>
-          <div><label class="f-lbl">Amount (₹)</label><input class="field-i" id="mdAmount" type="number" placeholder="500"></div>
-        </div>
+        <div class="grid2"><div><label class="f-lbl">Mobile Number</label><input class="field-i" id="mdMobile" placeholder="10-digit mobile"></div>
+          <div><label class="f-lbl">Amount (₹)</label><input class="field-i" id="mdAmount" type="number" placeholder="500"></div></div>
         <div style="margin-top:13px"><label class="f-lbl" style="text-transform:none;letter-spacing:0"><input type="checkbox" id="mdAutoVip" checked style="margin-right:7px;accent-color:var(--gold)">Auto-grant VIP if live wallet balance meets threshold</label></div>
         <button class="btn btn-gold" style="margin-top:15px;width:100%" onclick="addManualDeposit()">Add Deposit</button>
       </div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Mobile</th><th>Amount</th><th>Source</th><th>VIP Granted</th><th>Time</th></tr></thead>
-          <tbody id="depsBody"></tbody>
-        </table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Mobile</th><th>Amount</th><th>Source</th><th>VIP Granted</th><th>Time</th></tr></thead><tbody id="depsBody"></tbody></table></div>
         <div id="depsEmpty" class="empty" style="display:none"><div class="ic">💰</div><p>No deposits yet</p></div>
       </div>
     </div>
 
-    <!-- VIP -->
     <div class="section" id="sec-vip">
       <div class="topbar"><div><div class="pg-title">VIP Keys</div><div class="pg-sub">Assign, block, or reset device locks</div></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Mobile</th><th>Key</th><th>Key Status</th><th>Device</th><th>Valid Until</th><th style="text-align:right">Actions</th></tr></thead>
-          <tbody id="vipBody"></tbody>
-        </table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Mobile</th><th>Key</th><th>Key Status</th><th>Device</th><th>Valid Until</th><th style="text-align:right">Actions</th></tr></thead><tbody id="vipBody"></tbody></table></div>
       </div>
     </div>
 
-    <!-- REFERRALS -->
     <div class="section" id="sec-refs">
       <div class="topbar"><div><div class="pg-title">Referrals</div><div class="pg-sub">Referral code ownership and usage</div></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th></tr></thead>
-          <tbody id="refsBody"></tbody>
-        </table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Owner Mobile</th><th>Active</th></tr></thead><tbody id="refsBody"></tbody></table></div>
       </div>
     </div>
 
-    <!-- AUDIT -->
     <div class="section" id="sec-audit">
       <div class="topbar"><div><div class="pg-title">Audit Log</div><div class="pg-sub">Every admin and system action, timestamped</div></div></div>
       <div class="card3d" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
-        <div class="tbl-wrap"><table>
-          <thead><tr><th>Actor</th><th>Action</th><th>Target</th><th>Time</th></tr></thead>
-          <tbody id="auditBody"></tbody>
-        </table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Actor</th><th>Action</th><th>Target</th><th>Time</th></tr></thead><tbody id="auditBody"></tbody></table></div>
       </div>
     </div>
 
-    <!-- CONFIG -->
     <div class="section" id="sec-config">
       <div class="topbar"><div><div class="pg-title">Config</div><div class="pg-sub">App-wide settings in Firebase /Config</div></div></div>
       <div class="card3d card-pad" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
         <div class="grid2">
           <div><label class="f-lbl">Auto VIP Amount (₹)</label><input class="field-i" id="cfgAmt"></div>
-          <div><label class="f-lbl">Auto VIP Duration</label>
-            <select class="field-i" id="cfgDur">
-              <option value="1day">1 Day</option><option value="3days">3 Days</option>
-              <option value="7days">7 Days</option><option value="14days">14 Days</option>
-              <option value="30days">30 Days</option><option value="">Lifetime</option>
-            </select></div>
+          <div><label class="f-lbl">Auto VIP Duration</label><select class="field-i" id="cfgDur">
+            <option value="1day">1 Day</option><option value="3days">3 Days</option><option value="7days">7 Days</option>
+            <option value="14days">14 Days</option><option value="30days">30 Days</option><option value="">Lifetime</option></select></div>
           <div><label class="f-lbl">Min Deposit to Detect (₹)</label><input class="field-i" id="cfgMin"></div>
           <div><label class="f-lbl">Referral Reward (days)</label><input class="field-i" id="cfgRefDays"></div>
           <div style="grid-column:1/-1"><label class="f-lbl">Telegram Support Link</label><input class="field-i" id="cfgTg"></div>
@@ -506,61 +468,48 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 
 <div id="toasts"></div>
 
-<!-- ═══ USER DETAIL ═══ -->
 <div class="overlay" id="ovDetail" onclick="if(event.target===this)closeOv('ovDetail')">
-  <div class="sheet"><div class="sheet-strip"></div>
-    <div class="sheet-body">
-      <div class="sheet-head"><div class="sheet-title">User Details</div><button class="sheet-close" onclick="closeOv('ovDetail')">✕</button></div>
-      <div id="detailBody"></div>
-    </div>
-  </div>
+  <div class="sheet"><div class="sheet-strip"></div><div class="sheet-body">
+    <div class="sheet-head"><div class="sheet-title">User Details</div><button class="sheet-close" onclick="closeOv('ovDetail')">✕</button></div>
+    <div id="detailBody"></div></div></div>
 </div>
 
-<!-- ═══ REVOKE VIP ═══ -->
 <div class="overlay" id="ovRevoke" onclick="if(event.target===this)closeOv('ovRevoke')">
-  <div class="sheet" style="max-width:390px"><div class="sheet-strip"></div>
-    <div class="sheet-body">
-      <div class="sheet-head"><div class="sheet-title">👑 Revoke VIP</div><button class="sheet-close" onclick="closeOv('ovRevoke')">✕</button></div>
-      <p style="font-size:13px;color:var(--ink-dim);line-height:1.65">Removes VIP status, key, and device lock for <b id="revokeMob" style="color:var(--ink)"></b>. Account, deposits, and referral history stay intact.</p>
-      <div class="danger-box"><b>Cannot be undone.</b> They'll need a fresh deposit or manual key assignment to regain VIP.</div>
-      <div class="sheet-actions"><button class="btn btn-ghost" onclick="closeOv('ovRevoke')">Cancel</button>
-        <button class="btn btn-danger" id="revokeBtn" onclick="confirmRevokeVip()">Revoke VIP</button></div>
-    </div>
-  </div>
+  <div class="sheet" style="max-width:390px"><div class="sheet-strip"></div><div class="sheet-body">
+    <div class="sheet-head"><div class="sheet-title">👑 Revoke VIP</div><button class="sheet-close" onclick="closeOv('ovRevoke')">✕</button></div>
+    <p style="font-size:13px;color:var(--ink-dim);line-height:1.65">Removes VIP status, key, and device lock for <b id="revokeMob" style="color:var(--ink)"></b>. Account, deposits, and referral history stay intact.</p>
+    <div class="danger-box"><b>Cannot be undone.</b> They'll need a fresh deposit or manual key assignment to regain VIP.</div>
+    <div class="sheet-actions"><button class="btn btn-ghost" onclick="closeOv('ovRevoke')">Cancel</button><button class="btn btn-danger" id="revokeBtn" onclick="confirmRevokeVip()">Revoke VIP</button></div>
+  </div></div>
 </div>
 
-<!-- ═══ DELETE USER ═══ -->
 <div class="overlay" id="ovDelete" onclick="if(event.target===this)closeOv('ovDelete')">
-  <div class="sheet" style="max-width:410px"><div class="sheet-strip"></div>
-    <div class="sheet-body">
-      <div class="sheet-head"><div class="sheet-title">🗑️ Delete User — Full Wipe</div><button class="sheet-close" onclick="closeOv('ovDelete')">✕</button></div>
-      <p style="font-size:13px;color:var(--ink-dim);line-height:1.65">Permanently deletes everything for <b id="deleteMob" style="color:var(--ink)"></b>:</p>
-      <ul style="font-size:12px;color:var(--ink-dim);line-height:1.95;margin:10px 0 0;padding-left:19px">
-        <li>Profile, UID, device & login data</li><li>VIP status, key & entitlements</li>
-        <li>All deposit history</li><li>Their referral code & link</li><li>Notifications & badge counts</li>
-      </ul>
-      <div class="danger-box"><b>Cannot be undone.</b> Type the mobile number below to confirm.</div>
-      <input class="confirm-input" id="deleteConfirmInput" placeholder="Type mobile number exactly" oninput="checkDeleteConfirm()">
-      <div class="sheet-actions"><button class="btn btn-ghost" onclick="closeOv('ovDelete')">Cancel</button>
-        <button class="btn btn-danger" id="deleteBtn" disabled onclick="confirmDeleteUser()">Delete Everything</button></div>
-    </div>
-  </div>
+  <div class="sheet" style="max-width:410px"><div class="sheet-strip"></div><div class="sheet-body">
+    <div class="sheet-head"><div class="sheet-title">🗑️ Delete User — Full Wipe</div><button class="sheet-close" onclick="closeOv('ovDelete')">✕</button></div>
+    <p style="font-size:13px;color:var(--ink-dim);line-height:1.65">Permanently deletes everything for <b id="deleteMob" style="color:var(--ink)"></b>:</p>
+    <ul style="font-size:12px;color:var(--ink-dim);line-height:1.95;margin:10px 0 0;padding-left:19px">
+      <li>Profile, UID, device & login data</li><li>VIP status, key & entitlements</li><li>All deposit history</li>
+      <li>Their referral code & link</li><li>Notifications & badge counts</li></ul>
+    <div class="danger-box"><b>Cannot be undone.</b> Type the mobile number below to confirm.</div>
+    <input class="confirm-input" id="deleteConfirmInput" placeholder="Type mobile number exactly" oninput="checkDeleteConfirm()">
+    <div class="sheet-actions"><button class="btn btn-ghost" onclick="closeOv('ovDelete')">Cancel</button><button class="btn btn-danger" id="deleteBtn" disabled onclick="confirmDeleteUser()">Delete Everything</button></div>
+  </div></div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════
-//  BACKGROUND VIDEO (swap this URL with your own hosted mp4
-//  for guaranteed playback — Google Drive share links are
-//  unreliable for direct <video> embedding)
+//  BACKGROUND VIDEO — hosted on your GitHub repo
+//  (raw.githubusercontent.com serves it directly,
+//  no virus-scan interstitial like Drive)
 // ═══════════════════════════════════════════
-const VIDEO_SRC = "https://drive.google.com/uc?export=download&id=1YaYfQam4PLRuROqpdaBBm_6pwGjchTff";
+const VIDEO_SRC = "https://raw.githubusercontent.com/jahid9088/A-brand-new-admin-panel-system/main/1777899277608.mp4";
 const bgVideo = document.getElementById('bgVideo');
 const mediaToggle = document.getElementById('mediaToggle');
 let videoWorking = false;
 try{
   bgVideo.src = VIDEO_SRC;
   bgVideo.addEventListener('canplaythrough',()=>{ bgVideo.classList.add('ready'); videoWorking=true; mediaToggle.classList.add('show'); });
-  bgVideo.addEventListener('error',()=>{ bgVideo.style.display='none'; }); // silently fall back to particle bg
+  bgVideo.addEventListener('error',()=>{ bgVideo.style.display='none'; });
   bgVideo.play().catch(()=>{});
 }catch(e){}
 function toggleMedia(){
@@ -570,9 +519,7 @@ function toggleMedia(){
   mediaToggle.textContent = bgVideo.muted ? '🔇' : '🔊';
 }
 
-// ═══════════════════════════════════════════
-//  SYNTHESIZED CLICK SOUND (Web Audio API — no file needed)
-// ═══════════════════════════════════════════
+// ═══ CLICK SOUND ═══
 let actx=null;
 function clickSound(){
   try{
@@ -585,32 +532,23 @@ function clickSound(){
     o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+.1);
   }catch(e){}
 }
-// attach click sound to every interactive control, globally
 document.addEventListener('click',function(e){
   const el=e.target.closest('button,.btn,.dock-item,.ti,.ibtn,.sheet-close,#mediaToggle,input[type=checkbox]');
   if(el) clickSound();
 },true);
 
-// ═══════════════════════════════════════════
-//  PARTICLE FIELD
-// ═══════════════════════════════════════════
+// ═══ PARTICLE FIELD ═══
 (function(){
-  const cvs=document.getElementById('pField');const ctx=cvs.getContext('2d');
-  let w,h,pts=[];
-  function resize(){w=cvs.width=innerWidth;h=cvs.height=innerHeight;
-    pts=[];const n=Math.min(50,Math.floor(w*h/28000));
-    for(let i=0;i<n;i++)pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22});
-  }
+  const cvs=document.getElementById('pField');const ctx=cvs.getContext('2d');let w,h,pts=[];
+  function resize(){w=cvs.width=innerWidth;h=cvs.height=innerHeight;pts=[];const n=Math.min(50,Math.floor(w*h/28000));
+    for(let i=0;i<n;i++)pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22});}
   function step(){
     ctx.clearRect(0,0,w,h);
     for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
     for(let i=0;i<pts.length;i++){
       ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,1.4,0,7);ctx.fillStyle='rgba(255,216,77,.35)';ctx.fill();
-      for(let j=i+1;j<pts.length;j++){
-        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-        if(d<115){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.strokeStyle='rgba(139,124,255,'+(0.12*(1-d/115))+')';ctx.lineWidth=1;ctx.stroke();}
-      }
+      for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<115){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(139,124,255,'+(0.12*(1-d/115))+')';ctx.lineWidth=1;ctx.stroke();}}
     }
     requestAnimationFrame(step);
   }
@@ -618,7 +556,7 @@ document.addEventListener('click',function(e){
 })();
 
 function tilt3d(e,el){
-  if(window.innerWidth<=780)return; // no tilt on touch devices
+  if(window.innerWidth<=780)return;
   const r=el.getBoundingClientRect();const x=e.clientX-r.left, y=e.clientY-r.top;
   const cx=r.width/2, cy=r.height/2;const rx=((y-cy)/cy)*-5, ry=((x-cx)/cx)*5;
   el.style.transform='perspective(900px) rotateX('+rx+'deg) rotateY('+ry+'deg) translateZ(4px)';
@@ -626,9 +564,6 @@ function tilt3d(e,el){
 }
 function untilt3d(el){el.style.transform='perspective(900px) rotateX(0) rotateY(0)';}
 
-// ═══════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={};
 let pendingMobile='';
 
@@ -636,85 +571,56 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa8_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa9_cfg')||'{}');
   const finalUrl = url || saved.url;
-  document.getElementById('fUrl').classList.remove('err');
-  document.getElementById('fPass').classList.remove('err');
+  document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
   if(pass!=='funxpro786' && pass!==saved.pass){
     document.getElementById('gateErr').textContent='Incorrect password';
     document.getElementById('fPass').classList.add('err');
-    const card=document.getElementById('gateCard');
-    card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
+    const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa8_cfg',JSON.stringify({url:finalUrl,pass:pass}));
-  const btn=document.getElementById('loginBtn');
-  btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
+  localStorage.setItem('fxa9_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa8_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa9_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
-    firebase.initializeApp({databaseURL:url});
-    db=firebase.database();
-    // success burst → collapse gate → reveal app
-    const burst=document.getElementById('successBurst');
-    burst.classList.add('play');
-    setTimeout(()=>{
-      document.getElementById('gate').style.opacity='0';
-      document.getElementById('gate').style.transform='scale(1.04)';
-      document.getElementById('gate').style.transition='opacity .4s var(--sp), transform .4s var(--sp)';
-      document.getElementById('gate').style.pointerEvents='none';
-    },250);
-    setTimeout(()=>{
-      document.getElementById('gate').style.display='none';
-      burst.classList.remove('play');
-      const app=document.getElementById('app');
-      app.classList.add('show','entering');
-      loadAll();
-    },680);
-  }catch(e){
-    document.getElementById('gateErr').textContent='Connection failed: '+e.message;
-    const btn=document.getElementById('loginBtn');btn.classList.remove('loading');btn.innerHTML='Unlock Console →';
-  }
+    firebase.initializeApp({databaseURL:url});db=firebase.database();
+    const burst=document.getElementById('successBurst');burst.classList.add('play');
+    setTimeout(()=>{document.getElementById('gate').style.opacity='0';document.getElementById('gate').style.transform='scale(1.04)';
+      document.getElementById('gate').style.transition='opacity .4s var(--sp), transform .4s var(--sp)';document.getElementById('gate').style.pointerEvents='none';},250);
+    setTimeout(()=>{document.getElementById('gate').style.display='none';burst.classList.remove('play');
+      document.getElementById('app').classList.add('show','entering');loadAll();},680);
+  }catch(e){document.getElementById('gateErr').textContent='Connection failed: '+e.message;
+    const btn=document.getElementById('loginBtn');btn.classList.remove('loading');btn.innerHTML='Unlock Console →';}
 }
-
 function goSec(name){
   document.querySelectorAll('.dock-item,.ti').forEach(n=>n.classList.toggle('active',n.dataset.sec===name));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('sec-'+name).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
 }
-
-function toast(msg,type,icon){
-  const box=document.getElementById('toasts');const t=document.createElement('div');t.className='toast '+type;
+function toast(msg,type,icon){const box=document.getElementById('toasts');const t=document.createElement('div');t.className='toast '+type;
   t.innerHTML='<div class="tic">'+icon+'</div><div>'+msg+'</div>';box.appendChild(t);
-  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300);},3200);
-}
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300);},3200);}
 function toastOk(m){toast(m,'success','✓');}
 function toastErr(m){toast(m,'error','✕');}
 function toastInfo(m){toast(m,'info','ℹ');}
 function openOv(id){document.getElementById(id).classList.add('show');}
 function closeOv(id){document.getElementById(id).classList.remove('show');}
 
-// ═══════════════════════════════════════════
-//  DATA LOADING
-// ═══════════════════════════════════════════
 function loadAll(){
   db.ref('Users').on('value',s=>{allUsers=s.val()||{};renderUsers();renderVip();renderDash();});
   db.ref('DepositLogs').on('value',s=>{allDeposits=s.val()||{};renderDeposits();renderDash();});
   db.ref('ReferralCodes').on('value',s=>{allRefs=s.val()||{};renderRefs();renderDash();});
   db.ref('AuditLogs').limitToLast(200).on('value',s=>{allAudit=s.val()||{};renderAudit();});
   db.ref('Config').on('value',s=>{const c=s.val()||{};
-    document.getElementById('cfgAmt').value=c.autoVipAmount||500;
-    document.getElementById('cfgDur').value=c.autoVipDuration||'30days';
-    document.getElementById('cfgMin').value=c.minDepositDetect||50;
-    document.getElementById('cfgRefDays').value=c.referralRewardDays||1;
-    document.getElementById('cfgTg').value=c.telegramLink||'';
-    document.getElementById('cfgDl').value=c.downloadUrl||'';
-  });
+    document.getElementById('cfgAmt').value=c.autoVipAmount||500;document.getElementById('cfgDur').value=c.autoVipDuration||'30days';
+    document.getElementById('cfgMin').value=c.minDepositDetect||50;document.getElementById('cfgRefDays').value=c.referralRewardDays||1;
+    document.getElementById('cfgTg').value=c.telegramLink||'';document.getElementById('cfgDl').value=c.downloadUrl||'';});
 }
 function logAudit(action,target){db.ref('AuditLogs').push({actor:'ADMIN',action,target,timestamp:Date.now()});}
 
@@ -722,19 +628,13 @@ function renderDash(){
   const users=Object.keys(allUsers);let blocked=0, totalDep=0, depCount=0;
   users.forEach(m=>{const u=allUsers[m];if(u.accountStatus==='BLOCKED'||u.accountStatus==='SUSPENDED')blocked++;});
   Object.keys(allDeposits).forEach(m=>{Object.values(allDeposits[m]||{}).forEach(d=>{totalDep+=parseFloat(d.amount||0);depCount++;});});
-  db.ref('VIP').once('value',s=>{const vip=s.val()||{};
-    const vipCount=Object.values(vip).filter(v=>v.status==='ACTIVE'&&(v.validUntil==0||Date.now()<v.validUntil)).length;
-    animateNum('stVip',vipCount);});
-  animateNum('stUsers',users.length);
-  document.getElementById('stDep').textContent='₹'+totalDep.toLocaleString('en-IN');
+  db.ref('VIP').once('value',s=>{const vip=s.val()||{};const vipCount=Object.values(vip).filter(v=>v.status==='ACTIVE'&&(v.validUntil==0||Date.now()<v.validUntil)).length;animateNum('stVip',vipCount);});
+  animateNum('stUsers',users.length);document.getElementById('stDep').textContent='₹'+totalDep.toLocaleString('en-IN');
   animateNum('stBlocked',blocked);animateNum('stRefs',Object.keys(allRefs).length);animateNum('stDepCount',depCount);
 }
-function animateNum(id,target){
-  const el=document.getElementById(id);const start=parseInt(el.textContent)||0;const dur=650,t0=performance.now();
-  function step(t){const p=Math.min(1,(t-t0)/dur);const eased=1-Math.pow(1-p,3);
-    el.textContent=Math.round(start+(target-start)*eased);if(p<1)requestAnimationFrame(step);}
-  requestAnimationFrame(step);
-}
+function animateNum(id,target){const el=document.getElementById(id);const start=parseInt(el.textContent)||0;const dur=650,t0=performance.now();
+  function step(t){const p=Math.min(1,(t-t0)/dur);const eased=1-Math.pow(1-p,3);el.textContent=Math.round(start+(target-start)*eased);if(p<1)requestAnimationFrame(step);}
+  requestAnimationFrame(step);}
 
 function renderUsers(){
   const q=(document.getElementById('userSearch').value||'').toLowerCase();
@@ -774,49 +674,32 @@ function viewUser(m){
       <div class="kv"><b>Referral Code</b><span style="color:var(--violet)">${u.referralCode||'—'}</span></div>
       <div class="kv"><b>Referred By</b><span>${u.referredBy||'—'}</span></div>
       <div class="kv" style="border-bottom:none"><b>Battery @ Register</b><span>${u.battery||'—'}</span></div>
-      <div class="sheet-actions" style="margin-top:17px">
-        <button class="btn btn-ghost" onclick="closeOv('ovDetail')">Close</button>
-        <button class="btn btn-gold" onclick="closeOv('ovDetail');openRevoke('${m}')">Manage VIP</button></div>`;
+      <div class="sheet-actions" style="margin-top:17px"><button class="btn btn-ghost" onclick="closeOv('ovDetail')">Close</button>
+      <button class="btn btn-gold" onclick="closeOv('ovDetail');openRevoke('${m}')">Manage VIP</button></div>`;
     openOv('ovDetail');
   });
 }
-
 function openRevoke(m){pendingMobile=m;document.getElementById('revokeMob').textContent=m;openOv('ovRevoke');}
 function confirmRevokeVip(){
   const btn=document.getElementById('revokeBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div>';
-  const m=pendingMobile;
-  const updates={};updates['VIP/'+m]=null;
-  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';
-  updates['Users/'+m+'/vipKeyDeviceId']=null;updates['Users/'+m+'/vipKeyUsedAt']=null;
-  updates['Users/'+m+'/vipKeyBrand']=null;updates['Users/'+m+'/vipKeyModel']=null;
-  db.ref().update(updates).then(()=>{
-    logAudit('VIP_REVOKED_ADMIN',m);toastOk('VIP revoked for '+m);closeOv('ovRevoke');
-    btn.disabled=false;btn.innerHTML='Revoke VIP';
-  }).catch(e=>{toastErr('Failed: '+e.message);btn.disabled=false;btn.innerHTML='Revoke VIP';});
+  const m=pendingMobile;const updates={};updates['VIP/'+m]=null;
+  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';updates['Users/'+m+'/vipKeyDeviceId']=null;
+  updates['Users/'+m+'/vipKeyUsedAt']=null;updates['Users/'+m+'/vipKeyBrand']=null;updates['Users/'+m+'/vipKeyModel']=null;
+  db.ref().update(updates).then(()=>{logAudit('VIP_REVOKED_ADMIN',m);toastOk('VIP revoked for '+m);closeOv('ovRevoke');btn.disabled=false;btn.innerHTML='Revoke VIP';})
+  .catch(e=>{toastErr('Failed: '+e.message);btn.disabled=false;btn.innerHTML='Revoke VIP';});
 }
-
-function openDelete(m){
-  pendingMobile=m;document.getElementById('deleteMob').textContent=m;
+function openDelete(m){pendingMobile=m;document.getElementById('deleteMob').textContent=m;
   document.getElementById('deleteConfirmInput').value='';document.getElementById('deleteBtn').disabled=true;
-  openOv('ovDelete');setTimeout(()=>document.getElementById('deleteConfirmInput').focus(),350);
-}
-function checkDeleteConfirm(){
-  const val=document.getElementById('deleteConfirmInput').value.trim();
-  document.getElementById('deleteBtn').disabled = (val!==pendingMobile);
-}
+  openOv('ovDelete');setTimeout(()=>document.getElementById('deleteConfirmInput').focus(),350);}
+function checkDeleteConfirm(){const val=document.getElementById('deleteConfirmInput').value.trim();document.getElementById('deleteBtn').disabled = (val!==pendingMobile);}
 function confirmDeleteUser(){
-  const m=pendingMobile;const btn=document.getElementById('deleteBtn');
-  btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div> Deleting…';
-  const u=allUsers[m]||{};const refCode=u.referralCode;
-  const updates={};updates['Users/'+m]=null;updates['dbRef/'+m]=null;updates['VIP/'+m]=null;
-  updates['DepositLogs/'+m]=null;updates['Notifications/'+m]=null;
+  const m=pendingMobile;const btn=document.getElementById('deleteBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div> Deleting…';
+  const u=allUsers[m]||{};const refCode=u.referralCode;const updates={};
+  updates['Users/'+m]=null;updates['dbRef/'+m]=null;updates['VIP/'+m]=null;updates['DepositLogs/'+m]=null;updates['Notifications/'+m]=null;
   if(refCode) updates['ReferralCodes/'+refCode]=null;
   db.ref('VipEntitlements').orderByChild('mobile').equalTo(m).once('value').then(entSnap=>{
-    entSnap.forEach(child=>{ updates['VipEntitlements/'+child.key]=null; });
-    return db.ref().update(updates);
-  }).then(()=>{
-    logAudit('USER_DELETED_ADMIN',m+(refCode?' (code:'+refCode+')':''));
-    toastOk('User '+m+' fully deleted');closeOv('ovDelete');
+    entSnap.forEach(child=>{ updates['VipEntitlements/'+child.key]=null; });return db.ref().update(updates);
+  }).then(()=>{logAudit('USER_DELETED_ADMIN',m+(refCode?' (code:'+refCode+')':''));toastOk('User '+m+' fully deleted');closeOv('ovDelete');
     btn.disabled=false;btn.innerHTML='Delete Everything';
   }).catch(e=>{toastErr('Delete failed: '+e.message);btn.disabled=false;btn.innerHTML='Delete Everything';});
 }
@@ -828,18 +711,15 @@ function renderDeposits(){
   document.getElementById('depsEmpty').style.display=rows.length?'none':'block';
   rows.slice(0,150).forEach((d,i)=>{
     const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.015)+'s';
-    tr.innerHTML=`<td class="mono">${d.mobile}</td>
-      <td class="mono" style="color:var(--mint);font-weight:800">₹${parseFloat(d.amount||0).toLocaleString('en-IN')}</td>
+    tr.innerHTML=`<td class="mono">${d.mobile}</td><td class="mono" style="color:var(--mint);font-weight:800">₹${parseFloat(d.amount||0).toLocaleString('en-IN')}</td>
       <td><span class="badge ${d.source==='MANUAL_ADMIN'?'badge-warn':'badge-none'}">${d.source||'—'}</span></td>
       <td>${d.vipGranted?'<span class="badge badge-vip">✓ Yes</span>':'—'}</td>
       <td style="font-size:11px;color:var(--ink-dim)">${d.detectedAt?new Date(d.detectedAt).toLocaleString('en-IN'):'—'}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function addManualDeposit(){
-  const m=document.getElementById('mdMobile').value.trim();
-  const amt=parseFloat(document.getElementById('mdAmount').value);
+  const m=document.getElementById('mdMobile').value.trim();const amt=parseFloat(document.getElementById('mdAmount').value);
   const autoVip=document.getElementById('mdAutoVip').checked;
   if(!m||m.length<8){toastErr('Enter a valid mobile number');return;}
   if(!amt||amt<=0){toastErr('Enter a valid amount');return;}
@@ -850,33 +730,27 @@ function addManualDeposit(){
     const dep={amount:amt,detectedAt:now,mobile:m,source:'MANUAL_ADMIN',prevBalance:prevBal,newBalance:newBal};
     db.ref('DepositLogs/'+m).push(dep).then(()=>{
       db.ref('Users/'+m).update({balance:String(newBal),currentBalance:String(newBal)});
-      logAudit('MANUAL_DEPOSIT_ADMIN',m+' +₹'+amt+' (wallet now ₹'+newBal+')');
-      toastOk('₹'+amt+' added for '+m);
+      logAudit('MANUAL_DEPOSIT_ADMIN',m+' +₹'+amt+' (wallet now ₹'+newBal+')');toastOk('₹'+amt+' added for '+m);
       document.getElementById('mdMobile').value='';document.getElementById('mdAmount').value='';
       if(autoVip) checkAutoVipThreshold(m,newBal);
     });
   });
 }
 function checkAutoVipThreshold(m,liveBal){
-  db.ref('Config').once('value',cs=>{
-    const cfg=cs.val()||{};const threshold=parseFloat(cfg.autoVipAmount||500);const dur=cfg.autoVipDuration||'30days';
+  db.ref('Config').once('value',cs=>{const cfg=cs.val()||{};const threshold=parseFloat(cfg.autoVipAmount||500);const dur=cfg.autoVipDuration||'30days';
     if(liveBal<threshold)return;
-    db.ref('VIP/'+m).once('value',vs=>{
-      const v=vs.val()||{};
+    db.ref('VIP/'+m).once('value',vs=>{const v=vs.val()||{};
       if(v.status==='ACTIVE'&&(v.validUntil===0||Date.now()<v.validUntil)){toastInfo(m+' already has active VIP');return;}
-      grantVipAdmin(m,dur);
-    });
+      grantVipAdmin(m,dur);});
   });
 }
 function vuFromDur(d){const n=Date.now();const map={'1day':864e5,'3days':2592e5,'7days':6048e5,'14days':12096e5,'30days':2592e6};return d&&map[d]?n+map[d]:0;}
-function makeVipKey(mobile){
-  const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const S=mobile+'FUNXPRO';let k='';
+function makeVipKey(mobile){const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const S=mobile+'FUNXPRO';let k='';
   for(let i=0;i<15;i++){let c=((S.charCodeAt(i%S.length)*31+i*7)%C.length+C.length)%C.length;k+=C[c];}
-  return 'FUN-'+k.slice(0,5)+'-'+k.slice(5,10)+'-'+k.slice(10,15);
-}
+  return 'FUN-'+k.slice(0,5)+'-'+k.slice(5,10)+'-'+k.slice(10,15);}
 function grantVipAdmin(m,dur){
-  const now=Date.now();const vu=vuFromDur(dur);const vk=makeVipKey(m);
-  const updates={};updates['VIP/'+m+'/status']='ACTIVE';updates['VIP/'+m+'/validUntil']=vu;updates['VIP/'+m+'/activatedAt']=now;updates['VIP/'+m+'/autoGranted']=true;
+  const now=Date.now();const vu=vuFromDur(dur);const vk=makeVipKey(m);const updates={};
+  updates['VIP/'+m+'/status']='ACTIVE';updates['VIP/'+m+'/validUntil']=vu;updates['VIP/'+m+'/activatedAt']=now;updates['VIP/'+m+'/autoGranted']=true;
   updates['Users/'+m+'/vipKey']=vk;updates['Users/'+m+'/vipKeyStatus']='ACTIVE';updates['Users/'+m+'/vipKeyDeviceId']='';
   updates['Notifications/'+m+'/lastMsg']='👑 VIP granted by admin!';
   db.ref().update(updates).then(()=>{logAudit('AUTO_VIP_ADMIN',m);toastOk('VIP granted to '+m);});
@@ -922,31 +796,21 @@ function renderAudit(){
   const entries=Object.values(allAudit).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
   entries.slice(0,150).forEach((a,i)=>{
     const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.01)+'s';
-    tr.innerHTML=`<td><span class="badge badge-none">${a.actor||'—'}</span></td>
-      <td style="font-weight:800;font-size:12px">${a.action||'—'}</td>
-      <td class="mono" style="font-size:11.5px">${a.target||'—'}</td>
-      <td style="font-size:11px;color:var(--ink-dim)">${a.timestamp?new Date(a.timestamp).toLocaleString('en-IN'):'—'}</td>`;
+    tr.innerHTML=`<td><span class="badge badge-none">${a.actor||'—'}</span></td><td style="font-weight:800;font-size:12px">${a.action||'—'}</td>
+      <td class="mono" style="font-size:11.5px">${a.target||'—'}</td><td style="font-size:11px;color:var(--ink-dim)">${a.timestamp?new Date(a.timestamp).toLocaleString('en-IN'):'—'}</td>`;
     tbody.appendChild(tr);
   });
   const feed=document.getElementById('dashAudit');
-  if(entries.length){
-    feed.innerHTML=entries.slice(0,6).map(a=>`
-      <div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
-        <span><b>${a.action||''}</b> <span style="color:var(--ink-dim)">· ${a.target||''}</span></span>
-        <span style="color:var(--ink-faint);font-size:10.5px;white-space:nowrap">${a.timestamp?new Date(a.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):''}</span>
-      </div>`).join('');
-  }
+  if(entries.length){feed.innerHTML=entries.slice(0,6).map(a=>`
+    <div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
+      <span><b>${a.action||''}</b> <span style="color:var(--ink-dim)">· ${a.target||''}</span></span>
+      <span style="color:var(--ink-faint);font-size:10.5px;white-space:nowrap">${a.timestamp?new Date(a.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):''}</span>
+    </div>`).join('');}
 }
 function saveConfig(){
-  const cfg={
-    autoVipAmount:parseFloat(document.getElementById('cfgAmt').value)||500,
-    autoVipDuration:document.getElementById('cfgDur').value,
-    minDepositDetect:parseFloat(document.getElementById('cfgMin').value)||50,
-    referralRewardDays:parseInt(document.getElementById('cfgRefDays').value)||1,
-    telegramLink:document.getElementById('cfgTg').value.trim(),
-    downloadUrl:document.getElementById('cfgDl').value.trim(),
-    autoVipEnabled:true
-  };
+  const cfg={autoVipAmount:parseFloat(document.getElementById('cfgAmt').value)||500,autoVipDuration:document.getElementById('cfgDur').value,
+    minDepositDetect:parseFloat(document.getElementById('cfgMin').value)||50,referralRewardDays:parseInt(document.getElementById('cfgRefDays').value)||1,
+    telegramLink:document.getElementById('cfgTg').value.trim(),downloadUrl:document.getElementById('cfgDl').value.trim(),autoVipEnabled:true};
   db.ref('Config').update(cfg).then(()=>{logAudit('CONFIG_UPDATED','—');toastOk('Config saved');});
 }
 </script>
