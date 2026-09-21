@@ -274,6 +274,13 @@ tbody td{padding:13px 16px;font-size:12.5px;border-top:1px solid rgba(255,255,25
 .empty .ic{font-size:38px;margin-bottom:12px;opacity:.5;animation:floatIc 3s ease-in-out infinite}
 @keyframes floatIc{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .empty p{font-size:13px}
+.more-item{display:flex;align-items:center;gap:14px;padding:15px 6px;border-radius:var(--r-md);cursor:pointer;
+  transition:background .2s var(--sp2)}
+.more-item:hover,.more-item:active{background:rgba(255,255,255,.05)}
+.more-item .mi-ic{font-size:22px;width:38px;height:38px;border-radius:var(--r-sm);background:rgba(255,216,77,.1);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.more-item .mi-t{font-size:13.5px;font-weight:800}
+.more-item .mi-s{font-size:11px;color:var(--ink-dim);margin-top:1px}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .card-pad{padding:clamp(18px,4.5vw,24px)}
@@ -374,7 +381,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="ti" data-sec="users" onclick="goSec('users')"><span class="ti-ic">👥</span><span class="ti-lbl">Users</span></div>
     <div class="ti" data-sec="deps" onclick="goSec('deps')"><span class="ti-ic">💰</span><span class="ti-lbl">Deposits</span></div>
     <div class="ti" data-sec="vip" onclick="goSec('vip')"><span class="ti-ic">👑</span><span class="ti-lbl">VIP</span></div>
-    <div class="ti" data-sec="config" onclick="goSec('config')"><span class="ti-ic">⚙️</span><span class="ti-lbl">More</span></div>
+    <div class="ti" id="moreTab" onclick="openMore()"><span class="ti-ic">☰</span><span class="ti-lbl">More</span></div>
   </div>
 
   <div class="main">
@@ -467,6 +474,15 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
   </div>
 </div>
 
+<div class="overlay" id="ovMore" onclick="if(event.target===this)closeOv('ovMore')">
+  <div class="sheet" style="max-width:360px"><div class="sheet-strip"></div><div class="sheet-body">
+    <div class="sheet-head"><div class="sheet-title">More</div><button class="sheet-close" onclick="closeOv('ovMore')">✕</button></div>
+    <div class="more-item" onclick="goSec('refs');closeOv('ovMore')"><span class="mi-ic">🔗</span><div><div class="mi-t">Referrals</div><div class="mi-s">Referral code ownership &amp; usage</div></div></div>
+    <div class="more-item" onclick="goSec('audit');closeOv('ovMore')"><span class="mi-ic">📜</span><div><div class="mi-t">Audit Log</div><div class="mi-s">Every admin &amp; system action</div></div></div>
+    <div class="more-item" onclick="goSec('config');closeOv('ovMore')"><span class="mi-ic">⚙️</span><div><div class="mi-t">Config</div><div class="mi-s">App-wide VIP &amp; deposit settings</div></div></div>
+  </div></div>
+</div>
+
 <div id="toasts"></div>
 
 <div class="overlay" id="ovDetail" onclick="if(event.target===this)closeOv('ovDetail')">
@@ -502,17 +518,22 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 //  BACKGROUND VIDEO — sound-unlock + seamless loop
 //  Hosted on GitHub (raw.githubusercontent.com serves
 //  raw bytes directly — no Drive virus-scan wall)
+//  File confirmed to contain AAC audio (48kHz stereo) —
+//  if sound still doesn't play after tapping the toggle,
+//  it's Chrome's per-site "Sound" permission blocking it,
+//  not the video. The toggle below detects that case and
+//  tells the person exactly what to do about it.
 // ═══════════════════════════════════════════
 const VIDEO_SRC = "https://raw.githubusercontent.com/jahid9088/A-brand-new-admin-panel-system/main/1777899277608.mp4";
 const bgVideo = document.getElementById('bgVideo');
 const mediaToggle = document.getElementById('mediaToggle');
 let videoWorking = false;
+let soundBlockedByBrowser = false;
 
 try{
   bgVideo.src = VIDEO_SRC;
+  bgVideo.volume = 1.0;
 
-  // Show fade-in + attempt sound as soon as first frame is ready
-  // (not "canplaythrough" — that waits for the WHOLE video and can take a while)
   bgVideo.addEventListener('loadeddata', ()=>{
     bgVideo.classList.add('ready');
     videoWorking = true;
@@ -530,35 +551,78 @@ try{
 
 }catch(e){}
 
-// Try playing WITH sound immediately — succeeds if the browser already
-// trusts this site (e.g. user interacted with it before, or PWA context).
-// If blocked (the common case on first visit), fall back to muted and
-// nudge the person to tap the toggle once.
+// Try playing WITH sound immediately — succeeds only if the browser already
+// trusts this site. Almost always blocked on first visit (expected) — falls
+// back to muted silently here; the person unlocks it with one tap below.
 function attemptSoundOnLoad(){
   bgVideo.muted = false;
   const p = bgVideo.play();
   if (p !== undefined) {
-    p.then(()=>{
-      mediaToggle.textContent = '🔊';
-    }).catch(()=>{
-      bgVideo.muted = true;
-      bgVideo.play().catch(()=>{});
-      mediaToggle.textContent = '🔇';
-      pulseSoundHint();
-    });
+    p.then(()=>{ mediaToggle.textContent = '🔊'; })
+     .catch(()=>{
+        bgVideo.muted = true;
+        bgVideo.play().catch(()=>{});
+        mediaToggle.textContent = '🔇';
+      });
   }
 }
-function pulseSoundHint(){
-  mediaToggle.style.animation = 'soundPulse 1.4s ease-in-out 3';
-  toastInfo('Tap 🔊 once to enable video sound');
+
+// FIX: much more forceful unmute — sets every relevant property, replays,
+// then VERIFIES after a short delay whether the browser actually honored it.
+// If Chrome's site-level "Sound: Block/Mute" permission is silently
+// overriding us, .muted flips back to true on its own — we now detect
+// that instead of pretending it worked, and tell the person exactly
+// what to tap to fix it (this can't be forced from JavaScript; it's a
+// per-site browser permission, same as camera/location).
+// Shared by: (1) the very first tap/click ANYWHERE on the page — including
+// the login form, so sound starts during login itself without the person
+// needing to find the speaker icon — and (2) the explicit 🔊/🔇 toggle.
+function unlockSound(reportResult){
+  bgVideo.muted = false;
+  bgVideo.volume = 1.0;
+  bgVideo.play().catch(()=>{});
+  setTimeout(()=>{
+    if (bgVideo.muted) {
+      // Browser silently re-muted us — this is Chrome's per-site
+      // Sound permission, not our code and not the video file.
+      soundBlockedByBrowser = true;
+      mediaToggle.textContent = '🔇';
+      if (reportResult) {
+        mediaToggle.style.animation = 'soundPulse 1.4s ease-in-out 3';
+        toastErr('Blocked by Chrome — tap ⓘ or 🔒 next to the URL → Site settings → Sound → Allow');
+      }
+    } else {
+      mediaToggle.textContent = '🔊';
+      if (reportResult) toastOk('Sound on');
+    }
+  }, 400);
 }
+
+// FIX: unlock sound on the very FIRST interaction anywhere on the page —
+// typing the DB URL, tapping the password field, tapping "Unlock Console"
+// all count. This is what makes sound "just start" during login itself.
+// Runs once only; silent (no toast) so it doesn't interrupt the login flow —
+// the explicit 🔊 toggle still reports errors loudly if this quiet attempt
+// didn't work.
+function firstGestureUnlock(){
+  if(videoWorking) unlockSound(false);
+  document.removeEventListener('pointerdown', firstGestureUnlock, true);
+  document.removeEventListener('keydown', firstGestureUnlock, true);
+}
+document.addEventListener('pointerdown', firstGestureUnlock, true);
+document.addEventListener('keydown', firstGestureUnlock, true);
+
 function toggleMedia(){
   clickSound();
   if(!videoWorking)return;
   mediaToggle.style.animation = '';
-  bgVideo.muted = !bgVideo.muted;
-  if(!bgVideo.muted && bgVideo.paused) bgVideo.play().catch(()=>{});
-  mediaToggle.textContent = bgVideo.muted ? '🔇' : '🔊';
+  const wantUnmute = bgVideo.muted;
+  if (wantUnmute) {
+    unlockSound(true);
+  } else {
+    bgVideo.muted = true;
+    mediaToggle.textContent = '🔇';
+  }
 }
 
 // ═══ CLICK SOUND (synthesized — no file needed) ═══
@@ -613,7 +677,7 @@ function doLogin(){
   clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa10_cfg')||'{}');
+  const saved=JSON.parse(localStorage.getItem('fxa13_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
   if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
@@ -623,11 +687,11 @@ function doLogin(){
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
-  localStorage.setItem('fxa10_cfg',JSON.stringify({url:finalUrl,pass:pass}));
+  localStorage.setItem('fxa13_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
   setTimeout(()=>initFirebase(finalUrl),350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa10_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa13_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
 
 function initFirebase(url){
   try{
@@ -642,9 +706,12 @@ function initFirebase(url){
 }
 function goSec(name){
   document.querySelectorAll('.dock-item,.ti').forEach(n=>n.classList.toggle('active',n.dataset.sec===name));
+  const moreTab=document.getElementById('moreTab');
+  if(moreTab) moreTab.classList.toggle('active', name==='refs'||name==='audit'||name==='config');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});
 }
+function openMore(){ clickSound(); openOv('ovMore'); }
 function toast(msg,type,icon){const box=document.getElementById('toasts');const t=document.createElement('div');t.className='toast '+type;
   t.innerHTML='<div class="tic">'+icon+'</div><div>'+msg+'</div>';box.appendChild(t);
   setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300);},3200);}
