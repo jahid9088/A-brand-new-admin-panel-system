@@ -408,6 +408,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="dock-item" data-sec="requests" onclick="goSec('requests')"><span class="di-ic">🔔</span><span>Requests</span><span class="nav-badge" id="reqBadgeDock" style="display:none">0</span></div>
     <div class="dock-item" data-sec="refs" onclick="goSec('refs')"><span class="di-ic">🔗</span><span>Refers</span></div>
     <div class="dock-item" data-sec="audit" onclick="goSec('audit')"><span class="di-ic">📜</span><span>Audit</span></div>
+    <div class="dock-item" data-sec="update" onclick="goSec('update')"><span class="di-ic">🚀</span><span>Update</span></div>
     <div class="dock-item" data-sec="config" onclick="goSec('config')"><span class="di-ic">⚙️</span><span>Config</span></div>
   </div>
 
@@ -510,6 +511,34 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
       </div>
     </div>
 
+    <div class="section" id="sec-update">
+      <div class="topbar"><div><div class="pg-title">App Update</div><div class="pg-sub">Controls the in-app update prompt — Firebase /update</div></div></div>
+
+      <div class="card3d card-pad" style="margin-bottom:16px" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
+        <div class="hdr-row"><h3>🟢 Currently Live</h3></div>
+        <div id="updLiveWrap">
+          <div class="skel" style="height:16px;margin-bottom:10px;width:40%"></div>
+          <div class="skel" style="height:13px;margin-bottom:6px"></div>
+          <div class="skel" style="height:13px;width:70%"></div>
+        </div>
+      </div>
+
+      <div class="card3d card-pad" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
+        <div class="hdr-row"><h3>🚀 Push New Update</h3></div>
+        <div class="grid2">
+          <div><label class="f-lbl">Version Code</label><input class="field-i" id="updVersion" type="number" placeholder="e.g. 21" oninput="this.dataset.touched=1"></div>
+          <div><label class="f-lbl">APK Download URL</label><input class="field-i" id="updApkUrl" placeholder="https://.../app.apk"></div>
+        </div>
+        <div style="margin-top:13px"><label class="f-lbl">Changelog (shown to users in the update dialog)</label>
+          <textarea class="field-i" id="updChangelog" rows="4" placeholder="- Fixed FAB not showing on some pages&#10;- Smoother login&#10;- New referral rewards screen" style="resize:vertical;font-family:inherit"></textarea>
+        </div>
+        <div class="danger-box" style="margin-top:13px;background:rgba(255,149,0,.08);border-color:rgba(255,149,0,.25);color:#FFD9A0">
+          <b style="color:var(--amber)">Heads up.</b> Every user whose app version is below the Version Code you set here will immediately see the mandatory update dialog next time they open the app. Double-check the APK URL is live and downloadable before publishing.
+        </div>
+        <button class="btn btn-gold" style="margin-top:6px;width:100%" onclick="publishUpdate()" id="updPublishBtn">Publish Update</button>
+      </div>
+    </div>
+
     <div class="section" id="sec-config">
       <div class="topbar"><div><div class="pg-title">Config</div><div class="pg-sub">App-wide settings in Firebase /Config</div></div></div>
       <div class="card3d card-pad" onmousemove="tilt3d(event,this)" onmouseleave="untilt3d(this)">
@@ -546,6 +575,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
     <div class="more-item" onclick="goSec('refs');closeOv('ovMore')"><span class="mi-ic">🔗</span><div><div class="mi-t">Referrals</div><div class="mi-s">Referral code ownership &amp; usage</div></div></div>
     <div class="more-item" onclick="goSec('audit');closeOv('ovMore')"><span class="mi-ic">📜</span><div><div class="mi-t">Audit Log</div><div class="mi-s">Every admin &amp; system action</div></div></div>
     <div class="more-item" onclick="goSec('requests');closeOv('ovMore')"><span class="mi-ic">🔔</span><div><div class="mi-t">Requests</div><div class="mi-s">Users pending "more deposit required"</div></div><span class="nav-badge" id="reqBadgeMore" style="display:none">0</span></div>
+    <div class="more-item" onclick="goSec('update');closeOv('ovMore')"><span class="mi-ic">🚀</span><div><div class="mi-t">App Update</div><div class="mi-s">Push new version, APK link &amp; changelog</div></div></div>
     <div class="more-item" onclick="goSec('config');closeOv('ovMore')"><span class="mi-ic">⚙️</span><div><div class="mi-t">Config</div><div class="mi-s">App-wide VIP &amp; deposit settings</div></div></div>
   </div></div>
 </div>
@@ -767,6 +797,54 @@ function loadAll(){
     document.getElementById('cfgAmt').value=c.autoVipAmount||500;document.getElementById('cfgDur').value=c.autoVipDuration||'30days';
     document.getElementById('cfgMin').value=c.minDepositDetect||50;document.getElementById('cfgRefDays').value=c.referralRewardDays||1;
     document.getElementById('cfgTg').value=c.telegramLink||'';document.getElementById('cfgDl').value=c.downloadUrl||'';});
+  db.ref('update').on('value',s=>{renderLiveUpdate(s.val()||{});});
+}
+
+// ── App Update — reflects whatever is currently live in Firebase /update ──
+function renderLiveUpdate(u){
+  const wrap=document.getElementById('updLiveWrap');
+  if(!u.latest_version){
+    wrap.innerHTML='<div class="empty" style="padding:20px 10px"><div class="ic">🚀</div><p>No update has been published yet</p></div>';
+    return;
+  }
+  const when = u.publishedAt ? new Date(u.publishedAt).toLocaleString('en-IN') : '—';
+  wrap.innerHTML=`
+    <div class="kv"><b>Version Code</b><span style="color:var(--gold);font-size:16px">${u.latest_version}</span></div>
+    <div class="kv"><b>APK URL</b><span style="font-size:11px;word-break:break-all;text-align:right">${u.apk_url||'—'}</span></div>
+    <div class="kv" style="border-bottom:none"><b>Published</b><span style="font-size:11px">${when}</span></div>
+    <div style="margin-top:12px;padding:12px 13px;border-radius:var(--r-sm);background:rgba(255,255,255,.03);border:1px solid var(--glass-brd)">
+      <div style="font-size:9px;letter-spacing:.6px;color:var(--ink-faint);font-weight:800;margin-bottom:6px">CHANGELOG</div>
+      <div style="font-size:12px;color:var(--ink-dim);white-space:pre-wrap;line-height:1.6">${(u.changelog||'—').replace(/</g,'&lt;')}</div>
+    </div>`;
+  // Pre-fill the publish form with the live values so admin can tweak+republish easily
+  if(!document.getElementById('updVersion').dataset.touched){
+    document.getElementById('updVersion').value = u.latest_version;
+    document.getElementById('updApkUrl').value = u.apk_url||'';
+    document.getElementById('updChangelog').value = u.changelog||'';
+  }
+}
+function publishUpdate(){
+  const version = parseInt(document.getElementById('updVersion').value);
+  const apkUrl = document.getElementById('updApkUrl').value.trim();
+  const changelog = document.getElementById('updChangelog').value.trim();
+  if(!version || version<=0){toastErr('Enter a valid version code');return;}
+  if(!apkUrl || !/^https?:\/\//.test(apkUrl)){toastErr('Enter a valid APK URL (https://...)');return;}
+  if(!changelog){toastErr('Add a short changelog for users');return;}
+  const btn=document.getElementById('updPublishBtn');
+  btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div> Publishing…';
+  db.ref('update').update({
+    latest_version: version,
+    apk_url: apkUrl,
+    changelog: changelog,
+    publishedAt: Date.now()
+  }).then(()=>{
+    logAudit('APP_UPDATE_PUBLISHED', 'v'+version+' — '+apkUrl);
+    toastOk('Update v'+version+' published — live now');
+    btn.disabled=false;btn.innerHTML='Publish Update';
+  }).catch(e=>{
+    toastErr('Failed: '+e.message);
+    btn.disabled=false;btn.innerHTML='Publish Update';
+  });
 }
 function logAudit(action,target){db.ref('AuditLogs').push({actor:'ADMIN',action,target,timestamp:Date.now()});}
 
@@ -946,203 +1024,4 @@ function renderRequests(){
   const pending = Object.keys(allUsers).filter(m=>allUsers[m].vipKeyStatus==='MORE_DEPOSIT_REQUIRED');
   document.getElementById('requestsEmpty').style.display = pending.length?'none':'block';
   pending.forEach((m,i)=>{
-    const u=allUsers[m];let dep=0;Object.values((allDeposits[m])||{}).forEach(d=>dep+=parseFloat(d.amount||0));
-    const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
-    tr.innerHTML=`<td class="mono">${m}</td><td class="mono">${u.uid||'—'}</td>
-      <td class="mono" style="color:var(--gold)">₹${u.balance||0}</td>
-      <td class="mono">₹${dep.toLocaleString('en-IN')}</td>
-      <td><div class="act-row" style="justify-content:flex-end">
-        <button class="ibtn" title="View" onclick="viewUser('${m}')">👁</button>
-        <button class="ibtn gold" title="Clear — let them try again" onclick="clearRequest('${m}')">✓</button>
-        <button class="ibtn danger" title="Block instead" onclick="setKeyStatus('${m}','BLOCKED')">🚫</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
-  // Update pending-count badges everywhere they appear
-  const cnt = pending.length;
-  const dockB=document.getElementById('reqBadgeDock'), moreB=document.getElementById('reqBadgeMore');
-  [dockB,moreB].forEach(b=>{ if(!b)return; if(cnt>0){b.textContent=cnt>9?'9+':cnt;b.style.display='flex';} else {b.style.display='none';} });
-  animateNum('stReq', cnt);
-}
-
-function renderRefs(){
-  const tbody=document.getElementById('refsBody');tbody.innerHTML='';
-  Object.entries(allRefs).forEach(([code,d],i)=>{
-    const referredCount = Object.keys(allUsers).filter(m=>allUsers[m].referredBy===code).length;
-    const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
-    tr.innerHTML=`<td class="mono" style="color:var(--violet)">${code}</td><td class="mono">${d.mobile||'—'}</td>
-      <td><div class="ref-code-row"><div class="ref-toggle ${d.active?'on':''}" onclick="toggleRefCodeActive('${code}',${!!d.active})" title="${d.active?'Active — tap to deactivate':'Inactive — tap to activate'}"></div>
-      <span style="font-size:10.5px;color:var(--ink-dim)">${referredCount} referred</span></div></td>
-      <td><div class="act-row" style="justify-content:flex-end">
-        <button class="ibtn gold" title="Manage referred users" onclick="showRefCodeUsers('${code}','${d.mobile||''}')">👥</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
-}
-
-function toggleRefCodeActive(code,currentActive){
-  db.ref('ReferralCodes/'+code+'/active').set(!currentActive).then(()=>{
-    logAudit(currentActive?'REF_CODE_DEACTIVATED':'REF_CODE_ACTIVATED',code);
-    toastOk('Code '+code+' '+(currentActive?'deactivated':'activated'));
-  });
-}
-
-// ── Referral management: who did THIS code bring in — full A-to-Z control ──
-let _refUsersCode='', _refUsersOwner='';
-function showRefCodeUsers(code, ownerMobile){
-  _refUsersCode=code; _refUsersOwner=ownerMobile;
-  document.getElementById('refUsersTitle').textContent = code;
-  document.getElementById('refUsersOwner').textContent = ownerMobile ? ('Owned by '+ownerMobile) : '';
-  renderRefUsersBody();
-  openOv('ovRefUsers');
-}
-function renderRefUsersBody(){
-  const code=_refUsersCode, ownerMobile=_refUsersOwner;
-  const referred = Object.keys(allUsers).filter(m => allUsers[m].referredBy === code);
-  const body = document.getElementById('refUsersBody');
-  if(referred.length === 0){
-    body.innerHTML = '<div class="empty" style="padding:36px 10px"><div class="ic">🔗</div><p>No one has used this code yet</p></div>';
-    return;
-  }
-  db.ref('Config/referralRewardDays').once('value').then(rdSnap=>{
-    let rewardDays=1; try{rewardDays=parseInt(rdSnap.val())||1;}catch(e){}
-    body.innerHTML = referred.map(m=>{
-      const u = allUsers[m];
-      let dep=0; Object.values(allDeposits[m]||{}).forEach(d=>dep+=parseFloat(d.amount||0));
-      const confirmed = dep>0;
-      const vipOn = u.vipKeyStatus==='ACTIVE'||u.vipKeyStatus==='USED';
-      const banned = u.accountStatus==='BLOCKED'||u.accountStatus==='SUSPENDED';
-      const refBlocked = !!u.referralBlocked;
-      const rewardGiven = !!u.referralRewardGiven;
-      const joined = u.referralUsedAt ? new Date(u.referralUsedAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-      return `<div class="ruCard">
-        <div class="ruTop">
-          <div>
-            <div class="ruMob mono">${m}</div>
-            <div class="ruMeta">UID: ${u.uid||'—'} · Joined ${joined}${refBlocked?' · <span style="color:var(--danger)">Referral Blocked</span>':''}</div>
-          </div>
-          <div class="ruBadges">
-            <span class="badge ${vipOn?'badge-vip':'badge-none'}">${vipOn?'👑 VIP':'None'}</span>
-            <span class="badge ${banned?'badge-blocked':'badge-active'}">${banned?'⛔ Banned':'● Active'}</span>
-          </div>
-        </div>
-        <div class="ruMid">
-          <div class="ruStat ${confirmed?'ok':'warn'}"><img src="${ICO_CLOCK}">${confirmed?('Confirmed · ₹'+dep.toLocaleString('en-IN')):'Deposit Pending'}</div>
-          <div class="ruStat ${rewardGiven?'ok':''}"><img src="${ICO_GIFT}">${rewardGiven?('Reward Given +'+rewardDays+'d'):'No Reward Yet'}</div>
-        </div>
-        <div class="ruActions">
-          <button class="ruBtn" onclick="closeOv('ovRefUsers');viewUser('${m}')">👁 View</button>
-          ${rewardGiven
-            ? `<button class="ruBtn danger" onclick="revokeReferralReward('${ownerMobile}','${m}',${rewardDays})"><img src="${ICO_GIFT}">Revoke Reward</button>`
-            : `<button class="ruBtn gold" onclick="grantReferralReward('${ownerMobile}','${m}',${rewardDays})"><img src="${ICO_GIFT}">Grant Reward</button>`}
-          <button class="ruBtn ${refBlocked?'mint':'danger'}" onclick="toggleReferralBlock('${m}',${refBlocked})">${refBlocked?'✅ Unblock Ref':'🚫 Block Ref'}</button>
-          <button class="ruBtn" onclick="resetReferralLink('${m}')">🔄 Reset Link</button>
-          <button class="ruBtn ${banned?'mint':'danger'}" onclick="${banned?'unbanUser':'banUser'}('${m}')">${banned?'✅ Unban':'⛔ Ban'}</button>
-          <button class="ruBtn danger" onclick="closeOv('ovRefUsers');openDelete('${m}')">🗑 Delete</button>
-        </div>
-      </div>`;
-    }).join('');
-  });
-}
-
-// ── Manual reward grant/revoke — credits/debits the REFERRER's VIP validUntil directly ──
-function grantReferralReward(referrerMobile, referredMobile, days){
-  if(!referrerMobile){toastErr('No referrer mobile on this code');return;}
-  const addMs = days*86400000;
-  db.ref('VIP/'+referrerMobile).once('value').then(vs=>{
-    const v=vs.val()||{};
-    const now=Date.now();
-    const cur = v.validUntil && v.validUntil>now ? v.validUntil : now;
-    const newUntil = cur+addMs;
-    const updates={};
-    updates['VIP/'+referrerMobile+'/validUntil']=newUntil;
-    updates['VIP/'+referrerMobile+'/status']='ACTIVE';
-    updates['Users/'+referredMobile+'/referralRewardGiven']=true;
-    return db.ref().update(updates);
-  }).then(()=>{
-    logAudit('REFERRAL_REWARD_GRANTED', referrerMobile+' +'+days+'d (via '+referredMobile+')');
-    toastOk('+'+days+'d granted to '+referrerMobile);
-    renderRefUsersBody();
-  }).catch(e=>toastErr('Failed: '+e.message));
-}
-function revokeReferralReward(referrerMobile, referredMobile, days){
-  if(!referrerMobile){toastErr('No referrer mobile on this code');return;}
-  const subMs = days*86400000;
-  db.ref('VIP/'+referrerMobile+'/validUntil').once('value').then(vs=>{
-    const cur=vs.val()||Date.now();
-    const newUntil=Math.max(Date.now(),cur-subMs);
-    const updates={};
-    updates['VIP/'+referrerMobile+'/validUntil']=newUntil;
-    updates['Users/'+referredMobile+'/referralRewardGiven']=false;
-    return db.ref().update(updates);
-  }).then(()=>{
-    logAudit('REFERRAL_REWARD_REVOKED', referrerMobile+' -'+days+'d (via '+referredMobile+')');
-    toastOk('Reward revoked for '+referrerMobile);
-    renderRefUsersBody();
-  }).catch(e=>toastErr('Failed: '+e.message));
-}
-
-// ── Block/unblock a single referral relationship (excludes it from rewards without touching the account) ──
-function toggleReferralBlock(mobile, currentlyBlocked){
-  db.ref('Users/'+mobile+'/referralBlocked').set(!currentlyBlocked).then(()=>{
-    logAudit(currentlyBlocked?'REFERRAL_UNBLOCKED':'REFERRAL_BLOCKED', mobile);
-    toastOk('Referral '+(currentlyBlocked?'unblocked':'blocked')+' for '+mobile);
-    renderRefUsersBody();
-  });
-}
-
-// ── Reset a user's referral link — clears referredBy so they can be referred again ──
-function resetReferralLink(mobile){
-  const updates={};
-  updates['Users/'+mobile+'/referredBy']=null;
-  updates['Users/'+mobile+'/referralUsed']=false;
-  updates['Users/'+mobile+'/referralUsedAt']=null;
-  updates['Users/'+mobile+'/referralRewardGiven']=false;
-  updates['Users/'+mobile+'/referralBlocked']=false;
-  db.ref().update(updates).then(()=>{
-    logAudit('REFERRAL_LINK_RESET', mobile);
-    toastOk('Referral link reset for '+mobile);
-    renderRefUsersBody();
-  });
-}
-
-// ── Ban / unban an account entirely ──
-function banUser(mobile){
-  db.ref('Users/'+mobile+'/accountStatus').set('BLOCKED').then(()=>{
-    logAudit('USER_BANNED', mobile);
-    toastOk(mobile+' banned');
-    renderRefUsersBody();
-  });
-}
-function unbanUser(mobile){
-  db.ref('Users/'+mobile+'/accountStatus').set('ACTIVE').then(()=>{
-    logAudit('USER_UNBANNED', mobile);
-    toastOk(mobile+' unbanned');
-    renderRefUsersBody();
-  });
-}
-function renderAudit(){
-  const tbody=document.getElementById('auditBody');tbody.innerHTML='';
-  const entries=Object.values(allAudit).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
-  entries.slice(0,150).forEach((a,i)=>{
-    const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.01)+'s';
-    tr.innerHTML=`<td><span class="badge badge-none">${a.actor||'—'}</span></td><td style="font-weight:800;font-size:12px">${a.action||'—'}</td>
-      <td class="mono" style="font-size:11.5px">${a.target||'—'}</td><td style="font-size:11px;color:var(--ink-dim)">${a.timestamp?new Date(a.timestamp).toLocaleString('en-IN'):'—'}</td>`;
-    tbody.appendChild(tr);
-  });
-  const feed=document.getElementById('dashAudit');
-  if(entries.length){feed.innerHTML=entries.slice(0,6).map(a=>`
-    <div style="display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px">
-      <span><b>${a.action||''}</b> <span style="color:var(--ink-dim)">· ${a.target||''}</span></span>
-      <span style="color:var(--ink-faint);font-size:10.5px;white-space:nowrap">${a.timestamp?new Date(a.timestamp).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}):''}</span>
-    </div>`).join('');}
-}
-function saveConfig(){
-  const cfg={autoVipAmount:parseFloat(document.getElementById('cfgAmt').value)||500,autoVipDuration:document.getElementById('cfgDur').value,
-    minDepositDetect:parseFloat(document.getElementById('cfgMin').value)||50,referralRewardDays:parseInt(document.getElementById('cfgRefDays').value)||1,
-    telegramLink:document.getElementById('cfgTg').value.trim(),downloadUrl:document.getElementById('cfgDl').value.trim(),autoVipEnabled:true};
-  db.ref('Config').update(cfg).then(()=>{logAudit('CONFIG_UPDATED','—');toastOk('Config saved');});
-}
-</script>
-</body>
-</html>
+    const u=allUsers[m];let dep=0;Object.values((allDeposits[m])||{}).forEach(d=>dep+=parseF
