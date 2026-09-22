@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>FUN XPro — Nova Admin</title>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -740,6 +743,35 @@ const ICO_CLOCK="data:image/webp;base64,UklGRhYOAABXRUJQVlA4IAoOAACQNgCdASqAAIAA
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={};
 let pendingMobile='';
 
+// ── Lightweight obfuscation for what we store in localStorage. This is
+//     NOT real encryption — anyone determined enough can still reverse it
+//     by reading this very script. What it DOES do: stop the URL and
+//     password from sitting in DevTools' Application > Local Storage tab
+//     as plain readable text on a casual glance.
+//     IMPORTANT — what this can NEVER hide: once you log in, the Firebase
+//     SDK has to send your Database URL over the network to actually
+//     connect. Anyone with the Network tab open will always see that
+//     request and the URL in it — that's true of every client-side web
+//     app that talks to Firebase, not something any code here can change.
+const _OBF_KEY='FUNXPRONOVA2026';
+function _obf(str){
+  try{
+    let out='';for(let i=0;i<str.length;i++)out+=String.fromCharCode(str.charCodeAt(i)^_OBF_KEY.charCodeAt(i%_OBF_KEY.length));
+    return btoa(unescape(encodeURIComponent(out)));
+  }catch(e){return '';}
+}
+function _deobf(b64){
+  try{
+    const str=decodeURIComponent(escape(atob(b64)));
+    let out='';for(let i=0;i<str.length;i++)out+=String.fromCharCode(str.charCodeAt(i)^_OBF_KEY.charCodeAt(i%_OBF_KEY.length));
+    return out;
+  }catch(e){return '{}';}
+}
+function _loadSavedLogin(){ try{return JSON.parse(_deobf(localStorage.getItem('fxa16_cfg')||''))||{};}catch(e){return {};} }
+function _saveLogin(url,pass){ try{localStorage.setItem('fxa16_cfg',_obf(JSON.stringify({url,pass})));}catch(e){} }
+
+console.log('%c FUN XPro Nova — admin script loaded ', 'background:#FFD700;color:#1a1204;font-weight:800;padding:4px 8px;border-radius:4px');
+
 // FIX: the whole function now runs inside a single try/catch. Previously,
 // if ANYTHING unexpected threw here (a blocked AudioContext, a storage
 // quota error, etc.) the entire click silently did nothing — no error,
@@ -747,31 +779,61 @@ let pendingMobile='';
 // onclick handler just aborts with no visible sign. Now any such failure
 // still surfaces a real message and un-sticks the button instead of the
 // tap appearing to do nothing.
+function showLoginError(msg){
+  console.error('[FUN XPro Nova] Login error:', msg);
+  const ge=document.getElementById('gateErr');
+  if(ge){
+    ge.textContent = msg;
+    ge.style.cssText = 'color:#fff;font-weight:800;font-size:12px;padding:10px 12px;'
+      +'background:rgba(255,75,92,.18);border:1px solid rgba(255,75,92,.5);border-radius:10px;'
+      +'margin-top:12px;text-align:center;';
+  }
+  // Absolute last-resort visibility net — if for any reason the styled
+  // banner above didn't render (DOM not ready, CSS conflict, whatever),
+  // this guarantees the person still SEES something concrete to report
+  // back instead of a silent dead button.
+  try{ if(!document.getElementById('gateErr')) alert('FUN XPro Nova — Login error: '+msg); }catch(e){}
+}
+
 function doLogin(fromAuto){
   try{
     if(!fromAuto){ try{clickSound();}catch(e){} }
     const url=document.getElementById('gFbUrl').value.trim();
     const pass=document.getElementById('gPass').value.trim();
-    let saved={}; try{saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');}catch(e){}
+    const saved=_loadSavedLogin();
     const finalUrl = url || saved.url;
     document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
-    if(!finalUrl){if(!fromAuto){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}return;}
+    const ge=document.getElementById('gateErr'); if(ge){ge.textContent='';ge.style.cssText='';}
+    if(!finalUrl){
+      if(!fromAuto){showLoginError('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}
+      return;
+    }
     if(pass!=='funxpro786' && pass!==saved.pass){
       if(fromAuto)return resetLoginBtn(); // stale/bad saved password — don't leave the button stuck, just fall back to manual
-      document.getElementById('gateErr').textContent='Incorrect password';
+      showLoginError('Incorrect password');
       document.getElementById('fPass').classList.add('err');
       const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
       return;
     }
-    // FIX: password + database URL now always saved together on every
-    // successful login — this is what makes the next visit able to
-    // auto-sign-in without retyping anything.
-    try{localStorage.setItem('fxa16_cfg',JSON.stringify({url:finalUrl,pass:pass}));}catch(e){}
+    if(typeof firebase==='undefined'){
+      // The Firebase SDK <script> tags in <head> didn't load — usually a
+      // network/CDN block. This is the #1 real-world cause of "the button
+      // does nothing": everything below this point needs `firebase` to
+      // exist, so we catch it explicitly with a message that actually
+      // says what's wrong instead of silently going nowhere.
+      showLoginError('Firebase SDK failed to load — check your internet connection and reload the page.');
+      resetLoginBtn();
+      return;
+    }
+    // FIX: password + database URL now saved together on every successful
+    // login, obfuscated (not plain text) in localStorage — this is what
+    // makes the next visit able to auto-sign-in without retyping anything.
+    _saveLogin(finalUrl,pass);
     const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
     setTimeout(()=>initFirebase(finalUrl),fromAuto?60:350);
   }catch(e){
     resetLoginBtn();
-    const ge=document.getElementById('gateErr'); if(ge) ge.textContent='Something went wrong: '+e.message;
+    showLoginError('Unexpected error — '+e.message);
   }
 }
 function resetLoginBtn(){
@@ -779,15 +841,15 @@ function resetLoginBtn(){
   if(btn){btn.classList.remove('loading');btn.innerHTML='Unlock Console →';}
 }
 
-// FIX: auto-fills BOTH fields from the saved login, then auto-submits
-// shortly after — the console unlocks itself with no typing or tapping
-// needed once you've logged in successfully once. Also self-heals: if
-// the gate hasn't actually gone away within 3s of an auto-attempt
-// (network stall, bad saved URL, anything), the button un-sticks itself
-// instead of sitting there looking dead with "Signing in…" forever.
+// FIX: auto-fills BOTH fields from the saved (obfuscated) login, then
+// auto-submits shortly after — the console unlocks itself with no typing
+// or tapping needed once you've logged in successfully once. Also self-
+// heals: if the gate hasn't actually gone away within 3s of an auto-
+// attempt (network stall, bad saved URL, anything), the button un-sticks
+// itself instead of sitting there looking dead with "Signing in…" forever.
 (function autoLogin(){
   try{
-    let saved={}; try{saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');}catch(e){}
+    const saved=_loadSavedLogin();
     if(saved.url) document.getElementById('gFbUrl').value=saved.url;
     if(saved.pass) document.getElementById('gPass').value=saved.pass;
     if(saved.url && saved.pass){
@@ -821,8 +883,8 @@ function initFirebase(url){
     setTimeout(()=>{document.getElementById('gate').style.display='none';burst.classList.remove('play');
       document.getElementById('app').classList.add('show','entering');loadAll();},680);
   }catch(e){
-    document.getElementById('gateErr').textContent='Connection failed: '+e.message;
-    const btn=document.getElementById('loginBtn');btn.classList.remove('loading');btn.innerHTML='Unlock Console →';
+    showLoginError('Connection failed — '+e.message);
+    resetLoginBtn();
   }
 }
 function goSec(name){
@@ -997,48 +1059,4 @@ function renderDeposits(){
   });
 }
 function addManualDeposit(){
-  const m=document.getElementById('mdMobile').value.trim();const amt=parseFloat(document.getElementById('mdAmount').value);
-  const autoVip=document.getElementById('mdAutoVip').checked;
-  if(!m||m.length<8){toastErr('Enter a valid mobile number');return;}
-  if(!amt||amt<=0){toastErr('Enter a valid amount');return;}
-  if(!allUsers[m]){toastErr('User not found: '+m);return;}
-  const now=Date.now();
-  db.ref('Users/'+m+'/balance').once('value',s=>{
-    const prevBal=parseFloat(s.val()||0);const newBal=prevBal+amt;
-    const dep={amount:amt,detectedAt:now,mobile:m,source:'MANUAL_ADMIN',prevBalance:prevBal,newBalance:newBal};
-    db.ref('DepositLogs/'+m).push(dep).then(()=>{
-      db.ref('Users/'+m).update({balance:String(newBal),currentBalance:String(newBal)});
-      logAudit('MANUAL_DEPOSIT_ADMIN',m+' +₹'+amt+' (wallet now ₹'+newBal+')');toastOk('₹'+amt+' added for '+m);
-      document.getElementById('mdMobile').value='';document.getElementById('mdAmount').value='';
-      if(autoVip) checkAutoVipThreshold(m,newBal);
-    });
-  });
-}
-function checkAutoVipThreshold(m,liveBal){
-  db.ref('Config').once('value',cs=>{const cfg=cs.val()||{};const threshold=parseFloat(cfg.autoVipAmount||500);const dur=cfg.autoVipDuration||'30days';
-    if(liveBal<threshold)return;
-    db.ref('VIP/'+m).once('value',vs=>{const v=vs.val()||{};
-      if(v.status==='ACTIVE'&&(v.validUntil===0||Date.now()<v.validUntil)){toastInfo(m+' already has active VIP');return;}
-      grantVipAdmin(m,dur);});
-  });
-}
-function vuFromDur(d){const n=Date.now();const map={'1day':864e5,'3days':2592e5,'7days':6048e5,'14days':12096e5,'30days':2592e6};return d&&map[d]?n+map[d]:0;}
-function makeVipKey(mobile){const C='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const S=mobile+'FUNXPRO';let k='';
-  for(let i=0;i<15;i++){let c=((S.charCodeAt(i%S.length)*31+i*7)%C.length+C.length)%C.length;k+=C[c];}
-  return 'FUN-'+k.slice(0,5)+'-'+k.slice(5,10)+'-'+k.slice(10,15);}
-function grantVipAdmin(m,dur){
-  const now=Date.now();const vu=vuFromDur(dur);const vk=makeVipKey(m);const updates={};
-  updates['VIP/'+m+'/status']='ACTIVE';updates['VIP/'+m+'/validUntil']=vu;updates['VIP/'+m+'/activatedAt']=now;updates['VIP/'+m+'/autoGranted']=true;
-  updates['Users/'+m+'/vipKey']=vk;updates['Users/'+m+'/vipKeyStatus']='ACTIVE';updates['Users/'+m+'/vipKeyDeviceId']='';
-  updates['Notifications/'+m+'/lastMsg']='👑 VIP granted by admin!';
-  db.ref().update(updates).then(()=>{logAudit('AUTO_VIP_ADMIN',m);toastOk('VIP granted to '+m);});
-}
-
-function renderVip(){
-  const tbody=document.getElementById('vipBody');tbody.innerHTML='';
-  const mobiles=Object.keys(allUsers).filter(m=>allUsers[m].vipKey);
-  mobiles.forEach((m,i)=>{
-    const u=allUsers[m];
-    db.ref('VIP/'+m+'/validUntil').once('value',s=>{
-      const vu=s.val();const vuTxt=vu===0?'Lifetime':(vu?new Date(vu).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}):'—');
-      const ksBadge = u.vipKeyStatus==='ACTIVE'?'<span class="badge badge-vi
+  const m=document.getElementById('mdMobile').value.trim();const amt=parseFloat(document.getElementB
