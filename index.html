@@ -89,31 +89,64 @@ body{
 @keyframes gateRise{from{opacity:0;transform:perspective(1000px) rotateX(-8deg) translateY(40px) scale(.94)}to{opacity:1;transform:none}}
 .gate-card.wrong{animation:gateShake .45s var(--sp)}
 @keyframes gateShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-11px) rotate(-.6deg)}30%{transform:translateX(9px) rotate(.5deg)}45%{transform:translateX(-7px)}60%{transform:translateX(6px)}75%{transform:translateX(-4px)}90%{transform:translateX(3px)}}
-.gate-holo-strip{height:4px;background:var(--holo);background-size:300% 100%;animation:holoShift 4s linear infinite}
-.gate-inner{padding:clamp(28px,7vw,38px) clamp(22px,6vw,32px) 30px}
-.gate-logo{width:68px;height:68px;border-radius:var(--r-lg);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(135deg,#241a08,#0d0902);position:relative;border:1px solid rgba(255,216,77,.35);
-  box-shadow:0 10px 32px rgba(255,190,0,.28), inset 0 1px 0 rgba(255,255,255,.06);animation:logoFloat 3.5s ease-in-out infinite}
+.gate-inner{padding:clamp(30px,7vw,40px) clamp(24px,6vw,34px) 28px;position:relative}
+
+/* ── HUD corner brackets — replaces the old top strip with a distinct
+     "targeting reticle" frame around the whole card ── */
+.hud-corner{position:absolute;width:22px;height:22px;z-index:3;pointer-events:none}
+.hud-corner.tl{top:-1px;left:-1px;border-top:2.5px solid var(--gold);border-left:2.5px solid var(--gold);border-radius:var(--r-xl) 0 0 0}
+.hud-corner.tr{top:-1px;right:-1px;border-top:2.5px solid var(--gold);border-right:2.5px solid var(--gold);border-radius:0 var(--r-xl) 0 0}
+.hud-corner.bl{bottom:-1px;left:-1px;border-bottom:2.5px solid var(--violet);border-left:2.5px solid var(--violet);border-radius:0 0 0 var(--r-xl)}
+.hud-corner.br{bottom:-1px;right:-1px;border-bottom:2.5px solid var(--violet);border-right:2.5px solid var(--violet);border-radius:0 0 var(--r-xl) 0}
+@keyframes hudPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hud-corner{animation:hudPulse 2.6s ease-in-out infinite}
+.hud-corner.tr,.hud-corner.bl{animation-delay:.6s}
+
+/* ── Hexagonal logo badge (was a rounded square) ── */
+.gate-logo-hex{position:relative;width:76px;height:76px;margin:0 auto 18px;animation:logoFloat 3.5s ease-in-out infinite}
 @keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(-3deg)}}
+.hex-ring{position:absolute;inset:0;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0% 50%);
+  background:linear-gradient(135deg,var(--gold),var(--violet),var(--gold));background-size:220% 220%;
+  animation:holoShift 5s linear infinite}
+.hex-inner{position:absolute;inset:3px;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0% 50%);
+  background:linear-gradient(145deg,#241a08,#0d0902);display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 20px rgba(255,190,0,.15)}
+
 .gate-title{text-align:center;font-size:clamp(19px,5vw,22px);font-weight:800;letter-spacing:-.2px}
-.gate-sub{text-align:center;font-size:12px;color:var(--ink-dim);margin-bottom:26px;margin-top:4px}
-.field{margin-bottom:13px;position:relative}
-.field label{display:block;font-size:10.5px;color:var(--ink-faint);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.field input{width:100%;padding:14px 15px;border-radius:var(--r-sm);border:1px solid var(--glass-brd);
-  background:rgba(255,255,255,.03);color:var(--ink);font-size:15px;outline:none;
-  transition:border-color .25s var(--sp), background .25s var(--sp), box-shadow .25s var(--sp);-webkit-appearance:none}
-.field input:focus{border-color:rgba(255,216,77,.5);background:rgba(255,255,255,.06);box-shadow:0 0 0 4px rgba(255,216,77,.08)}
-.field.err input{border-color:rgba(255,75,92,.6);animation:fieldFlash .5s var(--sp)}
-@keyframes fieldFlash{0%,100%{box-shadow:0 0 0 0 rgba(255,75,92,0)}30%{box-shadow:0 0 0 5px rgba(255,75,92,.18)}}
-.btn{cursor:pointer;border:none;border-radius:var(--r-sm);padding:14px 18px;font-weight:800;font-size:14px;
-  transition:transform .16s var(--sp), box-shadow .3s var(--sp), filter .2s;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px;position:relative;overflow:hidden;-webkit-appearance:none}
-.btn:active{transform:scale(.955)}
-.btn-primary{width:100%;background:linear-gradient(135deg,var(--gold),var(--amber));color:#1A1204;
-  box-shadow:0 12px 32px rgba(255,180,0,.3);margin-top:8px}
-.btn-primary:hover{box-shadow:0 16px 42px rgba(255,180,0,.42);filter:brightness(1.05)}
-.btn-primary.loading{pointer-events:none}
+.gate-sub{text-align:center;font-size:11px;color:var(--violet);font-weight:700;letter-spacing:2px;margin-bottom:26px;margin-top:5px}
+
+/* ── Icon-prefixed input rows (was plain boxed inputs) ── */
+.gfield{display:flex;align-items:flex-end;gap:10px;margin-bottom:14px;position:relative}
+.gficon{font-size:16px;padding-bottom:13px;flex-shrink:0;opacity:.7}
+.gfwrap{flex:1;min-width:0}
+.gfwrap label{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.gfwrap input{width:100%;padding:12px 2px;border:none;border-bottom:1.5px solid var(--glass-brd);
+  background:transparent;color:var(--ink);font-size:15px;outline:none;border-radius:0;
+  transition:border-color .25s var(--sp);-webkit-appearance:none}
+.gfwrap input:focus{border-bottom-color:var(--gold)}
+.gfield.err .gfwrap input{border-bottom-color:var(--danger);animation:fieldFlash .5s var(--sp)}
+@keyframes fieldFlash{0%,100%{opacity:1}30%{opacity:.55}}
+
+/* ── Sweeping-shine button (was a flat gradient) ── */
+.gbtn{width:100%;margin-top:10px;cursor:pointer;border:none;border-radius:var(--r-sm);padding:15px 18px;
+  font-weight:800;font-size:13px;letter-spacing:1px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--gold),var(--amber));color:#1A1204;
+  box-shadow:0 12px 32px rgba(255,180,0,.3);display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .16s var(--sp), box-shadow .3s var(--sp)}
+.gbtn:active{transform:scale(.96)}
+.gbtn:hover{box-shadow:0 16px 42px rgba(255,180,0,.42)}
+.gbtn.loading{pointer-events:none}
+.gbtn-shine{position:absolute;top:0;bottom:0;width:40%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+  transform:skewX(-20deg);animation:gbtnSweep 2.8s ease-in-out infinite}
+@keyframes gbtnSweep{0%{left:-50%}100%{left:130%}}
+.gbtn-arrow{font-size:15px}
+
 .gate-err{color:var(--danger);font-size:11.5px;margin-top:11px;text-align:center;min-height:14px}
+.gate-status{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:18px;
+  font-size:9.5px;letter-spacing:1.2px;color:var(--ink-faint);font-weight:700}
+.gstat-dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 6px rgba(0,227,168,.7);
+  animation:hudPulse 1.4s ease-in-out infinite}
 
 #successBurst{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0}
 #successBurst.play{opacity:1}
@@ -371,24 +404,43 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 <!-- ═══ AUTH GATE ═══ -->
 <div id="gate">
   <div class="gate-card" id="gateCard">
-    <div class="gate-holo-strip"></div>
+    <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+    <div class="hud-corner bl"></div><div class="hud-corner br"></div>
     <div class="gate-inner">
-      <div class="gate-logo"><div class="crown-mark" style="width:100%;height:100%;animation:crownFloat 3s ease-in-out infinite">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:60%;height:60%">
-          <path d="M8 46L4 20L18 30L32 12L46 30L60 20L56 46H8Z" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2" stroke-linejoin="round"/>
-          <rect x="8" y="46" width="48" height="7" rx="2" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2"/>
-          <circle cx="32" cy="12" r="3.2" fill="#FF5E9E"/><circle cx="4" cy="20" r="2.6" fill="#4FE3D8"/><circle cx="60" cy="20" r="2.6" fill="#4FE3D8"/>
-          <circle cx="32" cy="36" r="3" fill="#FF5E9E" opacity=".9"/>
-        </svg>
-      </div></div>
+      <div class="gate-logo-hex">
+        <div class="hex-ring"></div>
+        <div class="hex-inner">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+            <path d="M8 46L4 20L18 30L32 12L46 30L60 20L56 46H8Z" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2" stroke-linejoin="round"/>
+            <rect x="8" y="46" width="48" height="7" rx="2" fill="url(#crownGrad)" stroke="#FFF4CC" stroke-width="1.2"/>
+            <circle cx="32" cy="12" r="3.2" fill="#FF5E9E"/><circle cx="4" cy="20" r="2.6" fill="#4FE3D8"/><circle cx="60" cy="20" r="2.6" fill="#4FE3D8"/>
+            <circle cx="32" cy="36" r="3" fill="#FF5E9E" opacity=".9"/>
+          </svg>
+        </div>
+      </div>
       <div class="gate-title holo-text">FUN XPro Nova</div>
-      <div class="gate-sub">Sign in to your command center</div>
-      <div class="field" id="fUrl"><label>Firebase Database URL</label>
-        <input id="gFbUrl" placeholder="https://your-project.firebaseio.com"></div>
-      <div class="field" id="fPass"><label>Admin Password</label>
-        <input id="gPass" type="password" placeholder="••••••••"></div>
-      <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Unlock Console →</button>
+      <div class="gate-sub">〈 ACCESS TERMINAL 〉</div>
+
+      <div class="gfield" id="fUrl">
+        <span class="gficon">🔗</span>
+        <div class="gfwrap">
+          <label>Firebase Database URL</label>
+          <input id="gFbUrl" placeholder="https://your-project.firebaseio.com">
+        </div>
+      </div>
+      <div class="gfield" id="fPass">
+        <span class="gficon">🔒</span>
+        <div class="gfwrap">
+          <label>Admin Password</label>
+          <input id="gPass" type="password" placeholder="••••••••">
+        </div>
+      </div>
+
+      <button class="gbtn" id="loginBtn" onclick="doLogin()">
+        <span class="gbtn-shine"></span><span class="gbtn-txt">UNLOCK CONSOLE</span><span class="gbtn-arrow">➜</span>
+      </button>
       <div class="gate-err" id="gateErr"></div>
+      <div class="gate-status"><span class="gstat-dot"></span>SECURE CONNECTION</div>
     </div>
   </div>
 </div>
@@ -711,22 +763,41 @@ document.addEventListener('click',function(e){
 },true);
 
 // ═══ PARTICLE FIELD ═══
-(function(){
-  const cvs=document.getElementById('pField');const ctx=cvs.getContext('2d');let w,h,pts=[];
-  function resize(){w=cvs.width=innerWidth;h=cvs.height=innerHeight;pts=[];const n=Math.min(50,Math.floor(w*h/28000));
-    for(let i=0;i<n;i++)pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22});}
-  function step(){
-    ctx.clearRect(0,0,w,h);
-    for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
-    for(let i=0;i<pts.length;i++){
-      ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,1.4,0,7);ctx.fillStyle='rgba(255,216,77,.35)';ctx.fill();
-      for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-        if(d<115){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(139,124,255,'+(0.12*(1-d/115))+')';ctx.lineWidth=1;ctx.stroke();}}
+// ROOT-CAUSE FIX: this whole block was NOT wrapped in try/catch. On some
+// devices/browsers (low-end Android, data-saver / "Lite" modes) canvas
+// getContext('2d') can come back null instead of throwing gracefully —
+// and since this IIFE runs immediately at script-parse time, an
+// unguarded throw here HALTS EVERYTHING defined after it in this same
+// <script> block. That means doLogin, autoLogin, initFirebase — the
+// entire login system — would silently never get defined, which is
+// exactly "click karta hoon kuch nahi hota, no error, no animation."
+// Wrapping it means a decorative background effect can now fail
+// quietly on unusual devices without ever being able to take the login
+// system down with it.
+try{
+  (function(){
+    const cvs=document.getElementById('pField');
+    if(!cvs)return;
+    const ctx=cvs.getContext('2d');
+    if(!ctx)return;
+    let w,h,pts=[];
+    function resize(){w=cvs.width=innerWidth;h=cvs.height=innerHeight;pts=[];const n=Math.min(50,Math.floor(w*h/28000));
+      for(let i=0;i<n;i++)pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22});}
+    function step(){
+      try{
+        ctx.clearRect(0,0,w,h);
+        for(const p of pts){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;}
+        for(let i=0;i<pts.length;i++){
+          ctx.beginPath();ctx.arc(pts[i].x,pts[i].y,1.4,0,7);ctx.fillStyle='rgba(255,216,77,.35)';ctx.fill();
+          for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+            if(d<115){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle='rgba(139,124,255,'+(0.12*(1-d/115))+')';ctx.lineWidth=1;ctx.stroke();}}
+        }
+        requestAnimationFrame(step);
+      }catch(e){} // a frame failing never kills the animation loop or anything else again
     }
-    requestAnimationFrame(step);
-  }
-  resize();window.addEventListener('resize',resize);step();
-})();
+    resize();window.addEventListener('resize',resize);step();
+  })();
+}catch(e){ console.error('[FUN XPro Nova] Particle field failed to start (non-fatal):', e); }
 
 function tilt3d(e,el){
   if(window.innerWidth<=780)return;
@@ -838,7 +909,8 @@ function doLogin(fromAuto){
 }
 function resetLoginBtn(){
   const btn=document.getElementById('loginBtn');
-  if(btn){btn.classList.remove('loading');btn.innerHTML='Unlock Console →';}
+  if(btn){btn.classList.remove('loading');
+    btn.innerHTML='<span class="gbtn-shine"></span><span class="gbtn-txt">UNLOCK CONSOLE</span><span class="gbtn-arrow">➜</span>';}
 }
 
 // FIX: auto-fills BOTH fields from the saved (obfuscated) login, then
@@ -1019,44 +1091,4 @@ function viewUser(m){
     openOv('ovDetail');
   });
 }
-function openRevoke(m){pendingMobile=m;document.getElementById('revokeMob').textContent=m;openOv('ovRevoke');}
-function confirmRevokeVip(){
-  const btn=document.getElementById('revokeBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div>';
-  const m=pendingMobile;const updates={};updates['VIP/'+m]=null;
-  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';updates['Users/'+m+'/vipKeyDeviceId']=null;
-  updates['Users/'+m+'/vipKeyUsedAt']=null;updates['Users/'+m+'/vipKeyBrand']=null;updates['Users/'+m+'/vipKeyModel']=null;
-  db.ref().update(updates).then(()=>{logAudit('VIP_REVOKED_ADMIN',m);toastOk('VIP revoked for '+m);closeOv('ovRevoke');btn.disabled=false;btn.innerHTML='Revoke VIP';})
-  .catch(e=>{toastErr('Failed: '+e.message);btn.disabled=false;btn.innerHTML='Revoke VIP';});
-}
-function openDelete(m){pendingMobile=m;document.getElementById('deleteMob').textContent=m;
-  document.getElementById('deleteConfirmInput').value='';document.getElementById('deleteBtn').disabled=true;
-  openOv('ovDelete');setTimeout(()=>document.getElementById('deleteConfirmInput').focus(),350);}
-function checkDeleteConfirm(){const val=document.getElementById('deleteConfirmInput').value.trim();document.getElementById('deleteBtn').disabled = (val!==pendingMobile);}
-function confirmDeleteUser(){
-  const m=pendingMobile;const btn=document.getElementById('deleteBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div> Deleting…';
-  const u=allUsers[m]||{};const refCode=u.referralCode;const updates={};
-  updates['Users/'+m]=null;updates['dbRef/'+m]=null;updates['VIP/'+m]=null;updates['DepositLogs/'+m]=null;updates['Notifications/'+m]=null;
-  if(refCode) updates['ReferralCodes/'+refCode]=null;
-  db.ref('VipEntitlements').orderByChild('mobile').equalTo(m).once('value').then(entSnap=>{
-    entSnap.forEach(child=>{ updates['VipEntitlements/'+child.key]=null; });return db.ref().update(updates);
-  }).then(()=>{logAudit('USER_DELETED_ADMIN',m+(refCode?' (code:'+refCode+')':''));toastOk('User '+m+' fully deleted');closeOv('ovDelete');
-    btn.disabled=false;btn.innerHTML='Delete Everything';
-  }).catch(e=>{toastErr('Delete failed: '+e.message);btn.disabled=false;btn.innerHTML='Delete Everything';});
-}
-
-function renderDeposits(){
-  const tbody=document.getElementById('depsBody');tbody.innerHTML='';let rows=[];
-  Object.keys(allDeposits).forEach(m=>{Object.entries(allDeposits[m]||{}).forEach(([id,d])=>{rows.push({mobile:m,...d});});});
-  rows.sort((a,b)=>(b.detectedAt||0)-(a.detectedAt||0));
-  document.getElementById('depsEmpty').style.display=rows.length?'none':'block';
-  rows.slice(0,150).forEach((d,i)=>{
-    const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.015)+'s';
-    tr.innerHTML=`<td class="mono">${d.mobile}</td><td class="mono" style="color:var(--mint);font-weight:800">₹${parseFloat(d.amount||0).toLocaleString('en-IN')}</td>
-      <td><span class="badge ${d.source==='MANUAL_ADMIN'?'badge-warn':'badge-none'}">${d.source||'—'}</span></td>
-      <td>${d.vipGranted?'<span class="badge badge-vip">✓ Yes</span>':'—'}</td>
-      <td style="font-size:11px;color:var(--ink-dim)">${d.detectedAt?new Date(d.detectedAt).toLocaleString('en-IN'):'—'}</td>`;
-    tbody.appendChild(tr);
-  });
-}
-function addManualDeposit(){
-  const m=document.getElementById('mdMobile').value.trim();const amt=parseFloat(document.getElementB
+function openRevoke(m){
