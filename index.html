@@ -444,7 +444,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
       <div style="text-align:center;margin-top:10px">
         <span id="clearDataLink" style="font-size:9.5px;color:rgba(255,255,255,.25);text-decoration:underline;cursor:pointer">Reset saved login</span>
       </div>
-      <div style="text-align:center;margin-top:6px;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:1px">BUILD v25</div>
+      <div style="text-align:center;margin-top:6px;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:1px">BUILD v26</div>
     </div>
   </div>
 </div>
@@ -670,6 +670,8 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
 </div>
 
 <script>
+alert('FUN XPro Nova script started loading — Build v26');
+console.log('[FUN XPro Nova] Inline script execution confirmed — Build v26');
 // ═══════════════════════════════════════════
 //  BACKGROUND VIDEO — sound-unlock + seamless loop
 //  Hosted on GitHub (raw.githubusercontent.com serves
@@ -1111,6 +1113,4 @@ function openRevoke(m){pendingMobile=m;document.getElementById('revokeMob').text
 function confirmRevokeVip(){
   const btn=document.getElementById('revokeBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div>';
   const m=pendingMobile;const updates={};updates['VIP/'+m]=null;
-  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';updates['Users/'+m+'/vipKeyDeviceId']=null;
-  updates['Users/'+m+'/vipKeyUsedAt']=null;updates['Users/'+m+'/vipKeyBrand']=null;updates['Users/'+m+'/vipKeyModel']=null;
-  db.re
+  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';updates['Users/'+m+'/vipKeyDeviceId']=
