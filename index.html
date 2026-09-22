@@ -436,12 +436,15 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
         </div>
       </div>
 
-      <button class="gbtn" id="loginBtn" onclick="doLogin()">
+      <button class="gbtn" id="loginBtn" type="button">
         <span class="gbtn-shine"></span><span class="gbtn-txt">UNLOCK CONSOLE</span><span class="gbtn-arrow">➜</span>
       </button>
       <div class="gate-err" id="gateErr"></div>
       <div class="gate-status"><span class="gstat-dot"></span>SECURE CONNECTION</div>
-      <div style="text-align:center;margin-top:8px;font-size:9px;color:rgba(255,255,255,.2);letter-spacing:1px">BUILD v23</div>
+      <div style="text-align:center;margin-top:10px">
+        <span id="clearDataLink" style="font-size:9.5px;color:rgba(255,255,255,.25);text-decoration:underline;cursor:pointer">Reset saved login</span>
+      </div>
+      <div style="text-align:center;margin-top:6px;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:1px">BUILD v25</div>
     </div>
   </div>
 </div>
@@ -815,97 +818,62 @@ const ICO_CLOCK="data:image/webp;base64,UklGRhYOAABXRUJQVlA4IAoOAACQNgCdASqAAIAA
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={};
 let pendingMobile='';
 
-// ── Lightweight obfuscation for what we store in localStorage. This is
-//     NOT real encryption — anyone determined enough can still reverse it
-//     by reading this very script. What it DOES do: stop the URL and
-//     password from sitting in DevTools' Application > Local Storage tab
-//     as plain readable text on a casual glance.
-//     IMPORTANT — what this can NEVER hide: once you log in, the Firebase
-//     SDK has to send your Database URL over the network to actually
-//     connect. Anyone with the Network tab open will always see that
-//     request and the URL in it — that's true of every client-side web
-//     app that talks to Firebase, not something any code here can change.
-const _OBF_KEY='FUNXPRONOVA2026';
-function _obf(str){
-  try{
-    let out='';for(let i=0;i<str.length;i++)out+=String.fromCharCode(str.charCodeAt(i)^_OBF_KEY.charCodeAt(i%_OBF_KEY.length));
-    return btoa(unescape(encodeURIComponent(out)));
-  }catch(e){return '';}
-}
-function _deobf(b64){
-  try{
-    const str=decodeURIComponent(escape(atob(b64)));
-    let out='';for(let i=0;i<str.length;i++)out+=String.fromCharCode(str.charCodeAt(i)^_OBF_KEY.charCodeAt(i%_OBF_KEY.length));
-    return out;
-  }catch(e){return '{}';}
-}
-function _loadSavedLogin(){ try{return JSON.parse(_deobf(localStorage.getItem('fxa16_cfg')||''))||{};}catch(e){return {};} }
-function _saveLogin(url,pass){ try{localStorage.setItem('fxa16_cfg',_obf(JSON.stringify({url,pass})));}catch(e){} }
+// ═══════════════════════════════════════════
+//  LOGIN SYSTEM — v25 rebuild: intentionally as simple and defensive
+//  as possible. No auto-submit, no obfuscation, no timing-dependent
+//  auto-login IIFE — every one of those was a possible (even if never
+//  fully confirmed) point of silent failure. This version:
+//   • wires the button via addEventListener after window 'load' —
+//     removes any chance of a script-order/timing race
+//   • auto-clears any localStorage saved by an older build on first
+//     run of this version, so stale/incompatible saved data from
+//     earlier iterations can never silently interfere again
+//   • logs every step to console so a real failure is diagnosable
+//   • never auto-submits — you always get one deliberate tap, and
+//     that tap always does something visible (success, error, or an
+//     explicit "please reload" message if the page itself didn't
+//     finish loading correctly)
+// ═══════════════════════════════════════════
+const APP_BUILD = 'v25';
+const LOGIN_KEY = 'fxa_login_v2'; // new key name — never collides with any older build's saved format
 
-console.log('%c FUN XPro Nova — admin script loaded ', 'background:#FFD700;color:#1a1204;font-weight:800;padding:4px 8px;border-radius:4px');
+function safeGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function safeRemove(k){ try{ localStorage.removeItem(k); }catch(e){} }
 
-// FIX: the whole function now runs inside a single try/catch. Previously,
-// if ANYTHING unexpected threw here (a blocked AudioContext, a storage
-// quota error, etc.) the entire click silently did nothing — no error,
-// no loading state, nothing — because an uncaught exception in an
-// onclick handler just aborts with no visible sign. Now any such failure
-// still surfaces a real message and un-sticks the button instead of the
-// tap appearing to do nothing.
+(function autoClearOldBuildData(){
+  try{
+    if(safeGet('fxa_build') !== APP_BUILD){
+      const toRemove=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i);
+        if(k && k.indexOf('fxa')===0) toRemove.push(k);
+      }
+      toRemove.forEach(safeRemove);
+      safeSet('fxa_build', APP_BUILD);
+      console.log('[FUN XPro Nova] New build detected — cleared '+toRemove.length+' old saved key(s).');
+    }
+  }catch(e){}
+})();
+
+function loadSavedLogin(){ try{ const r=safeGet(LOGIN_KEY); return r?JSON.parse(r):{}; }catch(e){ return {}; } }
+function saveLogin(url,pass){ saveLoginRaw({url,pass}); }
+function saveLoginRaw(obj){ try{ safeSet(LOGIN_KEY, JSON.stringify(obj)); }catch(e){} }
+function clearSavedLogin(){
+  safeRemove(LOGIN_KEY);
+  const u=document.getElementById('gFbUrl'), p=document.getElementById('gPass');
+  if(u) u.value=''; if(p) p.value='';
+  showLoginError('Saved login cleared — enter your details fresh.');
+}
+
 function showLoginError(msg){
-  console.error('[FUN XPro Nova] Login error:', msg);
+  console.log('[FUN XPro Nova]', msg);
   const ge=document.getElementById('gateErr');
   if(ge){
-    ge.textContent = msg;
-    ge.style.cssText = 'color:#fff;font-weight:800;font-size:12px;padding:10px 12px;'
+    ge.textContent=msg;
+    ge.style.cssText='color:#fff;font-weight:800;font-size:12px;padding:10px 12px;'
       +'background:rgba(255,75,92,.18);border:1px solid rgba(255,75,92,.5);border-radius:10px;'
       +'margin-top:12px;text-align:center;';
-  }
-  // Absolute last-resort visibility net — if for any reason the styled
-  // banner above didn't render (DOM not ready, CSS conflict, whatever),
-  // this guarantees the person still SEES something concrete to report
-  // back instead of a silent dead button.
-  try{ if(!document.getElementById('gateErr')) alert('FUN XPro Nova — Login error: '+msg); }catch(e){}
-}
-
-function doLogin(fromAuto){
-  try{
-    if(!fromAuto){ try{clickSound();}catch(e){} }
-    const url=document.getElementById('gFbUrl').value.trim();
-    const pass=document.getElementById('gPass').value.trim();
-    const saved=_loadSavedLogin();
-    const finalUrl = url || saved.url;
-    document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
-    const ge=document.getElementById('gateErr'); if(ge){ge.textContent='';ge.style.cssText='';}
-    if(!finalUrl){
-      if(!fromAuto){showLoginError('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}
-      return;
-    }
-    if(pass!=='funxpro786' && pass!==saved.pass){
-      if(fromAuto)return resetLoginBtn(); // stale/bad saved password — don't leave the button stuck, just fall back to manual
-      showLoginError('Incorrect password');
-      document.getElementById('fPass').classList.add('err');
-      const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
-      return;
-    }
-    if(typeof firebase==='undefined'){
-      // The Firebase SDK <script> tags in <head> didn't load — usually a
-      // network/CDN block. This is the #1 real-world cause of "the button
-      // does nothing": everything below this point needs `firebase` to
-      // exist, so we catch it explicitly with a message that actually
-      // says what's wrong instead of silently going nowhere.
-      showLoginError('Firebase SDK failed to load — check your internet connection and reload the page.');
-      resetLoginBtn();
-      return;
-    }
-    // FIX: password + database URL now saved together on every successful
-    // login, obfuscated (not plain text) in localStorage — this is what
-    // makes the next visit able to auto-sign-in without retyping anything.
-    _saveLogin(finalUrl,pass);
-    const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
-    setTimeout(()=>initFirebase(finalUrl),fromAuto?60:350);
-  }catch(e){
-    resetLoginBtn();
-    showLoginError('Unexpected error — '+e.message);
   }
 }
 function resetLoginBtn(){
@@ -914,52 +882,99 @@ function resetLoginBtn(){
     btn.innerHTML='<span class="gbtn-shine"></span><span class="gbtn-txt">UNLOCK CONSOLE</span><span class="gbtn-arrow">➜</span>';}
 }
 
-// FIX: auto-fills BOTH fields from the saved (obfuscated) login, then
-// auto-submits shortly after — the console unlocks itself with no typing
-// or tapping needed once you've logged in successfully once. Also self-
-// heals: if the gate hasn't actually gone away within 3s of an auto-
-// attempt (network stall, bad saved URL, anything), the button un-sticks
-// itself instead of sitting there looking dead with "Signing in…" forever.
-(function autoLogin(){
-  try{
-    const saved=_loadSavedLogin();
-    if(saved.url) document.getElementById('gFbUrl').value=saved.url;
-    if(saved.pass) document.getElementById('gPass').value=saved.pass;
-    if(saved.url && saved.pass){
-      const btn=document.getElementById('loginBtn');
-      btn.innerHTML='<div class="orbit-loader"></div> Signing in…';
-      btn.classList.add('loading');
-      setTimeout(()=>doLogin(true),250);
-      setTimeout(()=>{
-        const gate=document.getElementById('gate');
-        if(gate && gate.style.display!=='none'){ resetLoginBtn(); }
-      },3000);
-    }
-  }catch(e){ resetLoginBtn(); }
-})();
+function handleLoginClick(){
+  console.log('[FUN XPro Nova] Unlock Console tapped');
+  try{ if(typeof clickSound==='function') clickSound(); }catch(e){}
 
-function initFirebase(url){
-  try{
-    // FIX: re-attempting login within the same page load (e.g. after a
-    // failed first try) used to crash here — firebase.initializeApp()
-    // throws "app already exists" if it's called a second time in one
-    // page session. Now we reuse the existing app instead of dying on it.
-    if(firebase.apps && firebase.apps.length){
-      db = firebase.apps[0].database();
-    } else {
-      firebase.initializeApp({databaseURL:url});
-      db = firebase.database();
-    }
-    const burst=document.getElementById('successBurst');burst.classList.add('play');
-    setTimeout(()=>{document.getElementById('gate').style.opacity='0';document.getElementById('gate').style.transform='scale(1.04)';
-      document.getElementById('gate').style.transition='opacity .4s var(--sp), transform .4s var(--sp)';document.getElementById('gate').style.pointerEvents='none';},250);
-    setTimeout(()=>{document.getElementById('gate').style.display='none';burst.classList.remove('play');
-      document.getElementById('app').classList.add('show','entering');loadAll();},680);
-  }catch(e){
-    showLoginError('Connection failed — '+e.message);
-    resetLoginBtn();
+  const urlField=document.getElementById('gFbUrl');
+  const passField=document.getElementById('gPass');
+  if(!urlField || !passField){
+    alert('FUN XPro Nova: the login form did not load correctly. Please fully reload the page.');
+    return;
   }
+  const url=urlField.value.trim();
+  const pass=passField.value.trim();
+  const saved=loadSavedLogin();
+  const finalUrl=url || saved.url || '';
+
+  const fUrl=document.getElementById('fUrl'), fPass=document.getElementById('fPass');
+  if(fUrl) fUrl.classList.remove('err'); if(fPass) fPass.classList.remove('err');
+  const ge=document.getElementById('gateErr'); if(ge){ge.textContent='';ge.style.cssText='';}
+
+  if(!finalUrl){
+    showLoginError('Enter your Firebase Database URL');
+    if(fUrl) fUrl.classList.add('err');
+    return;
+  }
+  if(pass!=='funxpro786' && pass!==saved.pass){
+    showLoginError('Incorrect password');
+    if(fPass) fPass.classList.add('err');
+    const card=document.getElementById('gateCard');
+    if(card){card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');}
+    return;
+  }
+  if(typeof firebase==='undefined'){
+    showLoginError('Firebase library failed to load — check your internet connection and reload the page.');
+    return;
+  }
+
+  saveLogin(finalUrl,pass);
+  const btn=document.getElementById('loginBtn');
+  if(btn){btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';}
+
+  setTimeout(function(){
+    try{
+      if(firebase.apps && firebase.apps.length){
+        db=firebase.apps[0].database();
+      }else{
+        firebase.initializeApp({databaseURL:finalUrl});
+        db=firebase.database();
+      }
+      console.log('[FUN XPro Nova] Firebase connected — opening dashboard');
+      const burst=document.getElementById('successBurst');
+      if(burst) burst.classList.add('play');
+      setTimeout(function(){
+        const gate=document.getElementById('gate');
+        if(gate){
+          gate.style.opacity='0';gate.style.transform='scale(1.04)';
+          gate.style.transition='opacity .4s ease, transform .4s ease';gate.style.pointerEvents='none';
+        }
+      },250);
+      setTimeout(function(){
+        const gate=document.getElementById('gate');
+        if(gate) gate.style.display='none';
+        if(burst) burst.classList.remove('play');
+        const app=document.getElementById('app');
+        if(app) app.classList.add('show','entering');
+        loadAll();
+      },680);
+    }catch(e){
+      console.error('[FUN XPro Nova] Firebase connect failed:', e);
+      showLoginError('Connection failed — '+e.message);
+      resetLoginBtn();
+    }
+  },300);
 }
+
+// Wired only after the window has FULLY finished loading — the safest
+// possible timing, removes any dependency on script execution order.
+window.addEventListener('load', function(){
+  try{
+    console.log('[FUN XPro Nova] Build '+APP_BUILD+' — window loaded, wiring gate');
+    const saved=loadSavedLogin();
+    if(saved.url){ const f=document.getElementById('gFbUrl'); if(f) f.value=saved.url; }
+    // Password is intentionally NOT pre-filled or auto-submitted — every
+    // login is one deliberate, visible tap. This removes every timing
+    // edge case the old auto-login flow could hit.
+    const btn=document.getElementById('loginBtn');
+    if(btn) btn.addEventListener('click', handleLoginClick);
+    const clearLink=document.getElementById('clearDataLink');
+    if(clearLink) clearLink.addEventListener('click', clearSavedLogin);
+  }catch(e){
+    console.error('[FUN XPro Nova] Gate wiring failed:', e);
+  }
+});
+
 function goSec(name){
   document.querySelectorAll('.dock-item,.ti').forEach(n=>n.classList.toggle('active',n.dataset.sec===name));
   const moreTab=document.getElementById('moreTab');
@@ -1088,4 +1103,14 @@ function viewUser(m){
       <div class="kv"><b>Referred By</b><span>${u.referredBy||'—'}</span></div>
       <div class="kv" style="border-bottom:none"><b>Battery @ Register</b><span>${u.battery||'—'}</span></div>
       <div class="sheet-actions" style="margin-top:17px"><button class="btn btn-ghost" onclick="closeOv('ovDetail')">Close</button>
-      <button class="btn btn-gold" oncl
+      <button class="btn btn-gold" onclick="closeOv('ovDetail');openRevoke('${m}')">Manage VIP</button></div>`;
+    openOv('ovDetail');
+  });
+}
+function openRevoke(m){pendingMobile=m;document.getElementById('revokeMob').textContent=m;openOv('ovRevoke');}
+function confirmRevokeVip(){
+  const btn=document.getElementById('revokeBtn');btn.disabled=true;btn.innerHTML='<div class="orbit-loader"></div>';
+  const m=pendingMobile;const updates={};updates['VIP/'+m]=null;
+  updates['Users/'+m+'/vipKey']=null;updates['Users/'+m+'/vipKeyStatus']='NONE';updates['Users/'+m+'/vipKeyDeviceId']=null;
+  updates['Users/'+m+'/vipKeyUsedAt']=null;updates['Users/'+m+'/vipKeyBrand']=null;updates['Users/'+m+'/vipKeyModel']=null;
+  db.re
