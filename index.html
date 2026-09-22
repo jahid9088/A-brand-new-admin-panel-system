@@ -740,36 +740,64 @@ const ICO_CLOCK="data:image/webp;base64,UklGRhYOAABXRUJQVlA4IAoOAACQNgCdASqAAIAA
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={};
 let pendingMobile='';
 
-function doLogin(){
-  clickSound();
+function doLogin(fromAuto){
+  if(!fromAuto) clickSound();
   const url=document.getElementById('gFbUrl').value.trim();
   const pass=document.getElementById('gPass').value.trim();
   const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');
   const finalUrl = url || saved.url;
   document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
-  if(!finalUrl){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');return;}
+  if(!finalUrl){if(!fromAuto){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}return;}
   if(pass!=='funxpro786' && pass!==saved.pass){
+    if(fromAuto)return; // a stale/bad saved password shouldn't auto-flash an error at the person — just let them log in manually
     document.getElementById('gateErr').textContent='Incorrect password';
     document.getElementById('fPass').classList.add('err');
     const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
     return;
   }
+  // FIX: password + database URL now always saved together on every
+  // successful login — this is what makes the next visit able to
+  // auto-sign-in without retyping anything.
   localStorage.setItem('fxa16_cfg',JSON.stringify({url:finalUrl,pass:pass}));
   const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
-  setTimeout(()=>initFirebase(finalUrl),350);
+  setTimeout(()=>initFirebase(finalUrl),fromAuto?60:350);
 }
-(function autoLogin(){const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');if(saved.url)document.getElementById('gFbUrl').value=saved.url;})();
+
+// FIX: auto-fills BOTH fields from the saved login, then auto-submits
+// shortly after — the console unlocks itself with no typing or tapping
+// needed once you've logged in successfully once.
+(function autoLogin(){
+  const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');
+  if(saved.url) document.getElementById('gFbUrl').value=saved.url;
+  if(saved.pass) document.getElementById('gPass').value=saved.pass;
+  if(saved.url && saved.pass){
+    document.getElementById('loginBtn').innerHTML='<div class="orbit-loader"></div> Signing in…';
+    document.getElementById('loginBtn').classList.add('loading');
+    setTimeout(()=>doLogin(true),250);
+  }
+})();
 
 function initFirebase(url){
   try{
-    firebase.initializeApp({databaseURL:url});db=firebase.database();
+    // FIX: re-attempting login within the same page load (e.g. after a
+    // failed first try) used to crash here — firebase.initializeApp()
+    // throws "app already exists" if it's called a second time in one
+    // page session. Now we reuse the existing app instead of dying on it.
+    if(firebase.apps && firebase.apps.length){
+      db = firebase.apps[0].database();
+    } else {
+      firebase.initializeApp({databaseURL:url});
+      db = firebase.database();
+    }
     const burst=document.getElementById('successBurst');burst.classList.add('play');
     setTimeout(()=>{document.getElementById('gate').style.opacity='0';document.getElementById('gate').style.transform='scale(1.04)';
       document.getElementById('gate').style.transition='opacity .4s var(--sp), transform .4s var(--sp)';document.getElementById('gate').style.pointerEvents='none';},250);
     setTimeout(()=>{document.getElementById('gate').style.display='none';burst.classList.remove('play');
       document.getElementById('app').classList.add('show','entering');loadAll();},680);
-  }catch(e){document.getElementById('gateErr').textContent='Connection failed: '+e.message;
-    const btn=document.getElementById('loginBtn');btn.classList.remove('loading');btn.innerHTML='Unlock Console →';}
+  }catch(e){
+    document.getElementById('gateErr').textContent='Connection failed: '+e.message;
+    const btn=document.getElementById('loginBtn');btn.classList.remove('loading');btn.innerHTML='Unlock Console →';
+  }
 }
 function goSec(name){
   document.querySelectorAll('.dock-item,.ti').forEach(n=>n.classList.toggle('active',n.dataset.sec===name));
@@ -1000,28 +1028,4 @@ function renderVip(){
           <button class="ibtn" title="Block key" onclick="setKeyStatus('${m}','BLOCKED')">🚫</button>
           <button class="ibtn" title="Reset device" onclick="resetDevice('${m}')">🔄</button>
           <button class="ibtn" title="Flag: more deposit required" onclick="flagMoreDeposit('${m}')" style="color:var(--amber)">🔔</button>
-          <button class="ibtn gold" title="Revoke VIP" onclick="openRevoke('${m}')">👑</button></div></td>`;
-      tbody.appendChild(tr);
-    });
-  });
-}
-function setKeyStatus(m,status){db.ref('Users/'+m+'/vipKeyStatus').set(status).then(()=>{logAudit('KEY_STATUS_'+status,m);toastOk('Key '+status.toLowerCase()+' for '+m);});}
-function resetDevice(m){db.ref('Users/'+m).update({vipKeyDeviceId:'',vipKeyStatus:'ACTIVE'}).then(()=>{logAudit('DEVICE_RESET',m);toastOk('Device reset for '+m);});}
-
-// ── "Request Required" management: flag / clear / block a pending deposit request ──
-function flagMoreDeposit(m){
-  db.ref('Users/'+m+'/vipKeyStatus').set('MORE_DEPOSIT_REQUIRED').then(()=>{
-    logAudit('FLAGGED_MORE_DEPOSIT_REQUIRED',m);toastOk(m+' flagged — more deposit required');
-  });
-}
-function clearRequest(m){
-  db.ref('Users/'+m+'/vipKeyStatus').set('NONE').then(()=>{
-    logAudit('REQUEST_CLEARED',m);toastOk('Cleared for '+m+' — can try again normally');
-  });
-}
-function renderRequests(){
-  const tbody=document.getElementById('requestsBody');tbody.innerHTML='';
-  const pending = Object.keys(allUsers).filter(m=>allUsers[m].vipKeyStatus==='MORE_DEPOSIT_REQUIRED');
-  document.getElementById('requestsEmpty').style.display = pending.length?'none':'block';
-  pending.forEach((m,i)=>{
-    const u=allUsers[m];let dep=0;Object.values((allDeposits[m])||{}).forEach(d=>dep+=parseF
+          <button class="ibtn gold" title="Revoke VIP" onclick="openRevoke('${m}')">👑</button></div></td
