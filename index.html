@@ -441,6 +441,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
       </button>
       <div class="gate-err" id="gateErr"></div>
       <div class="gate-status"><span class="gstat-dot"></span>SECURE CONNECTION</div>
+      <div style="text-align:center;margin-top:8px;font-size:9px;color:rgba(255,255,255,.2);letter-spacing:1px">BUILD v23</div>
     </div>
   </div>
 </div>
@@ -1087,8 +1088,4 @@ function viewUser(m){
       <div class="kv"><b>Referred By</b><span>${u.referredBy||'—'}</span></div>
       <div class="kv" style="border-bottom:none"><b>Battery @ Register</b><span>${u.battery||'—'}</span></div>
       <div class="sheet-actions" style="margin-top:17px"><button class="btn btn-ghost" onclick="closeOv('ovDetail')">Close</button>
-      <button class="btn btn-gold" onclick="closeOv('ovDetail');openRevoke('${m}')">Manage VIP</button></div>`;
-    openOv('ovDetail');
-  });
-}
-function openRevoke(m){
+      <button class="btn btn-gold" oncl
