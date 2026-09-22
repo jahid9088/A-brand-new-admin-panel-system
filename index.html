@@ -436,7 +436,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
         </div>
       </div>
 
-      <button class="gbtn" id="loginBtn" onclick="doLogin()">
+      <button class="gbtn" id="loginBtn" onclick="doLogin()" ontouchend="console.log('touchend fired on loginBtn')">
         <span class="gbtn-shine"></span><span class="gbtn-txt">UNLOCK CONSOLE</span><span class="gbtn-arrow">➜</span>
       </button>
       <div class="gate-err" id="gateErr"></div>
@@ -868,6 +868,9 @@ function showLoginError(msg){
 }
 
 function doLogin(fromAuto){
+  // ── TEMPORARY DIAGNOSTIC — tells us definitively whether the click is
+  //     reaching this function at all. Remove once confirmed working. ──
+  if(!fromAuto){ alert('doLogin() fired. fromAuto='+fromAuto); }
   try{
     if(!fromAuto){ try{clickSound();}catch(e){} }
     const url=document.getElementById('gFbUrl').value.trim();
@@ -1086,6 +1089,4 @@ function viewUser(m){
       <div class="kv"><b>Key Status</b><span>${u.vipKeyStatus||'—'}</span></div>
       <div class="kv"><b>Referral Code</b><span style="color:var(--violet)">${u.referralCode||'—'}</span></div>
       <div class="kv"><b>Referred By</b><span>${u.referredBy||'—'}</span></div>
-      <div class="kv" style="border-bottom:none"><b>Battery @ Register</b><span>${u.battery||'—'}</span></div>
-      <div class="sheet-actions" style="margin-top:17px"><button class="btn btn-ghost" onclick="closeOv('ovDetail')">Close</button>
-      <button class="btn btn-gold" oncl
+      <div cla
