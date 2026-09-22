@@ -740,41 +740,67 @@ const ICO_CLOCK="data:image/webp;base64,UklGRhYOAABXRUJQVlA4IAoOAACQNgCdASqAAIAA
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={};
 let pendingMobile='';
 
+// FIX: the whole function now runs inside a single try/catch. Previously,
+// if ANYTHING unexpected threw here (a blocked AudioContext, a storage
+// quota error, etc.) the entire click silently did nothing — no error,
+// no loading state, nothing — because an uncaught exception in an
+// onclick handler just aborts with no visible sign. Now any such failure
+// still surfaces a real message and un-sticks the button instead of the
+// tap appearing to do nothing.
 function doLogin(fromAuto){
-  if(!fromAuto) clickSound();
-  const url=document.getElementById('gFbUrl').value.trim();
-  const pass=document.getElementById('gPass').value.trim();
-  const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');
-  const finalUrl = url || saved.url;
-  document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
-  if(!finalUrl){if(!fromAuto){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}return;}
-  if(pass!=='funxpro786' && pass!==saved.pass){
-    if(fromAuto)return; // a stale/bad saved password shouldn't auto-flash an error at the person — just let them log in manually
-    document.getElementById('gateErr').textContent='Incorrect password';
-    document.getElementById('fPass').classList.add('err');
-    const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
-    return;
+  try{
+    if(!fromAuto){ try{clickSound();}catch(e){} }
+    const url=document.getElementById('gFbUrl').value.trim();
+    const pass=document.getElementById('gPass').value.trim();
+    let saved={}; try{saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');}catch(e){}
+    const finalUrl = url || saved.url;
+    document.getElementById('fUrl').classList.remove('err');document.getElementById('fPass').classList.remove('err');
+    if(!finalUrl){if(!fromAuto){toastErr('Enter your Firebase Database URL');document.getElementById('fUrl').classList.add('err');}return;}
+    if(pass!=='funxpro786' && pass!==saved.pass){
+      if(fromAuto)return resetLoginBtn(); // stale/bad saved password — don't leave the button stuck, just fall back to manual
+      document.getElementById('gateErr').textContent='Incorrect password';
+      document.getElementById('fPass').classList.add('err');
+      const card=document.getElementById('gateCard');card.classList.remove('wrong');void card.offsetWidth;card.classList.add('wrong');
+      return;
+    }
+    // FIX: password + database URL now always saved together on every
+    // successful login — this is what makes the next visit able to
+    // auto-sign-in without retyping anything.
+    try{localStorage.setItem('fxa16_cfg',JSON.stringify({url:finalUrl,pass:pass}));}catch(e){}
+    const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
+    setTimeout(()=>initFirebase(finalUrl),fromAuto?60:350);
+  }catch(e){
+    resetLoginBtn();
+    const ge=document.getElementById('gateErr'); if(ge) ge.textContent='Something went wrong: '+e.message;
   }
-  // FIX: password + database URL now always saved together on every
-  // successful login — this is what makes the next visit able to
-  // auto-sign-in without retyping anything.
-  localStorage.setItem('fxa16_cfg',JSON.stringify({url:finalUrl,pass:pass}));
-  const btn=document.getElementById('loginBtn');btn.classList.add('loading');btn.innerHTML='<div class="orbit-loader"></div>';
-  setTimeout(()=>initFirebase(finalUrl),fromAuto?60:350);
+}
+function resetLoginBtn(){
+  const btn=document.getElementById('loginBtn');
+  if(btn){btn.classList.remove('loading');btn.innerHTML='Unlock Console →';}
 }
 
 // FIX: auto-fills BOTH fields from the saved login, then auto-submits
 // shortly after — the console unlocks itself with no typing or tapping
-// needed once you've logged in successfully once.
+// needed once you've logged in successfully once. Also self-heals: if
+// the gate hasn't actually gone away within 3s of an auto-attempt
+// (network stall, bad saved URL, anything), the button un-sticks itself
+// instead of sitting there looking dead with "Signing in…" forever.
 (function autoLogin(){
-  const saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');
-  if(saved.url) document.getElementById('gFbUrl').value=saved.url;
-  if(saved.pass) document.getElementById('gPass').value=saved.pass;
-  if(saved.url && saved.pass){
-    document.getElementById('loginBtn').innerHTML='<div class="orbit-loader"></div> Signing in…';
-    document.getElementById('loginBtn').classList.add('loading');
-    setTimeout(()=>doLogin(true),250);
-  }
+  try{
+    let saved={}; try{saved=JSON.parse(localStorage.getItem('fxa16_cfg')||'{}');}catch(e){}
+    if(saved.url) document.getElementById('gFbUrl').value=saved.url;
+    if(saved.pass) document.getElementById('gPass').value=saved.pass;
+    if(saved.url && saved.pass){
+      const btn=document.getElementById('loginBtn');
+      btn.innerHTML='<div class="orbit-loader"></div> Signing in…';
+      btn.classList.add('loading');
+      setTimeout(()=>doLogin(true),250);
+      setTimeout(()=>{
+        const gate=document.getElementById('gate');
+        if(gate && gate.style.display!=='none'){ resetLoginBtn(); }
+      },3000);
+    }
+  }catch(e){ resetLoginBtn(); }
 })();
 
 function initFirebase(url){
@@ -1015,17 +1041,4 @@ function renderVip(){
     const u=allUsers[m];
     db.ref('VIP/'+m+'/validUntil').once('value',s=>{
       const vu=s.val();const vuTxt=vu===0?'Lifetime':(vu?new Date(vu).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}):'—');
-      const ksBadge = u.vipKeyStatus==='ACTIVE'?'<span class="badge badge-vip">Active</span>'
-        : u.vipKeyStatus==='USED'?'<span class="badge badge-active">Used</span>'
-        : u.vipKeyStatus==='BLOCKED'?'<span class="badge badge-blocked">Blocked</span>'
-        : u.vipKeyStatus==='MORE_DEPOSIT_REQUIRED'?'<span class="badge badge-warn">🔔 Deposit Req.</span>'
-        : '<span class="badge badge-none">'+(u.vipKeyStatus||'None')+'</span>';
-      const tr=document.createElement('tr');tr.className='row-in';tr.style.animationDelay=(Math.min(i,20)*0.02)+'s';
-      tr.innerHTML=`<td class="mono">${m}</td><td class="mono" style="font-size:11px;color:var(--gold)">${u.vipKey||'—'}</td>
-        <td>${ksBadge}</td><td class="mono" style="font-size:11px">${u.vipKeyDeviceId?u.vipKeyDeviceId.slice(0,10)+'…':'—'}</td>
-        <td class="mono" style="font-size:11px">${vuTxt}</td>
-        <td><div class="act-row" style="justify-content:flex-end">
-          <button class="ibtn" title="Block key" onclick="setKeyStatus('${m}','BLOCKED')">🚫</button>
-          <button class="ibtn" title="Reset device" onclick="resetDevice('${m}')">🔄</button>
-          <button class="ibtn" title="Flag: more deposit required" onclick="flagMoreDeposit('${m}')" style="color:var(--amber)">🔔</button>
-          <button class="ibtn gold" title="Revoke VIP" onclick="openRevoke('${m}')">👑</button></div></td
+      const ksBadge = u.vipKeyStatus==='ACTIVE'?'<span class="badge badge-vi
