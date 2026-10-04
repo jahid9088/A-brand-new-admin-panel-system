@@ -464,7 +464,7 @@ label.f-lbl{display:block;font-size:10px;color:var(--ink-faint);margin-bottom:7p
         <span class="gficon">🔗</span>
         <div class="gfwrap">
           <label>Firebase Database URL</label>
-          <input id="gFbUrl" placeholder="https://jashcore-official-default-rtdb.firebaseio.com">
+          <input id="gFbUrl" placeholder="https://your-project.firebaseio.com">
         </div>
       </div>
       <div class="gfield" id="fPass">
@@ -973,7 +973,7 @@ const ICO_CLOCK="data:image/webp;base64,UklGRhYOAABXRUJQVlA4IAoOAACQNgCdASqAAIAA
 let db=null, allUsers={}, allDeposits={}, allVip={}, allRefs={}, allAudit={}, allSkips={}, allDepReq={};
 // Deploy fcm-sender-worker.js on Cloudflare (free) and paste its URL here —
 // this is what delivers a notification when the user's app is fully closed.
-const FCM_WORKER_URL='https://PASTE-YOUR-WORKER-URL-HERE.workers.dev';
+const FCM_WORKER_URL='https://notification.itsjahid76.workers.dev';
 let pendingMobile='';
 
 // ═══════════════════════════════════════════
@@ -1834,12 +1834,18 @@ function sendCustomNotification(){
     pushFcm(m,msg,link,notifAction==='telegram'?'telegram':'');
   }
 }
-// Reaches the user even if their app is fully closed — fire-and-forget so a
-// missing/undeployed Worker never blocks the normal (app-open) notification above.
+// Reaches the user even if their app is fully closed. Doesn't block the normal
+// (app-open) notification above if the Worker is missing/down — but DOES show
+// what happened, so a silent failure never hides as "nothing went wrong".
 function pushFcm(target,msg,link,linkType){
-  if(!FCM_WORKER_URL||FCM_WORKER_URL.indexOf('PASTE-YOUR-WORKER-URL-HERE')>=0)return;
+  if(!FCM_WORKER_URL||FCM_WORKER_URL.indexOf('PASTE-YOUR-WORKER-URL-HERE')>=0){
+    alert('FCM NOT sent — FCM_WORKER_URL is still the placeholder at the top of this file. Edit it to your Worker URL and reload this page.');
+    return;
+  }
   fetch(FCM_WORKER_URL+'/send',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({target:target,title:'🔔 FUN XPro',body:msg,link:link||'',linkType:linkType||''})}).catch(()=>{});
+    body:JSON.stringify({target:target,title:'🔔 FUN XPro',body:msg,link:link||'',linkType:linkType||''})})
+    .then(r=>r.json()).then(d=>{ alert('FCM result:\n'+JSON.stringify(d,null,2)); })
+    .catch(e=>alert('FCM worker unreachable:\n'+e));
 }
 </script>
 </body>
